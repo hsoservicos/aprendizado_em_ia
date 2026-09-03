@@ -1,8 +1,8 @@
 # Tools Registry — Inventário de Ferramentas do Projeto
 
-**Last Updated**: 2026-09-03T22:15:00Z  
+**Last Updated**: 2026-09-03T23:30:00Z  
 **Maintainer**: Hsantos  
-**Version**: 1.0.0
+**Version**: 1.1.0
 
 ---
 
@@ -69,6 +69,20 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | **Purpose** | Version control, repository management |
 | **Installed** | System |
 | **Used By** | All version control operations |
+
+### 1.6 CrewAI
+
+| Property | Value |
+|----------|-------|
+| **Name** | CrewAI |
+| **Version** | 1.15.18 |
+| **Path** | `~/.local/bin/crewai` |
+| **Purpose** | Multi-agent orchestration framework |
+| **Installed** | 2026-09-03 via `uv tool install crewai` |
+| **Used By** | BMAD-CrewAI integration, automated workflows |
+| **Status** | ✅ Active |
+| **Python** | >= 3.10, < 3.14 |
+| **Dependencies** | 134 packages (auto-installed) |
 
 ---
 
@@ -258,6 +272,7 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | 2026-09-03 | bmad-agent-php84 | Created | Hsantos |
 | 2026-09-03 | bmad-postgres18 | Created | Hsantos |
 | 2026-09-03 | bmad-agent-postgres18 | Created | Hsantos |
+| 2026-09-03 | CrewAI v1.15.18 | Installed via uv | Hsantos |
 
 ---
 
@@ -308,7 +323,7 @@ powershell -ExecutionPolicy Bypass -File _bmad-output/scripts/install-windows.ps
 
 ```bash
 # Check all installed tools
-node --version && python3 --version && uv --version && git --version && rtk --version
+node --version && python3 --version && uv --version && git --version && rtk --version && crewai --version
 
 # List all BMAD skills
 rtk ls .agents/skills/
@@ -324,6 +339,11 @@ uv run _bmad/scripts/render_skill.py --project-root /home/hsantos/app --skill .a
 
 # Install/update BMAD
 npx bmad-method install
+
+# CrewAI commands
+crewai --version
+crewai create crew <project-name>
+crewai run
 ```
 
 ### Prerequisites
@@ -331,8 +351,9 @@ npx bmad-method install
 | Tool | Required Version | Status |
 |------|-----------------|--------|
 | Node.js | >= 20.12 | ✅ v24.20.0 |
-| Python | >= 3.10 | ✅ 3.12.3 |
+| Python | >= 3.10, < 3.14 | ✅ 3.12.3 |
 | uv | >= 0.12 | ✅ 0.12.9 |
 | Git | Any | ✅ 2.43.0 |
 | RTK | Any | ✅ 0.47.0 |
 | ripgrep | Any | ✅ 14.1.1 |
+| CrewAI | >= 1.15 | ✅ 1.15.18 |

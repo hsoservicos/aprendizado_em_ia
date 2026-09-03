@@ -2,6 +2,7 @@
 
 ![Version](https://img.shields.io/badge/version-6.11.0-blue)
 ![Skills](https://img.shields.io/badge/skills-57-green)
+![CrewAI](https://img.shields.io/badge/CrewAI-1.15.18-purple)
 ![License](https://img.shields.io/badge/license-MIT-yellow)
 
 ---
@@ -16,6 +17,7 @@ BMAD Method (Breakthrough Method for Agile Development) is an AI-powered develop
 - Integration with OpenCode and Claude Code IDEs
 - Automated validation and rendering scripts
 - Token compression via RTK
+- **CrewAI integration** for multi-agent orchestration
 
 ---
 
@@ -26,11 +28,12 @@ BMAD Method (Breakthrough Method for Agile Development) is an AI-powered develop
 | Tool | Required Version | Purpose |
 |------|-----------------|---------|
 | Node.js | >= 20.12 | JavaScript runtime |
-| Python | >= 3.10 | Script execution |
+| Python | >= 3.10, < 3.14 | Script execution |
 | uv | >= 0.12 | Python package management |
 | Git | Any | Version control |
 | RTK | >= 0.47 | Token compression (optional) |
 | ripgrep | >= 14.0 | Fast search (recommended) |
+| CrewAI | >= 1.15 | Multi-agent orchestration (optional) |
 
 ### Automated Installation
 
@@ -130,6 +133,64 @@ Small changes can skip straight to build. Complex work follows the full path.
 
 ---
 
+## CrewAI Integration
+
+This project includes **CrewAI** for multi-agent orchestration, enabling automated development workflows.
+
+### What is CrewAI?
+
+CrewAI is an open-source Python framework for orchestrating role-playing, autonomous AI agents. It provides:
+
+- **Crews**: Teams of AI agents with roles, goals, tools, and tasks
+- **Flows**: Event-driven workflows with state management
+- **Production-ready patterns**: Human-in-the-loop, async execution, checkpointing
+
+### Integration Benefits
+
+| BMAD Strength | CrewAI Strength | Combined Benefit |
+|---------------|-----------------|------------------|
+| Development workflow expertise | Multi-agent orchestration | Automated development pipelines |
+| 57 specialized skills | Role-based agent collaboration | Specialized agent teams |
+| Technology-specific agents | Event-driven workflows | Complex automation flows |
+
+### Quick Start with CrewAI
+
+```bash
+# Install CrewAI (if not already installed)
+uv tool install crewai
+
+# Create a new CrewAI project
+crewai create crew bmad-project
+
+# Navigate to project and install dependencies
+cd bmad-project
+crewai install
+
+# Run the crew
+crewai run
+```
+
+### BMAD-CrewAI Bridge
+
+Use the bridge module to connect BMAD skills with CrewAI agents:
+
+```python
+from bmad_crewai_bridge import BMADBridge
+
+# Initialize bridge
+bridge = BMADBridge(project_root="/home/hsantos/app")
+
+# List all BMAD skills
+skills = bridge.list_skills()
+
+# Render a skill
+output = bridge.render_skill("bmad-docker")
+```
+
+For detailed integration guide, see `_bmad-output/crewai-integration-guide.md`.
+
+---
+
 ## Technology Stack
 
 ### Docker Agent & Skill
@@ -185,6 +246,7 @@ See `_bmad-output/scripts/README.md` for detailed instructions.
 | AGENTS.md | `/AGENTS.md` | Project instructions |
 | Tools Registry | `_bmad-output/tools-registry.md` | Tools inventory |
 | Replication Guide | `_bmad-output/project-replication-guide.md` | Full setup guide |
+| CrewAI Integration | `_bmad-output/crewai-integration-guide.md` | CrewAI + BMAD integration |
 | Docker Implementation | `_bmad-output/docker-skill-implementation.md` | Docker docs |
 | Python 3.14 Implementation | `_bmad-output/python314-skill-implementation.md` | Python docs |
 | PHP 8.4 Implementation | `_bmad-output/php84-skill-implementation.md` | PHP docs |
