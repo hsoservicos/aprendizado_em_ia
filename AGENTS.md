@@ -5,14 +5,15 @@ BMAD Method project — Agile AI-Driven Development workflow with OpenCode and C
 ## Project Setup
 
 - **User**: Hsantos
-- **Communication language**: English
+- **Communication language**: Português do Brasil (PT-BR)
 - **Artifacts output**: `_bmad-output/`
 - **Project knowledge**: `docs/` (not yet populated)
 - **Config files**: `_bmad/config.toml`, `_bmad/config.user.toml` (do not edit; re-run `npx bmad-method install` to change)
+- **Tools Registry**: `_bmad-output/tools-registry.md` (update when installing new tools)
 
 ## BMAD Skills
 
-49 skills installed in `.agents/skills/` and `.claude/skills/`. Skills are invoked through OpenCode commands in `.opencode/commands/`.
+57 skills installed in `.agents/skills/` and `.claude/skills/`. Skills are invoked through OpenCode commands in `.opencode/commands/`.
 
 ### Entry Points
 
@@ -30,6 +31,14 @@ BMAD Method project — Agile AI-Driven Development workflow with OpenCode and C
 | `bmad-sprint-planning` | Sprint readiness and status |
 | `bmad-code-review` | Adversarial code review |
 | `bmad-retrospective` | Epic retrospective with evidence-based verdict |
+| `bmad-docker` | Docker containerization: Dockerfile, Compose, BuildKit, security |
+| `bmad-agent-docker` | Docker Architect Agent — container infrastructure specialist |
+| `bmad-python314` | Python 3.14+: free-threading, subinterpreters, t-strings, compression |
+| `bmad-agent-python314` | Python Architect Agent — modern Python specialist |
+| `bmad-php84` | PHP 8.4: Property Hooks, Asymmetric Visibility, DOM API, array functions |
+| `bmad-agent-php84` | PHP Architect Agent — multi-role (Arch-PHP, CodeRefactor-PHP, WebSec-PHP) |
+| `bmad-postgres18` | PostgreSQL 18: AIO, Skip Scan, UUIDv7, pgvector, RETURNING OLD/NEW |
+| `bmad-agent-postgres18` | PostgreSQL Architect Agent — 5 SKILLs (DDL, OPT, VEC, CONC, SEC) |
 
 ### Skill Invocation Rule
 
@@ -57,6 +66,8 @@ Small changes can skip straight to build. Complex work follows the full path.
 - **Python** >= 3.10 (currently 3.12)
 - **uv** (0.12.9) — required for rendering skills; install at `~/.local/bin/uv`
 - **Git** — required for updates and external modules
+- **RTK** (0.47.0) — token compression proxy; install at `~/.local/bin/rtk`
+- **ripgrep** (14.1.1) — fast search; install at `~/.local/bin/rg`
 
 ## Updating BMAD
 
@@ -65,6 +76,21 @@ npx bmad-method install
 ```
 
 Detects existing installation and offers update/modification. Remove any stale `bmad-*` entries from legacy command directories if the installer warns about duplicates.
+
+## Automated Installation
+
+For new environments, use the installation scripts:
+
+```bash
+# Linux (Ubuntu/Debian)
+chmod +x _bmad-output/scripts/install-linux.sh
+./_bmad-output/scripts/install-linux.sh
+
+# Windows (PowerShell as Administrator)
+powershell -ExecutionPolicy Bypass -File _bmad-output/scripts/install-windows.ps1
+```
+
+See `_bmad-output/scripts/README.md` for detailed instructions.
 
 ## Project State
 
