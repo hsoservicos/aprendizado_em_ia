@@ -556,6 +556,7 @@ claude
 | Document | Location |
 |----------|----------|
 | Getting Started (onboarding) | `_bmad-output/getting-started.md` |
+| Implementation Playbook (detailed, new & legacy) | `_bmad-output/implementation-playbook.md` |
 | Project Lifecycle (5 phases) | `_bmad-output/bmad-project-lifecycle-guide.md` |
 | Tools Registry | `_bmad-output/tools-registry.md` |
 | Docker Implementation | `_bmad-output/docker-skill-implementation.md` |

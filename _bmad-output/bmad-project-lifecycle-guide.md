@@ -7,10 +7,14 @@
 
 > **Antes de começar:** conclua o pré-flight em
 > **`_bmad-output/getting-started.md`** (ambiente + os dois agentes + RTK +
-> configuração do projeto). Este guia cobre a **execução** — a Trilha A
-> (projeto novo). Para **projeto legado a modernizar**, comece pela Trilha B do
-> `getting-started.md` (`/bmad-project-context` → `/bmad-code-review` →
-> `/bmad-build`) e volte para as Fases 2–5 abaixo nas features maiores.
+> configuração do projeto).
+>
+> **Precisa de um passo a passo mais detalhado e sem jargão** (conceitos,
+> entradas/saídas de cada comando, Definition of Done, FAQ), inclusive para
+> **projeto legado**? Use o **Manual de Implementação**:
+> **`_bmad-output/implementation-playbook.md`** (Parte A = novo, Parte B = legado).
+>
+> Este guia é a **referência de operação e rotina** para quem já conhece o fluxo.
 
 ---
 
@@ -616,6 +620,7 @@ output = bridge.render_skill("bmad-build")
 | Documento | Localização | Descrição |
 |-----------|-------------|-----------|
 | Primeiros Passos / Onboarding | `_bmad-output/getting-started.md` | Pré-flight + trilhas A (novo) e B (legado) |
+| Manual de Implementação | `_bmad-output/implementation-playbook.md` | Passo a passo detalhado, sem jargão — Parte A (novo) e Parte B (legado) |
 | Guia de Replicação | `_bmad-output/project-replication-guide.md` | Preparar a máquina em detalhe |
 | Guia de Deploy Coolify | `_bmad-output/coolify-deploy-guide.md` | Visão geral do deploy |
 | Deploy GitHub | `_bmad-output/coolify-github-deploy-guide.md` | Repositórios GitHub |

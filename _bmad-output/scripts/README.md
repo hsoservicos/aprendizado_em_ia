@@ -122,8 +122,10 @@ After running the installation script:
    ```
 
 5. **Onboard onto a project** — new or legacy:
-   follow **`_bmad-output/getting-started.md`** (pre-flight + Track A greenfield /
-   Track B legacy modernization).
+   - **`_bmad-output/getting-started.md`** — pre-flight + track selector
+   - **`_bmad-output/implementation-playbook.md`** — the detailed, jargon-free
+     step-by-step for Track A (greenfield) and Track B (legacy modernization),
+     for any skill level
 
 ---
 

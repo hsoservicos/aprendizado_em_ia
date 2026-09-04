@@ -50,7 +50,20 @@ Then pick a track:
 | **A — New project (greenfield)** | no code yet | `/bmad-help` → 5-phase lifecycle |
 | **B — Legacy project (brownfield)** | existing codebase to modernize | `/bmad-project-context` → `/bmad-code-review` → `/bmad-build` |
 
-Full detail for both tracks: **[`_bmad-output/getting-started.md`](_bmad-output/getting-started.md)**.
+### Detailed step-by-step (any skill level)
+
+For a fully documented, jargon-free walkthrough of both tracks — concepts,
+exact commands, expected inputs/outputs, quality gates, troubleshooting — use the
+implementation playbook. It is written for team members **regardless of software
+engineering background**:
+
+**➡️ [`_bmad-output/implementation-playbook.md`](_bmad-output/implementation-playbook.md)** — *Manual de Implementação (PT-BR)*
+
+| Guide | Use it for |
+|-------|-----------|
+| [`getting-started.md`](_bmad-output/getting-started.md) | 5-minute orientation + pre-flight + track selector |
+| [`implementation-playbook.md`](_bmad-output/implementation-playbook.md) | **The detailed how-to for a new or legacy project (Parts A & B), glossary, Definition of Done, FAQ** |
+| [`bmad-project-lifecycle-guide.md`](_bmad-output/bmad-project-lifecycle-guide.md) | Operator reference: the 5 phases and the daily routine |
 
 ---
 
@@ -144,6 +157,7 @@ machine: `rtk init -g --auto-patch --opencode`.
 │   └── config.user.toml     # User config
 ├── _bmad-output/            # Implementation artifacts
 │   ├── getting-started.md              # First steps / onboarding (new + legacy)
+│   ├── implementation-playbook.md      # Detailed step-by-step, any skill level (Parts A & B)
 │   ├── bmad-project-lifecycle-guide.md # 5-phase lifecycle, step by step
 │   ├── coolify-deploy-guide.md         # Coolify deploy overview
 │   ├── coolify-github-deploy-guide.md  # GitHub repo deploy guide
@@ -376,6 +390,7 @@ See `_bmad-output/scripts/README.md` for detailed instructions.
 | Document | Location | Description |
 |----------|----------|-------------|
 | **Getting Started** | `_bmad-output/getting-started.md` | **First steps before a new project or a legacy modernization — pre-flight + tracks A/B** |
+| **Implementation Playbook** | `_bmad-output/implementation-playbook.md` | **Detailed, jargon-free step-by-step for a new OR legacy project — concepts, commands, quality gates, FAQ (any skill level)** |
 | **Project Lifecycle Guide** | `_bmad-output/bmad-project-lifecycle-guide.md` | **Complete step-by-step: 5 phases from idea to production** |
 | **README (Português)** | `README.pt-BR.md` | Documentação em Português do Brasil |
 | **README (Español)** | `README.es.md` | Documentación en Español |

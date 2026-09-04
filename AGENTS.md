@@ -41,6 +41,10 @@ codebase being modernized** must run the pre-flight in
   stack + conventions into `AGENTS.md`/`CLAUDE.md`) → `/bmad-code-review`
   (quality baseline) → `/bmad-build` for scoped changes.
 
+Detailed, jargon-free walkthrough of both tracks (concepts, exact commands,
+Definition of Done, FAQ — for any skill level):
+**`_bmad-output/implementation-playbook.md`**.
+
 ## BMAD Skills
 
 57 skills, installed once and exposed to **both** agents via the two skill trees

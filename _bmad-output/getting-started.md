@@ -24,6 +24,12 @@ igual nos dois. Escolha um e siga.
 > **Ordem obrigatória:** faça os **Passos 0 a 5** uma única vez. Só depois entre
 > na Trilha A ou B. Não pule fases.
 
+> **Precisa do passo a passo detalhado, explicado sem jargão?** Depois do
+> pré-flight, use o **Manual de Implementação**:
+> **`_bmad-output/implementation-playbook.md`** — conceitos, comandos exatos,
+> entradas/saídas esperadas, Definition of Done e FAQ, para **qualquer nível de
+> conhecimento**, cobrindo projeto novo (Parte A) e legado (Parte B).
+
 ---
 
 ## Passo 0 — Pré-requisitos da máquina
@@ -179,8 +185,9 @@ Você tem uma ideia e nenhum código. Siga o **ciclo de vida de 5 fases**:
 
 **Mudanças pequenas** podem ir direto para `/bmad-build`.
 
-📖 Passo a passo detalhado (todas as fases, checklists, rotina diária):
-**`_bmad-output/bmad-project-lifecycle-guide.md`**
+📖 **Passo a passo detalhado, sem jargão, com exemplos e checklists de qualidade:**
+**`_bmad-output/implementation-playbook.md`** → Parte A.
+Referência de operação e rotina diária: **`_bmad-output/bmad-project-lifecycle-guide.md`**.
 
 ---
 
@@ -234,8 +241,10 @@ Selecionar escopo → /bmad-build → /bmad-code-review → commit → repetir
 Uma unidade de mudança por vez. Cada commit referencia a story/issue.
 Ao fechar um épico: `/bmad-retrospective`.
 
-📖 As Fases 2–5 do **`_bmad-output/bmad-project-lifecycle-guide.md`** valem
-integralmente para features maiores em legado.
+📖 **Passo a passo detalhado do trabalho em legado** (mapear, diagnosticar,
+estratégia por incremento, testes de caracterização, ciclos curtos):
+**`_bmad-output/implementation-playbook.md`** → Parte B. As Fases 2–5 do
+`bmad-project-lifecycle-guide.md` valem para features maiores em legado.
 
 ---
 
@@ -274,8 +283,9 @@ Trilha B — Projeto legado
 | Documento | Localização | Para quê |
 |-----------|-------------|----------|
 | **Este guia** | `_bmad-output/getting-started.md` | Primeiros passos (você está aqui) |
+| **Manual de Implementação** | `_bmad-output/implementation-playbook.md` | Passo a passo detalhado e sem jargão — Parte A (novo) e Parte B (legado) |
 | Guia de Replicação | `_bmad-output/project-replication-guide.md` | Preparar a máquina em detalhe |
-| Ciclo de Vida (5 fases) | `_bmad-output/bmad-project-lifecycle-guide.md` | Passo a passo completo de execução |
+| Ciclo de Vida (5 fases) | `_bmad-output/bmad-project-lifecycle-guide.md` | Referência de operação e rotina diária |
 | Registro de Ferramentas | `_bmad-output/tools-registry.md` | Inventário de tudo que está instalado |
 | Integração RTK | `_bmad-output/rtk-installation-guide.md` | RTK nos dois agentes |
 | Instruções do projeto | `AGENTS.md` (OpenCode) / `CLAUDE.md` (Claude Code) | Contrato dos agentes |

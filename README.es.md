@@ -51,7 +51,20 @@ Luego elija la vía:
 | **A — Proyecto nuevo (greenfield)** | aún no hay código | `/bmad-help` → ciclo de vida de 5 fases |
 | **B — Proyecto heredado (brownfield)** | base de código a modernizar | `/bmad-project-context` → `/bmad-code-review` → `/bmad-build` |
 
-Detalle completo de ambas vías: **[`_bmad-output/getting-started.md`](_bmad-output/getting-started.md)**.
+### Paso a paso detallado (cualquier nivel de conocimiento)
+
+Para una guía **totalmente documentada y sin jerga** de ambas vías — conceptos,
+comandos exactos, entradas/salidas esperadas, controles de calidad y solución de
+problemas — use el **Manual de Implementación**. Está escrito para miembros del
+equipo **sin importar su formación en Ingeniería de Software**:
+
+**➡️ [`_bmad-output/implementation-playbook.md`](_bmad-output/implementation-playbook.md)** — *en portugués (PT-BR)*
+
+| Guía | Úsela para |
+|------|-----------|
+| [`getting-started.md`](_bmad-output/getting-started.md) | Orientación de 5 min + pre-flight + selector de vía |
+| [`implementation-playbook.md`](_bmad-output/implementation-playbook.md) | **El paso a paso detallado para proyecto nuevo o heredado (Partes A y B), glosario, Definition of Done, FAQ** |
+| [`bmad-project-lifecycle-guide.md`](_bmad-output/bmad-project-lifecycle-guide.md) | Referencia del operador: las 5 fases y la rutina diaria |
 
 ---
 
@@ -145,6 +158,7 @@ agentes en una máquina nueva: `rtk init -g --auto-patch --opencode`.
 │   └── config.user.toml     # Config del usuario
 ├── _bmad-output/            # Artefactos de implementación
 │   ├── getting-started.md               # Primeros pasos / onboarding (nuevo + heredado)
+│   ├── implementation-playbook.md       # Paso a paso detallado, cualquier nivel (Partes A y B)
 │   ├── bmad-project-lifecycle-guide.md  # Guía completa del ciclo de vida
 │   ├── coolify-deploy-guide.md         # Resumen del deploy Coolify
 │   ├── coolify-github-deploy-guide.md  # Deploy vía GitHub
@@ -354,6 +368,7 @@ Vea `_bmad-output/scripts/README.md` para instrucciones detalladas.
 | Documento | Ubicación | Descripción |
 |-----------|-----------|-------------|
 | **Primeros Pasos** | `_bmad-output/getting-started.md` | **Primeros pasos antes de un proyecto nuevo o una modernización de heredado — pre-flight + vías A/B** |
+| **Manual de Implementación** | `_bmad-output/implementation-playbook.md` | **Paso a paso detallado y sin jerga para proyecto nuevo O heredado — conceptos, comandos, controles de calidad, FAQ (cualquier nivel)** |
 | **Guía del Ciclo de Vida** | `_bmad-output/bmad-project-lifecycle-guide.md` | **Paso a paso completo: 5 fases de la idea a producción** |
 | AGENTS.md / CLAUDE.md | `/AGENTS.md`, `/CLAUDE.md` | Instrucciones del proyecto (OpenCode / Claude Code) |
 | Registro de Herramientas | `_bmad-output/tools-registry.md` | Inventario de herramientas (v1.3.1) |

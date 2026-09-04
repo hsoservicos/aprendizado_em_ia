@@ -1,8 +1,8 @@
 # Tools Registry — Inventário de Ferramentas do Projeto
 
-**Last Updated**: 2026-09-04T05:30:00Z  
+**Last Updated**: 2026-09-04T06:30:00Z  
 **Maintainer**: Hsantos  
-**Version**: 1.3.1
+**Version**: 1.3.2
 
 ---
 
@@ -277,6 +277,7 @@ One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --open
 | File | Size | Description |
 |------|------|-------------|
 | `getting-started.md` | ~9K | First steps / onboarding — pre-flight + Track A (greenfield) & Track B (legacy modernization) |
+| `implementation-playbook.md` | ~30K | Detailed, jargon-free step-by-step for a new OR legacy project (Parts A & B) — concepts, commands, Definition of Done, FAQ; for any skill level |
 | `bmad-project-lifecycle-guide.md` | ~20K | 5-phase lifecycle, step by step |
 | `project-replication-guide.md` | ~16K | Environment replication for a new machine (v1.1.0) |
 | `docker-skill-implementation.md` | 7.1K | Docker Agent & Skill docs |
@@ -327,6 +328,7 @@ One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --open
 │   └── config.user.toml     # User config
 ├── _bmad-output/            # Implementation artifacts
 │   ├── getting-started.md          # First steps / onboarding (new + legacy)
+│   ├── implementation-playbook.md  # Detailed step-by-step, any skill level (Parts A & B)
 │   ├── bmad-project-lifecycle-guide.md  # 5-phase lifecycle
 │   ├── coolify-deploy-guide.md      # Coolify deploy guide
 │   ├── coolify-github-deploy-guide.md  # GitHub repo deploy guide
@@ -385,6 +387,7 @@ One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --open
 | 2026-09-04 | RTK ↔ Claude Code | Integrated (project hook `rtk hook claude`) for parity with OpenCode plugin | Hsantos |
 | 2026-09-04 | RTK global (both agents) | `rtk init -g --auto-patch` (Claude hook) + `--opencode` (plugin) — machine-level | Hsantos |
 | 2026-09-04 | `getting-started.md` | Created — onboarding: pre-flight + Track A (greenfield) & Track B (legacy modernization) | Hsantos |
+| 2026-09-04 | `implementation-playbook.md` | Created — detailed jargon-free step-by-step for new & legacy projects (Parts A & B), any skill level | Hsantos |
 
 ---
 
