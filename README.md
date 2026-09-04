@@ -310,6 +310,7 @@ See `_bmad-output/scripts/README.md` for detailed instructions.
 
 | Document | Location | Description |
 |----------|----------|-------------|
+| **Project Lifecycle Guide** | `_bmad-output/bmad-project-lifecycle-guide.md` | **Complete step-by-step: 5 phases from idea to production** |
 | AGENTS.md | `/AGENTS.md` | Project instructions |
 | Tools Registry | `_bmad-output/tools-registry.md` | Tools inventory (v1.2.0) |
 | Replication Guide | `_bmad-output/project-replication-guide.md` | Full setup guide |
@@ -364,6 +365,37 @@ opencode
 
 # In OpenCode
 /bmad-help
+```
+
+### Complete Project Lifecycle (Recommended)
+
+For new projects, follow the **5-phase lifecycle** documented in the project lifecycle guide:
+
+| Phase | Skills | Duration | Output |
+|-------|--------|----------|--------|
+| **1. Clarify** | `bmad-help` → `bmad-brainstorming` → `bmad-forge-idea` | 30 min | Validated idea |
+| **2. Plan** | `bmad-create-prd` → `bmad-architecture` → `bmad-ux` → `bmad-create-epics-and-stories` | 1-2h | PRD + Architecture + UX + Stories |
+| **3. Build** | `bmad-build` (per story) | Variable | Working code |
+| **4. Review** | `bmad-code-review` → `bmad-qa-generate-e2e-tests` | 30 min | Validated code |
+| **5. Learn** | `bmad-retrospective` → Deploy to Coolify | 30 min | Lessons learned + Production |
+
+**📖 Full guide:** `_bmad-output/bmad-project-lifecycle-guide.md`
+
+### Quick Reference: All Phases
+
+```
+/bmad-help              → Start here, get oriented
+/bmad-brainstorming     → Structured ideation session
+/bmad-forge-idea        → Pressure-test your idea
+/bmad-create-prd        → Create Product Requirements Document
+/bmad-architecture      → Define architecture spine
+/bmad-ux                → Create DESIGN.md + EXPERIENCE.md
+/bmad-create-epics-and-stories → Break work into trackable stories
+/bmad-sprint-planning   → Plan sprint execution
+/bmad-build             → Implement code (one story at a time)
+/bmad-build-auto        → Autonomous build loop
+/bmad-code-review       → Adversarial code review
+/bmad-retrospective     → Epic retrospective with evidence
 ```
 
 ### Use Technology Agents
