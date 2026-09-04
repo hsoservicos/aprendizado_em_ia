@@ -25,6 +25,35 @@ BMAD Method (Breakthrough Method for Agile Development) is an AI-powered develop
 
 ---
 
+## First Steps (start here)
+
+If you are a team member picking up this repository to **build a new project** or
+to **modernize/update a legacy one**, follow the onboarding guide first:
+
+**➡️ [`_bmad-output/getting-started.md`](_bmad-output/getting-started.md)**
+
+The pre-flight (do once, in order):
+
+| # | Step | Command |
+|---|------|---------|
+| 0 | Install the toolchain + both agents | `./_bmad-output/scripts/install-linux.sh --project-dir "$PWD"` |
+| 1 | Get the repo + working branch | `git clone … && cd … && git checkout -b feat/setup` |
+| 2 | Install/update BMAD | `npx bmad-method install` |
+| 3 | Verify toolchain, both agents, RTK | `diff -rq .agents/skills .claude/skills && rtk init --show` |
+| 4 | Configure the project | edit `_bmad/custom/config.toml` + `_bmad/config.user.toml` |
+| 5 | Open an agent, then orient | `opencode` or `claude` → `/bmad-help` |
+
+Then pick a track:
+
+| Track | When | Where it goes |
+|-------|------|---------------|
+| **A — New project (greenfield)** | no code yet | `/bmad-help` → 5-phase lifecycle |
+| **B — Legacy project (brownfield)** | existing codebase to modernize | `/bmad-project-context` → `/bmad-code-review` → `/bmad-build` |
+
+Full detail for both tracks: **[`_bmad-output/getting-started.md`](_bmad-output/getting-started.md)**.
+
+---
+
 ## Quick Start
 
 ### Prerequisites
@@ -114,6 +143,8 @@ machine: `rtk init -g --auto-patch --opencode`.
 │   ├── config.toml          # Main config
 │   └── config.user.toml     # User config
 ├── _bmad-output/            # Implementation artifacts
+│   ├── getting-started.md              # First steps / onboarding (new + legacy)
+│   ├── bmad-project-lifecycle-guide.md # 5-phase lifecycle, step by step
 │   ├── coolify-deploy-guide.md         # Coolify deploy overview
 │   ├── coolify-github-deploy-guide.md  # GitHub repo deploy guide
 │   ├── coolify-local-deploy-guide.md   # Local deploy guide (no Git)
@@ -344,11 +375,12 @@ See `_bmad-output/scripts/README.md` for detailed instructions.
 
 | Document | Location | Description |
 |----------|----------|-------------|
+| **Getting Started** | `_bmad-output/getting-started.md` | **First steps before a new project or a legacy modernization — pre-flight + tracks A/B** |
 | **Project Lifecycle Guide** | `_bmad-output/bmad-project-lifecycle-guide.md` | **Complete step-by-step: 5 phases from idea to production** |
 | **README (Português)** | `README.pt-BR.md` | Documentação em Português do Brasil |
 | **README (Español)** | `README.es.md` | Documentación en Español |
-| AGENTS.md | `/AGENTS.md` | Project instructions |
-| Tools Registry | `_bmad-output/tools-registry.md` | Tools inventory (v1.3.0) |
+| AGENTS.md / CLAUDE.md | `/AGENTS.md`, `/CLAUDE.md` | Project instructions (OpenCode / Claude Code) |
+| Tools Registry | `_bmad-output/tools-registry.md` | Tools inventory (v1.3.1) |
 | Replication Guide | `_bmad-output/project-replication-guide.md` | Full setup guide (v1.1.0) |
 | CrewAI Integration | `_bmad-output/crewai-integration-guide.md` | CrewAI + BMAD integration |
 

@@ -25,6 +25,36 @@ BMAD Method (Breakthrough Method for Agile Development) es un framework de desar
 
 ---
 
+## Primeros Pasos (empiece aquí)
+
+Si usted es un miembro del equipo que va a usar este repositorio para **implementar
+un proyecto nuevo** o para **modernizar/actualizar uno heredado**, siga primero la
+guía de onboarding:
+
+**➡️ [`_bmad-output/getting-started.md`](_bmad-output/getting-started.md)**
+
+Pre-flight (hágalo una vez, en este orden):
+
+| # | Paso | Comando |
+|---|------|---------|
+| 0 | Instalar toolchain + ambos agentes | `./_bmad-output/scripts/install-linux.sh --project-dir "$PWD"` |
+| 1 | Obtener el repo + rama de trabajo | `git clone … && cd … && git checkout -b feat/setup` |
+| 2 | Instalar/actualizar BMAD | `npx bmad-method install` |
+| 3 | Verificar toolchain, ambos agentes y RTK | `diff -rq .agents/skills .claude/skills && rtk init --show` |
+| 4 | Configurar el proyecto | editar `_bmad/custom/config.toml` + `_bmad/config.user.toml` |
+| 5 | Abrir un agente y orientarse | `opencode` o `claude` → `/bmad-help` |
+
+Luego elija la vía:
+
+| Vía | Cuándo | Adónde va |
+|-----|--------|-----------|
+| **A — Proyecto nuevo (greenfield)** | aún no hay código | `/bmad-help` → ciclo de vida de 5 fases |
+| **B — Proyecto heredado (brownfield)** | base de código a modernizar | `/bmad-project-context` → `/bmad-code-review` → `/bmad-build` |
+
+Detalle completo de ambas vías: **[`_bmad-output/getting-started.md`](_bmad-output/getting-started.md)**.
+
+---
+
 ## Inicio Rápido
 
 ### Prerrequisitos
@@ -114,6 +144,7 @@ agentes en una máquina nueva: `rtk init -g --auto-patch --opencode`.
 │   ├── config.toml          # Config principal
 │   └── config.user.toml     # Config del usuario
 ├── _bmad-output/            # Artefactos de implementación
+│   ├── getting-started.md               # Primeros pasos / onboarding (nuevo + heredado)
 │   ├── bmad-project-lifecycle-guide.md  # Guía completa del ciclo de vida
 │   ├── coolify-deploy-guide.md         # Resumen del deploy Coolify
 │   ├── coolify-github-deploy-guide.md  # Deploy vía GitHub
@@ -322,10 +353,11 @@ Vea `_bmad-output/scripts/README.md` para instrucciones detalladas.
 
 | Documento | Ubicación | Descripción |
 |-----------|-----------|-------------|
+| **Primeros Pasos** | `_bmad-output/getting-started.md` | **Primeros pasos antes de un proyecto nuevo o una modernización de heredado — pre-flight + vías A/B** |
 | **Guía del Ciclo de Vida** | `_bmad-output/bmad-project-lifecycle-guide.md` | **Paso a paso completo: 5 fases de la idea a producción** |
-| AGENTS.md | `/AGENTS.md` | Instrucciones del proyecto |
-| Registro de Herramientas | `_bmad-output/tools-registry.md` | Inventario de herramientas (v1.3.0) |
-| Guía de Replicación | `_bmad-output/project-replication-guide.md` | Guía completa de setup |
+| AGENTS.md / CLAUDE.md | `/AGENTS.md`, `/CLAUDE.md` | Instrucciones del proyecto (OpenCode / Claude Code) |
+| Registro de Herramientas | `_bmad-output/tools-registry.md` | Inventario de herramientas (v1.3.1) |
+| Guía de Replicación | `_bmad-output/project-replication-guide.md` | Guía completa de setup (v1.1.0) |
 | Integración CrewAI | `_bmad-output/crewai-integration-guide.md` | Integración CrewAI + BMAD |
 
 ### Agentes de Tecnología

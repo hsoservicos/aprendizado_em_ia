@@ -391,9 +391,10 @@ Write-Host ""
 Write-Host "Next Steps:" -ForegroundColor Cyan
 Write-Host "1. Configure your API keys (Anthropic, OpenAI, etc.)"
 Write-Host "2. Open a new terminal and run: cd $ProjectDir"
-Write-Host "3. Start either coding agent:  opencode   OR   claude"
-Write-Host "4. In either agent, use: /bmad-help"
-Write-Host "5. (If skipped) wire RTK for both agents: rtk init -g --auto-patch --opencode"
+Write-Host "3. Read the onboarding guide: _bmad-output\getting-started.md"
+Write-Host "4. Start either coding agent:  opencode   OR   claude"
+Write-Host "5. In either agent, use: /bmad-help"
+Write-Host "6. (If skipped) wire RTK for both agents: rtk init -g --auto-patch --opencode"
 Write-Host ""
 Write-Host "Documentation:" -ForegroundColor Cyan
 Write-Host "- AGENTS.md: Project documentation"

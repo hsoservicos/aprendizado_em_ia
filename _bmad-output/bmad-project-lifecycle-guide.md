@@ -1,9 +1,16 @@
 # Guia Completo: Ciclo de Vida de Projetos com BMAD + CrewAI
 
-**Versão**: 1.0.0  
+**Versão**: 1.1.0  
 **Data**: 2026-09-04  
 **Autor**: Hsantos  
 **Público-alvo**: Operadores e membros da equipe
+
+> **Antes de começar:** conclua o pré-flight em
+> **`_bmad-output/getting-started.md`** (ambiente + os dois agentes + RTK +
+> configuração do projeto). Este guia cobre a **execução** — a Trilha A
+> (projeto novo). Para **projeto legado a modernizar**, comece pela Trilha B do
+> `getting-started.md` (`/bmad-project-context` → `/bmad-code-review` →
+> `/bmad-build`) e volte para as Fases 2–5 abaixo nas features maiores.
 
 ---
 
@@ -42,8 +49,8 @@ Este guia apresenta o **passo a passo completo** para criação de novos projeto
 | Python | >= 3.10, < 3.14 | `python3 --version` | Scripts BMAD |
 | uv | >= 0.12 | `uv --version` | Gerenciador de pacotes Python |
 | Git | Qualquer | `git --version` | Controle de versão |
-| OpenCode | Última | `opencode --version` | IDE com BMAD |
-| RTK | >= 0.47 | `rtk --version` | Compressão de tokens (opcional) |
+| Agente de codificação | OpenCode >= 1.18 **e/ou** Claude Code >= 2.1 | `opencode --version` / `claude --version` | Roda os comandos `/bmad-*` |
+| RTK | >= 0.47 | `rtk --version` | Compressão de tokens (ativo nos dois agentes) |
 | ripgrep | >= 14.0 | `rg --version` | Busca rápida (recomendado) |
 | CrewAI | >= 1.15 | `crewai --version` | Orquestração de agentes (opcional) |
 
@@ -608,6 +615,8 @@ output = bridge.render_skill("bmad-build")
 
 | Documento | Localização | Descrição |
 |-----------|-------------|-----------|
+| Primeiros Passos / Onboarding | `_bmad-output/getting-started.md` | Pré-flight + trilhas A (novo) e B (legado) |
+| Guia de Replicação | `_bmad-output/project-replication-guide.md` | Preparar a máquina em detalhe |
 | Guia de Deploy Coolify | `_bmad-output/coolify-deploy-guide.md` | Visão geral do deploy |
 | Deploy GitHub | `_bmad-output/coolify-github-deploy-guide.md` | Repositórios GitHub |
 | Deploy Local | `_bmad-output/coolify-local-deploy-guide.md` | Deploy sem Git |

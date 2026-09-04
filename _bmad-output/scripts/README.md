@@ -121,6 +121,10 @@ After running the installation script:
    rtk init --show     # expect [ok] OpenCode plugin + [ok] Claude hook
    ```
 
+5. **Onboard onto a project** — new or legacy:
+   follow **`_bmad-output/getting-started.md`** (pre-flight + Track A greenfield /
+   Track B legacy modernization).
+
 ---
 
 ## Troubleshooting

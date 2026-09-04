@@ -1,8 +1,8 @@
 # Tools Registry — Inventário de Ferramentas do Projeto
 
-**Last Updated**: 2026-09-04T04:00:00Z  
+**Last Updated**: 2026-09-04T05:30:00Z  
 **Maintainer**: Hsantos  
-**Version**: 1.3.0
+**Version**: 1.3.1
 
 ---
 
@@ -276,6 +276,9 @@ One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --open
 
 | File | Size | Description |
 |------|------|-------------|
+| `getting-started.md` | ~9K | First steps / onboarding — pre-flight + Track A (greenfield) & Track B (legacy modernization) |
+| `bmad-project-lifecycle-guide.md` | ~20K | 5-phase lifecycle, step by step |
+| `project-replication-guide.md` | ~16K | Environment replication for a new machine (v1.1.0) |
 | `docker-skill-implementation.md` | 7.1K | Docker Agent & Skill docs |
 | `python314-skill-implementation.md` | 5.5K | Python 3.14 Agent & Skill docs |
 | `php84-skill-implementation.md` | 3.8K | PHP 8.4 Agent & Skill docs |
@@ -323,6 +326,8 @@ One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --open
 │   ├── config.toml          # Main config
 │   └── config.user.toml     # User config
 ├── _bmad-output/            # Implementation artifacts
+│   ├── getting-started.md          # First steps / onboarding (new + legacy)
+│   ├── bmad-project-lifecycle-guide.md  # 5-phase lifecycle
 │   ├── coolify-deploy-guide.md      # Coolify deploy guide
 │   ├── coolify-github-deploy-guide.md  # GitHub repo deploy guide
 │   ├── coolify-local-deploy-guide.md   # Local deploy guide (no Git)
@@ -378,6 +383,8 @@ One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --open
 | 2026-09-04 | `.claude/settings.json` | Created — tool allow-list + RTK `PreToolUse` hook | Hsantos |
 | 2026-09-04 | `.claude/RTK.md` | Created — RTK reference for Claude Code | Hsantos |
 | 2026-09-04 | RTK ↔ Claude Code | Integrated (project hook `rtk hook claude`) for parity with OpenCode plugin | Hsantos |
+| 2026-09-04 | RTK global (both agents) | `rtk init -g --auto-patch` (Claude hook) + `--opencode` (plugin) — machine-level | Hsantos |
+| 2026-09-04 | `getting-started.md` | Created — onboarding: pre-flight + Track A (greenfield) & Track B (legacy modernization) | Hsantos |
 
 ---
 

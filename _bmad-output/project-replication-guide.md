@@ -9,6 +9,10 @@
 > Claude Code share the same 57 skills, the same toolchain, and RTK token
 > compression (`.claude/settings.json` hook mirrors the OpenCode plugin).
 
+> **Escopo:** este guia = preparar a **máquina**. Para os **primeiros passos de
+> um projeto** (novo ou legado a modernizar) depois que a máquina está pronta,
+> siga **`_bmad-output/getting-started.md`**.
+
 ---
 
 ## 1. Overview
@@ -542,12 +546,17 @@ claude
 # /bmad-postgres18    — PostgreSQL 18 tasks
 ```
 
+**Próximo:** siga o onboarding do projeto em `_bmad-output/getting-started.md`
+(pré-flight + Trilha A projeto novo / Trilha B projeto legado).
+
 ---
 
 ## 9. References
 
 | Document | Location |
 |----------|----------|
+| Getting Started (onboarding) | `_bmad-output/getting-started.md` |
+| Project Lifecycle (5 phases) | `_bmad-output/bmad-project-lifecycle-guide.md` |
 | Tools Registry | `_bmad-output/tools-registry.md` |
 | Docker Implementation | `_bmad-output/docker-skill-implementation.md` |
 | Python 3.14 Implementation | `_bmad-output/python314-skill-implementation.md` |

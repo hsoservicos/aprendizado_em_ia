@@ -28,6 +28,19 @@ coding agents are first-class and share one configuration, skill set, and toolch
 `.agents/skills/` and `.claude/skills/` are kept byte-identical — `npx bmad-method install`
 regenerates both; a manual change to one must be mirrored to the other.
 
+## Onboarding — first steps
+
+Anyone using this repo to **start a new project** or to **work on a legacy
+codebase being modernized** must run the pre-flight in
+**`_bmad-output/getting-started.md`** first (environment + both agents + RTK check
++ project config), then follow one of two tracks:
+
+- **Track A — greenfield**: `/bmad-help` → the 5-phase lifecycle
+  (`_bmad-output/bmad-project-lifecycle-guide.md`).
+- **Track B — brownfield / legacy**: `/bmad-project-context` (capture the repo's
+  stack + conventions into `AGENTS.md`/`CLAUDE.md`) → `/bmad-code-review`
+  (quality baseline) → `/bmad-build` for scoped changes.
+
 ## BMAD Skills
 
 57 skills, installed once and exposed to **both** agents via the two skill trees
@@ -127,4 +140,5 @@ Both scripts install the full toolchain, both agents, and wire RTK into OpenCode
 
 ## Project State
 
-This is a **greenfield** project — no application code exists yet. Use `bmad-help` to begin.
+This is a **greenfield** project — no application code exists yet. New here? Run
+the pre-flight in `_bmad-output/getting-started.md`, then `/bmad-help` to begin.
