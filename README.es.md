@@ -231,7 +231,24 @@ Los cambios pequeños pueden saltar directamente al build. Los trabajos complejo
 
 ## Integración CrewAI
 
-Este proyecto incluye **CrewAI** para orquestación de múltiples agentes, permitiendo flujos de trabajo automatizados.
+**CrewAI está integrado en la estructura del proyecto para su uso conjunto con el
+BMAD Method.** No es una herramienta opcional aparte — es la **capa de
+orquestación multi-agente** sobre las skills de BMAD:
+
+- Instalado como CLI gestionada (`uv tool install crewai` → `~/.local/bin/crewai`,
+  v1.15.18) y registrado en `_bmad-output/tools-registry.md`.
+- Accesible desde **ambos** agentes de codificación (OpenCode y Claude Code) —
+  `crewai` está en la lista de herramientas pre-aprobadas de `.claude/settings.json`.
+- Conectado a BMAD mediante el **bridge BMAD-CrewAI** (`BMADBridge`), que permite
+  a un crew de CrewAI listar y renderizar skills de BMAD como pasos de un flujo
+  automatizado.
+- Diseño, patrones y ejemplos completos: **`_bmad-output/crewai-integration-guide.md`**.
+
+**Cómo encajan los dos:** BMAD aporta el *método* (57 skills, ciclo de vida de 5
+fases, agentes de tecnología); CrewAI aporta la *automatización* (agentes por rol,
+flujos orientados a eventos, human-in-the-loop, checkpointing). Use las skills de
+BMAD de forma interactiva para el trabajo que exige criterio, y encapsule
+secuencias repetibles y bien definidas de esas mismas skills en un flujo CrewAI.
 
 ### ¿Qué es CrewAI?
 
@@ -361,38 +378,116 @@ Vea `_bmad-output/scripts/README.md` para instrucciones detalladas.
 
 ---
 
-## Documentación
+## Materiales y Herramientas del Proyecto (Índice)
 
-### Documentación Principal
+Todo documento, script, archivo de configuración y herramienta de este
+repositorio, con **qué es** y **cuándo usarlo** — para que cualquier miembro del
+equipo localice rápido el material de estudio y referencia. El inventario
+detallado y autoritativo (versiones, rutas, historial) es
+**`_bmad-output/tools-registry.md`** (v1.3.2).
 
-| Documento | Ubicación | Descripción |
-|-----------|-----------|-------------|
-| **Primeros Pasos** | `_bmad-output/getting-started.md` | **Primeros pasos antes de un proyecto nuevo o una modernización de heredado — pre-flight + vías A/B** |
-| **Manual de Implementación** | `_bmad-output/implementation-playbook.md` | **Paso a paso detallado y sin jerga para proyecto nuevo O heredado — conceptos, comandos, controles de calidad, FAQ (cualquier nivel)** |
-| **Guía del Ciclo de Vida** | `_bmad-output/bmad-project-lifecycle-guide.md` | **Paso a paso completo: 5 fases de la idea a producción** |
-| AGENTS.md / CLAUDE.md | `/AGENTS.md`, `/CLAUDE.md` | Instrucciones del proyecto (OpenCode / Claude Code) |
-| Registro de Herramientas | `_bmad-output/tools-registry.md` | Inventario de herramientas (v1.3.1) |
-| Guía de Replicación | `_bmad-output/project-replication-guide.md` | Guía completa de setup (v1.1.0) |
-| Integración CrewAI | `_bmad-output/crewai-integration-guide.md` | Integración CrewAI + BMAD |
+### 1. Guías para empezar (léalas en este orden)
 
-### Agentes de Tecnología
+| # | Documento | Qué es | Léalo cuando |
+|---|-----------|--------|--------------|
+| 1 | `_bmad-output/getting-started.md` | Onboarding de 5 min: pre-flight (Pasos 0–5: toolchain, ambos agentes, RTK, config del proyecto) + selector de Vía A/B. | Acaba de clonar el repo y necesita empezar. |
+| 2 | `_bmad-output/implementation-playbook.md` | **Manual de Implementación (PT-BR)** — el paso a paso detallado y sin jerga: glosario, 6 principios, **Parte A (proyecto nuevo / greenfield)** y **Parte B (modernización de heredado / brownfield)**, Definition of Done, tabla de decisión, FAQ. Para **cualquier nivel**. | Está construyendo de verdad — sistema nuevo o modernizando uno existente. |
+| 3 | `_bmad-output/bmad-project-lifecycle-guide.md` | Referencia de operación: las 5 fases (Clarify → Plan → Build → Review → Learn), checklists por fase, rutina diaria, chuleta de comandos, reglas de oro. | Ya conoce el flujo y quiere una referencia rápida. |
+| 4 | `_bmad-output/project-replication-guide.md` (v1.1.0) | Cómo reproducir el entorno en una **máquina nueva**: requisitos de hardware/SO, instalación por herramienta, setup de agentes, script de validación, troubleshooting. | Configurando una segunda máquina o la de un nuevo compañero. |
 
-| Documento | Ubicación | Descripción |
-|-----------|-----------|-------------|
-| Implementación Docker | `_bmad-output/docker-skill-implementation.md` | Docs del agente Docker |
-| Python 3.14 | `_bmad-output/python314-skill-implementation.md` | Docs Python 3.14 |
-| PHP 8.4 | `_bmad-output/php84-skill-implementation.md` | Docs PHP 8.4 |
-| PostgreSQL 18 | `_bmad-output/postgres18-skill-implementation.md` | Docs PostgreSQL 18 |
-| Instalación RTK | `_bmad-output/rtk-installation-guide.md` | Setup del RTK |
+### 2. Guías de integración y herramientas
 
-### Deploy Coolify
+| Documento | Qué es | Léalo cuando |
+|-----------|--------|--------------|
+| `_bmad-output/crewai-integration-guide.md` | Cómo **CrewAI** está integrado al proyecto para uso conjunto con BMAD — el `BMADBridge`, crews/flows, human-in-the-loop, ejemplos. | Automatizando secuencias repetibles de skills de BMAD. |
+| `_bmad-output/rtk-installation-guide.md` | Informe completo de **RTK** (compresión de tokens): instalación, el plugin de OpenCode **y** el hook `PreToolUse` de Claude Code, diagramas, referencia de comandos, troubleshooting. | Verificar/arreglar RTK o entender qué hace. |
+| `_bmad-output/tools-registry.md` | **Inventario canónico** — todo runtime, framework, agente, script e integración con versión, ruta, "usado por", mapa de directorios y log de instalación fechado. | Necesita la versión/ruta exacta de algo, o un historial. |
 
-| Documento | Ubicación | Descripción |
-|-----------|-----------|-------------|
-| Guía de Deploy | `_bmad-output/coolify-deploy-guide.md` | Resumen, preparación, CLI (12 secciones) |
-| Deploy GitHub | `_bmad-output/coolify-github-deploy-guide.md` | Repo público, Deploy Key, GitHub App (9 secciones) |
-| Deploy Local | `_bmad-output/coolify-local-deploy-guide.md` | Docker Image, Dockerfile, Compose Empty (10 secciones) |
-| Script de Deploy | `_bmad-output/scripts/coolify-deploy.sh` | Automatización CLI (Git + Docker Image) |
+### 3. Referencias de los agentes de tecnología
+
+| Documento | Qué es |
+|-----------|--------|
+| `_bmad-output/docker-skill-implementation.md` | Agente & Skill Docker: reglas de validación de Dockerfile/Compose (D001–D015, C001–C007), BuildKit, hardening, doc-sync. |
+| `_bmad-output/python314-skill-implementation.md` | Agente & Skill Python 3.14: free-threading, subinterpreters, t-strings, `compression.zstd`, deferred annotations. |
+| `_bmad-output/php84-skill-implementation.md` | Agente & Skill PHP 8.4: Property Hooks, Asymmetric Visibility, DOM API, nuevas funciones de array. |
+| `_bmad-output/postgres18-skill-implementation.md` | Agente & Skill PostgreSQL 18: AIO (`io_uring`), B-Tree Skip Scan, UUIDv7, `RETURNING OLD/NEW`, pgvector. |
+
+### 4. Deploy (Coolify)
+
+| Documento | Qué es |
+|-----------|--------|
+| `_bmad-output/coolify-deploy-guide.md` | Resumen + preparación + CLI + paso a paso (12 secciones). Empiece aquí. |
+| `_bmad-output/coolify-github-deploy-guide.md` | Fuentes GitHub: repo público, Deploy Key, GitHub App (9 secciones). |
+| `_bmad-output/coolify-local-deploy-guide.md` | Fuentes sin Git: Docker Image, Dockerfile pegado, Compose Empty, Service one-click (10 secciones). |
+| `_bmad-output/scripts/coolify-deploy.sh` | Ejecutable — deploy Coolify automatizado vía CLI (repos públicos + privados, imagen Docker). |
+
+### 5. Scripts de instalación y validación
+
+| Archivo | Qué es |
+|---------|--------|
+| `_bmad-output/scripts/install-linux.sh` (v1.1.0) | Setup Linux/Ubuntu de una vez: toolchain + ambos agentes + `npx bmad-method install` + RTK en ambos agentes + comprobaciones de paridad. |
+| `_bmad-output/scripts/install-windows.ps1` (v1.1.0) | Lo mismo para Windows 10/11 (PowerShell como Administrador). |
+| `_bmad-output/scripts/README.md` | Cómo ejecutar los scripts, pasos post-instalación, troubleshooting, desinstalación. |
+| `_bmad-output/scripts/test-local.sh` | Validación/dry-run local del flujo de instalación. |
+| `_bmad-output/scripts/installation-validation-report.md` | Resultado de la validación de entorno. |
+| `_bmad-output/scripts/windows-script-validation-report.md` | 73 casos de prueba ejecutados contra el script de Windows. |
+
+### 6. Instrucciones de los agentes y configuración
+
+| Archivo | Qué es |
+|---------|--------|
+| `AGENTS.md` | Contrato del proyecto leído por **OpenCode**: setup, paridad entre agentes, skills, onboarding, prerrequisitos. |
+| `CLAUDE.md` | Punto de entrada leído por **Claude Code** — importa `AGENTS.md` + notas específicas. |
+| `.claude/settings.json` | Allow-list de herramientas de Claude Code (`uv`, `rtk`, `rg`, `gh`, `crewai`, `npx bmad-method`) + hook RTK `PreToolUse`. |
+| `.claude/RTK.md` | Referencia de comandos RTK para Claude Code. |
+| `.opencode/commands/*.md` | 57 wrappers de comando de OpenCode (`/bmad-*`) que apuntan a `.agents/skills/`. |
+| `_bmad/config.toml` | Config base gestionada por el instalador. **No editar.** |
+| `_bmad/config.user.toml` | Sus respuestas personales de instalación (nombre, idioma, nivel). En gitignore. |
+| `_bmad/custom/config.toml` | Overrides del equipo, commiteado — el lugar para fijar la configuración del proyecto. |
+| `_bmad/_config/manifest.yaml` | Metadatos de la instalación (módulos, IDEs objetivo, versiones). |
+
+### 7. Scripts del motor BMAD (`_bmad/scripts/`)
+
+| Script | Qué hace |
+|--------|----------|
+| `render_skill.py` | Renderiza el workflow de una skill a un snapshot ejecutable. **Única** forma soportada de ejecutar una skill: `uv run _bmad/scripts/render_skill.py --project-root "$PWD" --skill .claude/skills/<nombre>` (o `.agents/skills/<nombre>`). |
+| `validate_dockerfile.py` | Valida Dockerfiles contra 15 reglas (D001–D015). |
+| `validate_compose.py` | Valida archivos `docker-compose` contra 7 reglas (C001–C007). |
+| `docsync_docker.py` | Mantiene la documentación Docker sincronizada. |
+| `memlog.py` | Utilidad de log de memoria de las ejecuciones de skill. |
+| `config_utils.py` / `resolve_config.py` / `resolve_customization.py` | Helpers de resolución de config usados por las skills. |
+
+### 8. Herramientas instaladas
+
+| Herramienta | Versión | Ruta | Propósito | Más información |
+|-------------|---------|------|-----------|----------------|
+| **Node.js** | v24.20.0 | nvm | Runtime JS; ejecuta `npx bmad-method`, OpenCode | `project-replication-guide.md` |
+| **npm** | 12.0.2 | con Node | Gestor de paquetes | — |
+| **Python** | 3.12.3 | sistema | Scripts BMAD y renderizado de skills (necesita `>=3.10,<3.14`) | `project-replication-guide.md` |
+| **uv** | 0.12.9 | `~/.local/bin/uv` | Runner Python rápido — `uv run` renderiza skills; `uv tool install` | `tools-registry.md` §1.4 |
+| **Git** | 2.43.0 | sistema | Control de versiones | — |
+| **GitHub CLI (`gh`)** | 2.73.0 | `~/.local/bin/gh` | Ops de repo / PR / release; `gh auth setup-git` para push | `tools-registry.md` §1.7 |
+| **ripgrep (`rg`)** | 14.1.1 | `~/.local/bin/rg` | Búsqueda rápida; dependencia de RTK | `rtk-installation-guide.md` |
+| **RTK** | 0.47.0 | `~/.local/bin/rtk` | Proxy de compresión de tokens — activo en **ambos** agentes (plugin OpenCode + hook `PreToolUse` de Claude). `RTK_DISABLED=1 <cmd>` para salida cruda. | `rtk-installation-guide.md` |
+| **CrewAI** | 1.15.18 | `~/.local/bin/crewai` | Orquestación multi-agente integrada con BMAD vía `BMADBridge` | `crewai-integration-guide.md` |
+| **OpenCode** | 1.18.27 | `~/.opencode/bin/opencode` | Agente de codificación — lee `AGENTS.md`, `.opencode/commands/`, `.agents/skills/` | `AGENTS.md` |
+| **Claude Code** | 2.1.260 | `~/.local/bin/claude` | Agente de codificación — lee `CLAUDE.md`, `.claude/settings.json`, `.claude/skills/` | `CLAUDE.md` |
+| **BMAD Method** | 6.11.0 | `_bmad/` | El framework — 57 skills, ciclo de 5 fases, agentes de tecnología | `AGENTS.md`, `tools-registry.md` §2 |
+
+### 9. "Quiero… → lea esto"
+
+| Objetivo | Empiece por |
+|----------|-------------|
+| Hacer el onboarding | `getting-started.md` |
+| Construir un proyecto **nuevo** de principio a fin | `implementation-playbook.md` → Parte A |
+| Modernizar / actualizar un proyecto **heredado** | `implementation-playbook.md` → Parte B |
+| Referencia rápida de operación de las 5 fases | `bmad-project-lifecycle-guide.md` |
+| Preparar una máquina nueva | `project-replication-guide.md` + `scripts/install-*.sh` |
+| Automatizar secuencias repetidas de skills | `crewai-integration-guide.md` |
+| Entender / arreglar la compresión de tokens | `rtk-installation-guide.md` |
+| Hacer deploy en producción | `coolify-deploy-guide.md` (+ variantes github / local) |
+| Consultar versión, ruta o historial exactos | `tools-registry.md` |
+| Trabajar con Docker / Python 3.14 / PHP 8.4 / PostgreSQL 18 | el `*-skill-implementation.md` correspondiente + `/bmad-agent-*` |
 
 ---
 
