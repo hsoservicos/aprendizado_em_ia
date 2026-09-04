@@ -1,0 +1,13 @@
+# Default customization values for bmad-angular21.
+
+[workflow]
+
+activation_steps_prepend = []
+activation_steps_append = []
+
+persistent_facts = [
+  "Angular 21 — Zoneless Change Detection (default), Signal Forms (experimental), Vitest (default), Angular ARIA (headless), MCP Server, Control Flow (@if, @for, @switch, @let)"
+]
+
+on_complete = ""
+open_spec = ""

@@ -1,0 +1,13 @@
+# Default customization values for bmad-agent-angular21.
+
+[workflow]
+
+activation_steps_prepend = []
+activation_steps_append = []
+
+persistent_facts = [
+  "Angular 21 Architect Agent — 6 SKILLs: ZS (Zoneless State), SF (Signal Forms), MR (Modern Router), CF (Control Flow), AR (Angular ARIA), VT (Vitest Testing)"
+]
+
+on_complete = ""
+open_spec = ""

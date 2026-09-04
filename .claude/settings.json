@@ -11,7 +11,8 @@
       "Bash(npx bmad-method:*)",
       "Bash(npx bmad-method@*:*)",
       "Bash(crewai:*)",
-      "Read(//home/hsantos/app/**)"
+      "Bash(python:*)",
+      "Bash(pip:*)"
     ],
     "deny": []
   },

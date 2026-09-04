@@ -1,0 +1,15 @@
+# Default customization values for bmad-java21.
+# Override in _bmad/custom/bmad-java21.toml or
+# _bmad/custom/bmad-java21.user.toml.
+
+[workflow]
+
+activation_steps_prepend = []
+activation_steps_append = []
+
+persistent_facts = [
+  "Java 21 LTS — Virtual Threads (JEP 444), Pattern Matching (JEP 440), Record Patterns (JEP 441), Sequenced Collections (JEP 431), Structured Concurrency (JEP 453 Preview), Scoped Values (JEP 446 Preview)"
+]
+
+on_complete = ""
+open_spec = ""

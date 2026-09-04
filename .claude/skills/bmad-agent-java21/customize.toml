@@ -1,0 +1,13 @@
+# Default customization values for bmad-agent-java21.
+
+[workflow]
+
+activation_steps_prepend = []
+activation_steps_append = []
+
+persistent_facts = [
+  "Java 21 LTS Architect Agent — 5 SKILLs: VT (Virtual Threads), PM (Pattern Matching), SC (Sequenced Collections), AR (Architecture), QA (Quality Gate)"
+]
+
+on_complete = ""
+open_spec = ""
