@@ -1,8 +1,8 @@
 # Tools Registry — Inventário de Ferramentas do Projeto
 
-**Last Updated**: 2026-09-04T06:30:00Z  
+**Last Updated**: 2026-09-04T07:30:00Z  
 **Maintainer**: Hsantos  
-**Version**: 1.3.2
+**Version**: 1.3.3
 
 ---
 
@@ -388,6 +388,7 @@ One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --open
 | 2026-09-04 | RTK global (both agents) | `rtk init -g --auto-patch` (Claude hook) + `--opencode` (plugin) — machine-level | Hsantos |
 | 2026-09-04 | `getting-started.md` | Created — onboarding: pre-flight + Track A (greenfield) & Track B (legacy modernization) | Hsantos |
 | 2026-09-04 | `implementation-playbook.md` | Created — detailed jargon-free step-by-step for new & legacy projects (Parts A & B), any skill level | Hsantos |
+| 2026-09-04 | README (EN/PT-BR/ES) | Added "Project Materials & Tools" index; CrewAI stated as integrated with BMAD; CrewAI registered in the Support section (upstream repo + docs); trilingual parity restored | Hsantos |
 
 ---
 

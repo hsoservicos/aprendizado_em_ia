@@ -258,6 +258,14 @@ CrewAI es un framework Python open-source para orquestar agentes de IA autónomo
 - **Flows**: Workflows orientados por eventos con gestión de estado
 - **Patrones listos para producción**: Human-in-the-loop, ejecución asíncrona, checkpointing
 
+### Beneficios de la Integración
+
+| Fortaleza de BMAD | Fortaleza de CrewAI | Beneficio combinado |
+|-------------------|---------------------|---------------------|
+| Experiencia en workflow de desarrollo | Orquestación multi-agente | Pipelines de desarrollo automatizados |
+| 57 skills especializadas | Colaboración de agentes por rol | Equipos de agentes especializados |
+| Agentes específicos por tecnología | Workflows orientados a eventos | Flujos de automatización complejos |
+
 ### Inicio Rápido con CrewAI
 
 ```bash
@@ -384,7 +392,7 @@ Todo documento, script, archivo de configuración y herramienta de este
 repositorio, con **qué es** y **cuándo usarlo** — para que cualquier miembro del
 equipo localice rápido el material de estudio y referencia. El inventario
 detallado y autoritativo (versiones, rutas, historial) es
-**`_bmad-output/tools-registry.md`** (v1.3.2).
+**`_bmad-output/tools-registry.md`** (v1.3.3).
 
 ### 1. Guías para empezar (léalas en este orden)
 
@@ -488,6 +496,7 @@ detallado y autoritativo (versiones, rutas, historial) es
 | Hacer deploy en producción | `coolify-deploy-guide.md` (+ variantes github / local) |
 | Consultar versión, ruta o historial exactos | `tools-registry.md` |
 | Trabajar con Docker / Python 3.14 / PHP 8.4 / PostgreSQL 18 | el `*-skill-implementation.md` correspondiente + `/bmad-agent-*` |
+| Resumen en otro idioma | `README.md` (EN) · `README.pt-BR.md` |
 
 ---
 
@@ -562,6 +571,20 @@ Para nuevos proyectos, siga el **ciclo de vida de 5 fases** documentado en la gu
 /bmad-agent-postgres18
 ```
 
+### Renderizar una Skill
+
+```bash
+# Claude Code
+uv run _bmad/scripts/render_skill.py \
+  --project-root /home/hsantos/app \
+  --skill .claude/skills/bmad-docker
+
+# OpenCode
+uv run _bmad/scripts/render_skill.py \
+  --project-root /home/hsantos/app \
+  --skill .agents/skills/bmad-docker
+```
+
 ---
 
 ## Configuración
@@ -604,9 +627,16 @@ npm update -g opencode @anthropic-ai/claude-code
 
 ## Soporte
 
-- **Documentación**: Vea `_bmad-output/` para guías detalladas
+- **Documentación**: Vea `_bmad-output/` para guías detalladas — empiece por el
+  [Índice de Materiales y Herramientas](#materiales-y-herramientas-del-proyecto-índice)
 - **Issues**: Abra una issue en el repositorio del proyecto
-- **BMAD Method**: https://github.com/bmadmethod/bmad-method
+- **BMAD Method**: https://github.com/bmadmethod/bmad-method — el framework
+  (57 skills, ciclo de vida de 5 fases, agentes de tecnología); instalado en
+  `_bmad/`, actualizado con `npx bmad-method install`
+- **CrewAI**: https://github.com/crewAIInc/crewAI · docs https://docs.crewai.com
+  — la capa de orquestación multi-agente **integrada con BMAD** en este proyecto
+  (v1.15.18 en `~/.local/bin/crewai`, conectada vía `BMADBridge`); vea
+  [`_bmad-output/crewai-integration-guide.md`](_bmad-output/crewai-integration-guide.md)
 
 ---
 

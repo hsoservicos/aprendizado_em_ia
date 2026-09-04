@@ -404,7 +404,7 @@ See `_bmad-output/scripts/README.md` for detailed instructions.
 Every document, script, config file and tool in this repository, with **what it
 is** and **when to use it** — so any team member can locate study and reference
 material quickly. The authoritative, detailed machine inventory (versions, paths,
-install log) is **`_bmad-output/tools-registry.md`** (v1.3.2).
+install log) is **`_bmad-output/tools-registry.md`** (v1.3.3).
 
 ### 1. Start-here guides (read in this order)
 
@@ -639,9 +639,16 @@ npm update -g opencode @anthropic-ai/claude-code
 
 ## Support
 
-- **Documentation**: See `_bmad-output/` for detailed guides
+- **Documentation**: See `_bmad-output/` for detailed guides — start with the
+  [Project Materials & Tools index](#project-materials--tools-index)
 - **Issues**: Open an issue on the project repository
-- **BMAD Method**: https://github.com/bmadmethod/bmad-method
+- **BMAD Method**: https://github.com/bmadmethod/bmad-method — the framework
+  (57 skills, 5-phase lifecycle, technology agents); installed at `_bmad/`,
+  updated with `npx bmad-method install`
+- **CrewAI**: https://github.com/crewAIInc/crewAI · docs https://docs.crewai.com
+  — the multi-agent orchestration layer **integrated with BMAD** in this project
+  (v1.15.18 at `~/.local/bin/crewai`, connected via the `BMADBridge`); see
+  [`_bmad-output/crewai-integration-guide.md`](_bmad-output/crewai-integration-guide.md)
 
 ---
 
