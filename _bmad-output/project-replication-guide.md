@@ -1,9 +1,13 @@
 # Project Replication Guide — Guia Completo de Replicação
 
-**Version**: 1.0.0  
-**Last Updated**: 2026-09-03  
+**Version**: 1.1.0  
+**Last Updated**: 2026-09-04  
 **Author**: Hsantos  
 **Status**: Production Ready
+
+> **v1.1.0** — full parity between the two coding agents: OpenCode **and**
+> Claude Code share the same 57 skills, the same toolchain, and RTK token
+> compression (`.claude/settings.json` hook mirrors the OpenCode plugin).
 
 ---
 
@@ -46,11 +50,15 @@ Este guia documenta o processo completo para replicar o ambiente de desenvolvime
 | Software | Minimum Version | Purpose |
 |----------|----------------|---------|
 | Node.js | >= 20.12 | JavaScript runtime, BMAD installer |
-| Python | >= 3.10 | Script execution, skill rendering |
+| Python | >= 3.10, < 3.14 | Script execution, skill rendering |
 | Git | >= 2.30 | Version control |
 | uv | >= 0.12 | Python package management |
-| RTK | >= 0.47 | Token compression (optional) |
-| ripgrep | >= 14.0 | Fast search (recommended) |
+| GitHub CLI (`gh`) | any | Repo / PR / release operations |
+| RTK | >= 0.47 | Token compression for both agents (optional) |
+| ripgrep | >= 14.0 | Fast search, RTK dependency (recommended) |
+| CrewAI | >= 1.15 | Multi-agent orchestration (optional) |
+
+Every tool above works from **both** OpenCode and Claude Code.
 
 ---
 
@@ -193,6 +201,31 @@ npx @anthropic-ai/claude-code --version
 claude config set apiKey YOUR_API_KEY
 ```
 
+#### Wire RTK into BOTH agents (one command)
+
+```bash
+# Global Claude Code PreToolUse hook + OpenCode plugin
+rtk init -g --auto-patch --opencode
+
+# Verify
+rtk init --show
+#   [ok] OpenCode: plugin installed ...
+#   [ok] Hook: rtk hook claude
+```
+
+> The project already ships an **in-repo** Claude Code hook in
+> `.claude/settings.json`, so RTK compression works in this repo even before the
+> global step. `rtk hook claude` is idempotent — project + global hooks coexist.
+
+#### Agent parity checklist
+
+| Item | OpenCode | Claude Code |
+|------|----------|-------------|
+| Instructions | `AGENTS.md` | `CLAUDE.md` (imports `AGENTS.md`) |
+| Skills (57) | `.agents/skills/` + `.opencode/commands/` | `.claude/skills/` (native discovery) |
+| Tool allow-list | shell `PATH` | `.claude/settings.json` → `permissions.allow` |
+| RTK | `~/.config/opencode/plugins/rtk.ts` | `.claude/settings.json` `PreToolUse` hook |
+
 ### Phase 4: BMAD Method Installation
 
 ```bash
@@ -245,6 +278,7 @@ communication_language = "English"
 # Create required directories
 mkdir -p docs
 mkdir -p _bmad-output
+mkdir -p .claude
 
 # Create .gitignore
 cat > .gitignore << 'EOF'
@@ -275,6 +309,49 @@ Thumbs.db
 .env.local
 EOF
 ```
+
+#### 5.3 Agent Instruction & Settings Files
+
+`AGENTS.md` is created by earlier steps / the reference repo. Add the Claude Code
+counterparts so both agents are configured identically:
+
+```bash
+# CLAUDE.md — Claude Code entry point; imports AGENTS.md
+cat > CLAUDE.md << 'EOF'
+# CLAUDE.md
+
+Claude Code's entry point. Counterpart of AGENTS.md (OpenCode). Both agents share
+one source of truth, the same 57 BMAD skills, and the same toolchain.
+
+@AGENTS.md
+
+## Claude Code specifics
+- Skills: .claude/skills/ (mirror of .agents/skills/), invoked as /bmad-*
+- Settings: .claude/settings.json (tool allow-list + RTK PreToolUse hook)
+- Render: uv run _bmad/scripts/render_skill.py --project-root "$PWD" --skill .claude/skills/<name>
+EOF
+
+# .claude/settings.json — tool allow-list + RTK hook (mirrors the OpenCode plugin)
+cat > .claude/settings.json << 'EOF'
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(uv run:*)", "Bash(uvx:*)", "Bash(rtk:*)", "Bash(rg:*)",
+      "Bash(gh:*)", "Bash(npx bmad-method:*)", "Bash(crewai:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Bash", "hooks": [ { "type": "command", "command": "rtk hook claude" } ] }
+    ]
+  }
+}
+EOF
+```
+
+Commit all three (`AGENTS.md`, `CLAUDE.md`, `.claude/settings.json`, plus
+`.claude/RTK.md` if used) so a clone is agent-ready with no extra steps.
 
 ---
 
@@ -370,16 +447,39 @@ rtk --version 2>/dev/null || echo "⚠️ NOT FOUND (optional)"
 echo -n "ripgrep: "
 rg --version 2>/dev/null | head -1 || echo "⚠️ NOT FOUND (recommended)"
 
+# Check GitHub CLI
+echo -n "gh: "
+gh --version 2>/dev/null | head -1 || echo "⚠️ NOT FOUND"
+
 # Check BMAD
 echo -n "BMAD Method: "
 npx bmad-method --version 2>/dev/null || echo "❌ NOT FOUND"
 
-# Check skills count
+# Check coding agents
+echo -n "OpenCode: "
+opencode --version 2>/dev/null || echo "⚠️ NOT FOUND"
+echo -n "Claude Code: "
+claude --version 2>/dev/null || echo "⚠️ NOT FOUND"
+
+# Check skills count (both trees must match)
 echo ""
 echo "=== Skills Count ==="
 echo "Skills in .agents/skills/: $(ls -d .agents/skills/bmad-* 2>/dev/null | wc -l)"
 echo "Skills in .claude/skills/: $(ls -d .claude/skills/bmad-* 2>/dev/null | wc -l)"
 echo "Commands in .opencode/commands/: $(ls .opencode/commands/bmad-*.md 2>/dev/null | wc -l)"
+diff -rq .agents/skills .claude/skills >/dev/null 2>&1 \
+  && echo "Skill trees: ✅ identical" || echo "Skill trees: ⚠️ DIVERGED — re-run 'npx bmad-method install'"
+
+# Check agent config files
+echo ""
+echo "=== Agent Config ==="
+[ -f AGENTS.md ] && echo "AGENTS.md: ✅" || echo "AGENTS.md: ❌"
+[ -f CLAUDE.md ] && echo "CLAUDE.md: ✅" || echo "CLAUDE.md: ❌"
+[ -f .claude/settings.json ] && echo ".claude/settings.json: ✅" || echo ".claude/settings.json: ❌"
+grep -q "rtk hook claude" .claude/settings.json 2>/dev/null \
+  && echo "RTK hook (Claude Code): ✅" || echo "RTK hook (Claude Code): ⚠️ not configured"
+[ -f "$HOME/.config/opencode/plugins/rtk.ts" ] \
+  && echo "RTK plugin (OpenCode): ✅" || echo "RTK plugin (OpenCode): ⚠️ not configured"
 
 echo ""
 echo "=== Validation Complete ==="
@@ -402,6 +502,10 @@ chmod +x validate-setup.sh
 | BMAD install fails | Ensure Node.js >= 20.12 and npm >= 10 |
 | Skills not rendering | Check `uv` is installed and in PATH |
 | OpenCode plugin not loading | Verify `~/.config/opencode/plugins/rtk.ts` exists |
+| Claude Code RTK hook not firing | `.claude/settings.json` must have the `PreToolUse`/`Bash` hook; restart Claude Code; check with `rtk init --show` |
+| Claude Code prompts for every tool | Ensure `.claude/settings.json` `permissions.allow` is present and valid JSON |
+| Skill trees diverged | Re-run `npx bmad-method install` (regenerates `.agents/skills/` **and** `.claude/skills/`) |
+| Wire RTK for both agents | `rtk init -g --auto-patch --opencode` |
 
 ### PATH Configuration
 
@@ -416,16 +520,19 @@ export PATH="$HOME/.npm-global/bin:$PATH"
 
 ## 8. Quick Start
 
-After installation, start developing:
+After installation, start developing with **either** agent — the BMAD commands
+are identical:
 
 ```bash
-# Navigate to project
 cd /path/to/your/project
 
-# Start OpenCode
+# Option A — OpenCode
 opencode
 
-# In OpenCode, use BMAD commands:
+# Option B — Claude Code
+claude
+
+# In either agent, use BMAD commands:
 # /bmad-help          — Get started
 # /bmad-build         — Build features
 # /bmad-code-review   — Review code

@@ -1,7 +1,12 @@
 # Installation Scripts
 
-**Version**: 1.0.0  
-**Last Updated**: 2026-09-03
+**Version**: 1.1.0  
+**Last Updated**: 2026-09-04
+
+> **v1.1.0** — both scripts now wire RTK into **both** coding agents (OpenCode
+> plugin + Claude Code `PreToolUse` hook via `rtk init -g --auto-patch --opencode`)
+> and validate the `.agents/skills` ↔ `.claude/skills` parity plus the agent
+> config files (`AGENTS.md`, `CLAUDE.md`, `.claude/settings.json`).
 
 ---
 
@@ -45,10 +50,10 @@ chmod +x install-linux.sh
 5. uv (Python package manager)
 6. ripgrep (fast search)
 7. RTK (token compression)
-8. OpenCode (IDE)
-9. Claude Code (AI assistant)
+8. OpenCode + Claude Code (coding agents)
+9. RTK → both agents (`rtk init -g --auto-patch --opencode`)
 10. BMAD Method v6.11.0
-11. Project structure and configuration
+11. Project structure and configuration (incl. `CLAUDE.md`, `.claude/settings.json`)
 
 ---
 
@@ -78,10 +83,10 @@ powershell -ExecutionPolicy Bypass -File install-windows.ps1 -ProjectDir "C:\pro
 4. Git
 5. uv (Python package manager)
 6. ripgrep (fast search)
-7. OpenCode (IDE)
-8. Claude Code (AI assistant)
+7. OpenCode + Claude Code (coding agents)
+8. RTK → both agents (`rtk init -g --auto-patch --opencode`)
 9. BMAD Method v6.11.0
-10. Project structure and configuration
+10. Project structure and configuration (incl. `CLAUDE.md`, `.claude/settings.json`)
 
 ---
 
@@ -98,10 +103,10 @@ After running the installation script:
    claude config set apiKey YOUR_API_KEY
    ```
 
-2. **Start Development**:
+2. **Start Development** (either agent — identical commands):
    ```bash
    cd ~/app  # or your custom directory
-   opencode
+   opencode  # or: claude
    ```
 
 3. **Use BMAD Commands**:
@@ -109,6 +114,11 @@ After running the installation script:
    /bmad-help          — Get started
    /bmad-build         — Build features
    /bmad-code-review   — Review code
+   ```
+
+4. **Verify RTK is wired into both agents**:
+   ```bash
+   rtk init --show     # expect [ok] OpenCode plugin + [ok] Claude hook
    ```
 
 ---
@@ -123,6 +133,9 @@ After running the installation script:
 | Command not found | Restart terminal or `source ~/.bashrc` | Restart PowerShell |
 | Network error | Check proxy settings | Check firewall/proxy |
 | Version conflict | Use nvm to manage Node.js versions | Reinstall via Chocolatey |
+| RTK not compressing in Claude Code | `.claude/settings.json` must contain the `PreToolUse`/`Bash` hook; restart the agent; `rtk init --show` | same |
+| RTK not compressing in OpenCode | Verify `~/.config/opencode/plugins/rtk.ts` exists | `%USERPROFILE%\.config\opencode\plugins\rtk.ts` |
+| Skill trees diverged | `npx bmad-method install` regenerates `.agents/skills` + `.claude/skills` | same |
 
 ### Manual PATH Setup
 

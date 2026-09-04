@@ -9,6 +9,10 @@ Thumbs.db
 *.swo
 *~
 
+# Coding agents — personal / machine-local overrides (keep shared configs tracked)
+.claude/settings.local.json
+_bmad/render/
+
 # Node
 node_modules/
 npm-debug.log*

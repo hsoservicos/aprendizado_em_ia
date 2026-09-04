@@ -1,7 +1,7 @@
 # RTK (Rust Token Killer) — Installation & Configuration Report
 
 **Author:** Hsantos  
-**Date:** 2026-09-03  
+**Date:** 2026-09-04  
 **Version:** RTK 0.47.0  
 **Platform:** Ubuntu 24.04.4 LTS (x86_64)
 
@@ -11,7 +11,17 @@
 
 RTK (Rust Token Killer) is a high-performance CLI proxy written in Rust that intercepts and compresses command outputs sent to AI coding assistants (Claude Code, Codex CLI, Cursor, Opencode, etc.). It reduces input token volume by **60-90%**, mitigating context window limits and accelerating agent response times.
 
-**Status:** ✅ Successfully installed, configured, and validated for Opencode.
+**Status:** ✅ Installed, configured, and validated for **both** coding agents used in
+this project:
+
+| Agent | Integration | Location |
+|-------|-------------|----------|
+| **OpenCode** | Plugin (`tool.execute.before` hook) | `~/.config/opencode/plugins/rtk.ts` |
+| **Claude Code** | `PreToolUse` hook (`rtk hook claude`) | `.claude/settings.json` (in-repo, committed) |
+
+Both delegate to the same rewrite engine, so `git status` → `rtk git status`
+transparently regardless of which agent is driving. One command wires both on a
+fresh machine: `rtk init -g --auto-patch --opencode`.
 
 ---
 
@@ -59,6 +69,43 @@ Plugin file located at:
 ```
 
 The plugin hooks into `tool.execute.before` events and rewrites Bash commands via `rtk rewrite`.
+
+### 3.4 Claude Code Hook — Added 2026-09-04
+
+To give Claude Code the same transparent compression OpenCode already had, a
+`PreToolUse` hook was added to the **in-repo** settings file
+`/home/hsantos/app/.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "rtk hook claude" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+`rtk hook claude` reads the Claude Code PreToolUse JSON on stdin and returns an
+`updatedInput.command` with the RTK-rewritten command. It is **idempotent** — a
+command that is already `rtk …` is returned unchanged — so this project hook and
+an optional global hook (`rtk init -g`) can coexist without double-wrapping.
+
+The same file also carries a `permissions.allow` list so `uv`, `rtk`, `rg`, `gh`,
+`crewai` and `npx bmad-method` run without prompting. A companion reference,
+`.claude/RTK.md`, documents the meta commands (`rtk gain`, `rtk discover`, …).
+
+**One-shot wiring for both agents** (per machine, global):
+
+```bash
+rtk init -g --auto-patch --opencode   # global Claude hook + OpenCode plugin
+rtk init --show                        # verify
+```
 
 ---
 
@@ -157,7 +204,25 @@ Tokens saved:      200 (11.9%)
 
 ---
 
-## 5. Architecture: How RTK Integrates with Opencode
+## 5. Architecture: How RTK Integrates with the Coding Agents
+
+### 5.0 Claude Code flow
+
+```
+Claude Code ──(Bash tool call)──▶ PreToolUse hook ──▶ rtk hook claude
+     ▲                                                      │
+     │                                             updatedInput.command
+     │                                                      ▼
+ Filtered output ◀── RTK Core (Rust) ◀── native command (git, pytest, …)
+```
+
+1. Claude Code emits a `PreToolUse` event for every `Bash` call.
+2. `.claude/settings.json` routes it to `rtk hook claude` (stdin JSON).
+3. RTK returns `{"hookSpecificOutput":{"updatedInput":{"command":"rtk …"}}}`.
+4. Claude Code runs the rewritten command; RTK Core filters the output.
+5. On failure the raw output is tee-logged to `~/.local/share/rtk/tee/`.
+
+### 5.1 OpenCode flow
 
 ```
 +------------------+     (Bash command)      +-------------------+
@@ -222,7 +287,14 @@ Tokens saved:      200 (11.9%)
 ~/.config/opencode/plugins/rtk.ts
 ```
 
-### 7.4 Environment Variables
+### 7.4 Claude Code Hook + Reference (in-repo)
+```
+<project-root>/.claude/settings.json   # hooks.PreToolUse[matcher=Bash] → rtk hook claude
+<project-root>/.claude/RTK.md          # RTK command reference for the agent
+~/.claude/settings.json                # optional global hook via `rtk init -g`
+```
+
+### 7.5 Environment Variables
 
 | Variable | Purpose |
 |----------|---------|
@@ -240,13 +312,20 @@ Tokens saved:      200 (11.9%)
 | Agent not using RTK | Run `rtk init -g --opencode` and restart the agent |
 | Need raw output | Prefix with `RTK_DISABLED=1` |
 | Custom filter not loading | Run `rtk trust` to authorize project filters |
-| Plugin not loading | Verify `~/.config/opencode/plugins/rtk.ts` exists and `rtk` is in PATH |
+| Plugin not loading (OpenCode) | Verify `~/.config/opencode/plugins/rtk.ts` exists and `rtk` is in PATH |
+| Hook not firing (Claude Code) | Check `.claude/settings.json` has the `PreToolUse`/`Bash` hook; restart Claude Code; `rtk init --show` |
+| Both agents at once | `rtk init -g --auto-patch --opencode` |
+| Verify rewrite | `echo '{"tool_name":"Bash","tool_input":{"command":"git status"}}' \| rtk hook claude` |
 
 ---
 
 ## 9. Conclusion
 
-RTK is fully operational in this environment. The integration with Opencode via the plugin system ensures automatic command rewriting, providing immediate token savings without manual intervention. The dashboard (`rtk gain`) confirms ongoing telemetry tracking and savings metrics.
+RTK is fully operational in this environment for **both** coding agents. OpenCode
+uses the plugin system (`tool.execute.before`); Claude Code uses a `PreToolUse`
+hook committed to the repo in `.claude/settings.json`. Both provide automatic
+command rewriting with immediate token savings and no manual intervention. The
+dashboard (`rtk gain`) confirms ongoing telemetry tracking and savings metrics.
 
 **Next Steps:**
 - Monitor `rtk gain` over time to quantify savings in production workflows

@@ -35,9 +35,14 @@ BMAD Method (Breakthrough Method for Agile Development) é um framework de desen
 | Python | >= 3.10, < 3.14 | Execução de scripts |
 | uv | >= 0.12 | Gerenciador de pacotes Python |
 | Git | Qualquer | Controle de versão |
-| RTK | >= 0.47 | Compressão de tokens (opcional) |
-| ripgrep | >= 14.0 | Busca rápida (recomendado) |
+| GitHub CLI (`gh`) | Qualquer | Operações de repositório / PR / release |
+| RTK | >= 0.47 | Compressão de tokens para ambos os agentes (opcional) |
+| ripgrep | >= 14.0 | Busca rápida, dependência do RTK (recomendado) |
 | CrewAI | >= 1.15 | Orquestração de agentes (opcional) |
+| Agente de codificação | — | OpenCode >= 1.18 e/ou Claude Code >= 2.1 |
+
+> Todas as ferramentas acima funcionam a partir de **ambos** os agentes, OpenCode
+> e Claude Code. Veja [Agentes de Codificação](#agentes-de-codificação).
 
 ### Instalação Automatizada
 
@@ -53,15 +58,38 @@ powershell -ExecutionPolicy Bypass -File _bmad-output/scripts/install-windows.ps
 ### Instalação Manual
 
 ```bash
-# Instalar BMAD Method
+# Instalar BMAD Method (regenera as duas árvores de skills + comandos OpenCode)
 npx bmad-method install
 
-# Iniciar OpenCode
-opencode
+# Conectar o RTK aos dois agentes (por máquina)
+rtk init -g --auto-patch --opencode
 
-# No OpenCode, use comandos BMAD
+# Iniciar qualquer um dos agentes — os comandos BMAD são idênticos
+opencode        # ou: claude
+
+# No agente escolhido
 /bmad-help
 ```
+
+---
+
+## Agentes de Codificação
+
+Este projeto está configurado para **dois agentes de codificação intercambiáveis**.
+Cada skill, comando e ferramenta funciona igual nos dois.
+
+| Aspecto | OpenCode | Claude Code |
+|---------|----------|-------------|
+| Instruções | `AGENTS.md` | `CLAUDE.md` (importa `AGENTS.md`) |
+| Skills (57) | `.agents/skills/` + `.opencode/commands/*.md` | `.claude/skills/` (descoberta nativa) |
+| Invocação | `/bmad-help`, `/bmad-build`, … | `/bmad-help`, `/bmad-build`, … |
+| Allow-list de ferramentas | `PATH` do shell | `.claude/settings.json` → `permissions.allow` |
+| Compressão de tokens RTK | `~/.config/opencode/plugins/rtk.ts` | hook `PreToolUse` em `.claude/settings.json` (`rtk hook claude`) |
+| Referência RTK | — | `.claude/RTK.md` |
+
+`.agents/skills/` e `.claude/skills/` são mantidas byte a byte idênticas;
+`npx bmad-method install` regenera ambas. Um comando conecta o RTK aos dois
+agentes em uma máquina nova: `rtk init -g --auto-patch --opencode`.
 
 ---
 
@@ -69,10 +97,15 @@ opencode
 
 ```
 /home/hsantos/app/
-├── .agents/skills/          # 57 skills BMAD
-├── .claude/skills/          # 57 skills BMAD (espelho)
-├── .opencode/commands/      # 57 comandos OpenCode
+├── .agents/skills/          # 57 skills BMAD (OpenCode)
+├── .claude/                 # Integração Claude Code
+│   ├── skills/              # 57 skills BMAD (espelho idêntico)
+│   ├── settings.json        # allow-list de ferramentas + hook RTK PreToolUse
+│   └── RTK.md               # referência de comandos RTK para o agente
+├── .opencode/commands/      # 57 wrappers de comando OpenCode
 ├── .git/                    # Repositório Git
+├── AGENTS.md                # Instruções OpenCode
+├── CLAUDE.md                # Instruções Claude Code (importa AGENTS.md)
 ├── _bmad/                   # Framework BMAD
 │   ├── _config/             # Manifests e configs
 │   ├── core/                # Skills core
@@ -99,7 +132,6 @@ opencode
 │       ├── install-windows.ps1         # Instalação Windows
 │       └── ...
 ├── docs/                    # Conhecimento do projeto
-├── AGENTS.md                # Instruções do projeto
 └── README.md                # Este arquivo
 ```
 
@@ -292,7 +324,7 @@ Veja `_bmad-output/scripts/README.md` para instruções detalhadas.
 |-----------|-------------|-----------|
 | **Guia do Ciclo de Vida** | `_bmad-output/bmad-project-lifecycle-guide.md` | **Passo a passo completo: 5 fases da ideia à produção** |
 | AGENTS.md | `/AGENTS.md` | Instruções do projeto |
-| Registro de Ferramentas | `_bmad-output/tools-registry.md` | Inventário de ferramentas (v1.2.0) |
+| Registro de Ferramentas | `_bmad-output/tools-registry.md` | Inventário de ferramentas (v1.3.0) |
 | Guia de Replicação | `_bmad-output/project-replication-guide.md` | Guia completo de setup |
 | Integração CrewAI | `_bmad-output/crewai-integration-guide.md` | Integração CrewAI + BMAD |
 
@@ -326,14 +358,14 @@ Veja `_bmad-output/scripts/README.md` para instruções detalhadas.
 git clone https://github.com/usuario/seu-repo.git
 cd seu-repo
 
-# Executar script de instalação
+# Executar script de instalação (instala os dois agentes + conecta o RTK aos dois)
 chmod +x _bmad-output/scripts/install-linux.sh
 ./_bmad-output/scripts/install-linux.sh
 
-# Iniciar OpenCode
-opencode
+# Iniciar qualquer um dos agentes
+opencode        # ou: claude
 
-# No OpenCode
+# No agente escolhido
 /bmad-help
 ```
 
@@ -403,6 +435,16 @@ Para novos projetos, siga o **ciclo de vida de 5 fases** documentado no guia:
 ### Config do Usuário
 
 `_bmad/config.user.toml` — Configurações pessoais, no gitignore.
+
+### Config dos Agentes de Codificação
+
+| Arquivo | Agente | Commitado | Propósito |
+|---------|--------|-----------|-----------|
+| `AGENTS.md` | OpenCode | ✅ | Instruções do projeto |
+| `CLAUDE.md` | Claude Code | ✅ | Ponto de entrada; importa `AGENTS.md` |
+| `.claude/settings.json` | Claude Code | ✅ | Allow-list de ferramentas + hook RTK `PreToolUse` |
+| `.claude/RTK.md` | Claude Code | ✅ | Referência de comandos RTK |
+| `~/.config/opencode/plugins/rtk.ts` | OpenCode | local da máquina | Plugin RTK |
 
 ---
 

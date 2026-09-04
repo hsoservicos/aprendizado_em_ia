@@ -2,10 +2,13 @@
 # ═══════════════════════════════════════════════════════════════════
 # BMAD Method — Automated Installation Script for Linux (Ubuntu/Debian)
 # ═══════════════════════════════════════════════════════════════════
-# Version: 1.0.0
+# Version: 1.1.0
 # Author: Hsantos
-# Date: 2026-09-03
+# Date: 2026-09-04
 # Usage: bash install-linux.sh [--project-dir /path/to/project]
+#
+# v1.1.0 — installs + wires RTK into BOTH coding agents (OpenCode plugin +
+#          Claude Code PreToolUse hook); registers GitHub CLI (gh).
 # ═══════════════════════════════════════════════════════════════════
 
 set -euo pipefail
@@ -238,6 +241,23 @@ else
     npm install -g @anthropic-ai/claude-code 2>/dev/null || log_warn "Claude Code install failed (optional)"
 fi
 
+# ─── Phase 8b: RTK ↔ Coding Agents ───────────────────────────────
+log_step "Phase 8b: RTK integration (OpenCode + Claude Code)"
+
+if check_command rtk; then
+    # Wires the global Claude Code PreToolUse hook AND the OpenCode plugin.
+    if rtk init -g --auto-patch --opencode >/dev/null 2>&1; then
+        log_success "RTK wired into both agents (rtk init -g --auto-patch --opencode)"
+    else
+        log_warn "rtk init failed — run manually: rtk init -g --auto-patch --opencode"
+    fi
+    rtk init --show 2>/dev/null | grep -E '^\[ok\]|^\[--\] Hook' || true
+else
+    log_warn "RTK not installed — skipping agent integration"
+fi
+# Note: the repo also ships an in-repo Claude Code hook at .claude/settings.json,
+# so RTK compression works in this project even without the global step above.
+
 # ─── Phase 9: Project Directory ───────────────────────────────────
 log_step "Phase 9: Project Directory"
 
@@ -377,6 +397,17 @@ else
     log_warn "ripgrep: Not installed (recommended)"
 fi
 
+# Check GitHub CLI
+if check_command gh; then
+    log_success "gh: $(gh --version | head -1)"
+else
+    log_warn "gh: Not installed"
+fi
+
+# Check coding agents
+check_command opencode && log_success "OpenCode: installed" || log_warn "OpenCode: not installed"
+check_command claude   && log_success "Claude Code: installed" || log_warn "Claude Code: not installed"
+
 # Check BMAD
 if [ -d "_bmad" ]; then
     log_success "BMAD Method: Installed"
@@ -385,14 +416,33 @@ else
     ((ERRORS++))
 fi
 
-# Count skills
-SKILLS_COUNT=$(ls -d .agents/skills/bmad-* 2>/dev/null | wc -l)
+# Count skills — both trees must match
+AGENTS_SKILLS=$(ls -d .agents/skills/bmad-* 2>/dev/null | wc -l)
+CLAUDE_SKILLS=$(ls -d .claude/skills/bmad-* 2>/dev/null | wc -l)
 COMMANDS_COUNT=$(ls .opencode/commands/bmad-*.md 2>/dev/null | wc -l)
 
 echo ""
 echo -e "${CYAN}═══ Skills Installed ═══${NC}"
-echo "Skills: ${SKILLS_COUNT}"
-echo "Commands: ${COMMANDS_COUNT}"
+echo ".agents/skills/ (OpenCode):   ${AGENTS_SKILLS}"
+echo ".claude/skills/ (Claude Code): ${CLAUDE_SKILLS}"
+echo ".opencode/commands/:          ${COMMANDS_COUNT}"
+if diff -rq .agents/skills .claude/skills >/dev/null 2>&1; then
+    log_success "Skill trees identical across both agents"
+else
+    log_warn "Skill trees diverged — run: npx bmad-method install"
+fi
+
+echo ""
+echo -e "${CYAN}═══ Agent Config ═══${NC}"
+[ -f AGENTS.md ] && log_success "AGENTS.md (OpenCode)" || log_warn "AGENTS.md missing"
+[ -f CLAUDE.md ] && log_success "CLAUDE.md (Claude Code)" || log_warn "CLAUDE.md missing"
+[ -f .claude/settings.json ] && log_success ".claude/settings.json" || log_warn ".claude/settings.json missing"
+if check_command rtk; then
+    grep -q "rtk hook claude" .claude/settings.json 2>/dev/null \
+        && log_success "RTK hook (Claude Code, in-repo)" || log_warn "RTK hook (Claude Code) not in .claude/settings.json"
+    [ -f "$HOME/.config/opencode/plugins/rtk.ts" ] \
+        && log_success "RTK plugin (OpenCode)" || log_warn "RTK plugin (OpenCode) not installed"
+fi
 
 echo ""
 if [ $ERRORS -eq 0 ]; then
@@ -409,8 +459,9 @@ echo ""
 echo -e "${CYAN}Next Steps:${NC}"
 echo "1. Configure your API keys (Anthropic, OpenAI, etc.)"
 echo "2. Run: cd ${PROJECT_DIR}"
-echo "3. Run: opencode"
-echo "4. In OpenCode, use: /bmad-help"
+echo "3. Start either coding agent:  opencode   OR   claude"
+echo "4. In either agent, use: /bmad-help"
+echo "5. (If skipped) wire RTK for both agents: rtk init -g --auto-patch --opencode"
 echo ""
 echo -e "${CYAN}Documentation:${NC}"
 echo "- AGENTS.md: Project documentation"

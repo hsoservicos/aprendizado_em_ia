@@ -1,8 +1,8 @@
 # Tools Registry — Inventário de Ferramentas do Projeto
 
-**Last Updated**: 2026-09-04T01:30:00Z  
+**Last Updated**: 2026-09-04T04:00:00Z  
 **Maintainer**: Hsantos  
-**Version**: 1.2.0
+**Version**: 1.3.0
 
 ---
 
@@ -83,6 +83,29 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | **Status** | ✅ Active |
 | **Python** | >= 3.10, < 3.14 |
 | **Dependencies** | 134 packages (auto-installed) |
+| **Available to** | OpenCode + Claude Code (allow-listed in `.claude/settings.json`) |
+
+### 1.7 GitHub CLI (`gh`)
+
+| Property | Value |
+|----------|-------|
+| **Name** | GitHub CLI |
+| **Version** | 2.73.0 |
+| **Path** | `~/.local/bin/gh` |
+| **Purpose** | Repository, PR, issue and release operations against GitHub |
+| **Installed** | Manual |
+| **Used By** | Repo sync, `gh repo`, `gh pr`, `gh release` |
+| **Status** | ✅ Active |
+| **Available to** | OpenCode + Claude Code (allow-listed in `.claude/settings.json`) |
+
+### 1.8 Coding Agents
+
+| Agent | Version | Path | Config surface | RTK integration |
+|-------|---------|------|----------------|-----------------|
+| **OpenCode** | 1.18.27 | `~/.opencode/bin/opencode` | `AGENTS.md`, `.opencode/commands/`, `.agents/skills/` | `~/.config/opencode/plugins/rtk.ts` |
+| **Claude Code** | 2.1.260 | `~/.local/bin/claude` | `CLAUDE.md`, `.claude/settings.json`, `.claude/skills/` | `PreToolUse` hook in `.claude/settings.json` (`rtk hook claude`) + `.claude/RTK.md` |
+
+Both agents run the **same 57 BMAD skills** and the **same toolchain**. See §3.
 
 ---
 
@@ -143,7 +166,18 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 
 ---
 
-## 3. OpenCode IDE Integration
+## 3. Coding Agent Integration
+
+Every capability in this registry is reachable from **both** OpenCode and Claude Code.
+
+| Surface | OpenCode | Claude Code |
+|---------|----------|-------------|
+| Instructions file | `AGENTS.md` | `CLAUDE.md` (imports `AGENTS.md`) |
+| Skill tree | `.agents/skills/` (57) | `.claude/skills/` (57) — byte-identical mirror |
+| Skill invocation | `.opencode/commands/*.md` (`/bmad-*`) | native skill discovery (`/bmad-*`) |
+| Tool allow-list | shell `PATH` | `.claude/settings.json` → `permissions.allow` |
+| RTK compression | `~/.config/opencode/plugins/rtk.ts` | `.claude/settings.json` → `PreToolUse` hook |
+| RTK reference | — | `.claude/RTK.md` |
 
 ### 3.1 OpenCode Commands (57 Total)
 
@@ -165,6 +199,22 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | `bmad-agent-php84` | `.opencode/commands/bmad-agent-php84.md` | PHP 8.4 agent |
 | `bmad-postgres18` | `.opencode/commands/bmad-postgres18.md` | PostgreSQL 18 skill |
 | `bmad-agent-postgres18` | `.opencode/commands/bmad-agent-postgres18.md` | PostgreSQL 18 agent |
+
+### 3.2 Claude Code Integration
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| **Instructions** | `CLAUDE.md` | Entry point; `@AGENTS.md` import + Claude-specific notes |
+| **Settings** | `.claude/settings.json` | Tool allow-list (`uv`, `rtk`, `rg`, `gh`, `crewai`, `npx bmad-method`) + RTK `PreToolUse` hook |
+| **RTK reference** | `.claude/RTK.md` | RTK command reference for the agent |
+| **Skills** | `.claude/skills/` (57) | Auto-discovered; invoked as `/bmad-*` or model-selected |
+
+Skills are **not** duplicated as command files for Claude Code — it discovers
+`.claude/skills/` natively, so `/bmad-help`, `/bmad-build`, `/bmad-agent-docker`,
+etc. work with no wrapper. The 57 skills in `.claude/skills/` are kept identical
+to `.agents/skills/`; `npx bmad-method install` regenerates both.
+
+**Per-machine RTK wiring (both agents):** `rtk init -g --auto-patch --opencode`
 
 ---
 
@@ -189,12 +239,21 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 
 ### 4.3 RTK Integration
 
-| Component | Location |
-|-----------|----------|
-| **OpenCode Plugin** | `~/.config/opencode/plugins/rtk.ts` |
-| **Global Config** | `~/.config/rtk/config.toml` |
-| **Project Filters** | `<project-root>/.rtk/filters.toml` |
-| **Tee Logs** | `~/.local/share/rtk/tee/` |
+| Component | Location | Agent |
+|-----------|----------|-------|
+| **OpenCode Plugin** | `~/.config/opencode/plugins/rtk.ts` | OpenCode |
+| **Claude Code Hook** | `.claude/settings.json` → `hooks.PreToolUse[matcher=Bash]` → `rtk hook claude` | Claude Code (project) |
+| **Claude Code Hook (global, optional)** | `~/.claude/settings.json` via `rtk init -g` | Claude Code (all repos) |
+| **Claude Code RTK reference** | `.claude/RTK.md` | Claude Code |
+| **Global Filters** | `~/.config/rtk/filters.toml` | both |
+| **Global Config** | `~/.config/rtk/config.toml` | both |
+| **Project Filters** | `<project-root>/.rtk/filters.toml` | both |
+| **Tee Logs** | `~/.local/share/rtk/tee/` | both |
+
+Both integrations delegate to the same engine (`rtk rewrite` / `rtk hook`), so
+`git status` → `rtk git status` transparently in either agent. `rtk hook claude`
+is idempotent — a project hook and a global hook may coexist safely.
+One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --opencode`.
 
 ### 4.4 RTK Commands Reference
 
@@ -236,7 +295,10 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 
 | File | Purpose |
 |------|---------|
-| `AGENTS.md` | Project instructions, skills, workflow |
+| `AGENTS.md` | Project instructions, skills, workflow (OpenCode) |
+| `CLAUDE.md` | Claude Code entry point — imports `AGENTS.md` + agent-specific notes |
+| `.claude/settings.json` | Claude Code tool allow-list + RTK `PreToolUse` hook |
+| `.claude/RTK.md` | RTK command reference surfaced to Claude Code |
 
 ---
 
@@ -244,10 +306,15 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 
 ```
 /home/hsantos/app/
-├── .agents/skills/          # 57 BMAD skills
-├── .claude/skills/          # 57 BMAD skills (mirror)
-├── .opencode/commands/      # 57 OpenCode commands
+├── .agents/skills/          # 57 BMAD skills (OpenCode)
+├── .claude/                 # Claude Code integration
+│   ├── skills/              # 57 BMAD skills (byte-identical mirror)
+│   ├── settings.json        # tool allow-list + RTK PreToolUse hook
+│   └── RTK.md               # RTK command reference for the agent
+├── .opencode/commands/      # 57 OpenCode command wrappers
 ├── .git/                    # Git repository
+├── AGENTS.md                # OpenCode instructions
+├── CLAUDE.md                # Claude Code instructions (imports AGENTS.md)
 ├── _bmad/                   # BMAD framework
 │   ├── _config/             # Manifests & configs
 │   ├── core/                # Core skills
@@ -275,7 +342,6 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 │       ├── README.md
 │       ├── test-local.sh
 │       └── windows-script-validation-report.md
-├── AGENTS.md                # Project instructions
 └── docs/                    # Project knowledge (empty)
 ```
 
@@ -305,6 +371,13 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | 2026-09-04 | coolify-github-deploy-guide.md | Created (18.5K) | Hsantos |
 | 2026-09-04 | coolify-deploy.sh | Updated (private repos) | Hsantos |
 | 2026-09-04 | coolify-local-deploy-guide.md | Created (18.8K) | Hsantos |
+| 2026-09-04 | gh (GitHub CLI) 2.73.0 | Registered (pre-existing at `~/.local/bin/gh`) | Hsantos |
+| 2026-09-04 | Claude Code 2.1.260 | Registered as coding agent | Hsantos |
+| 2026-09-04 | OpenCode 1.18.27 | Version bump (was implicit) | Hsantos |
+| 2026-09-04 | `CLAUDE.md` | Created — Claude Code entry point, imports `AGENTS.md` | Hsantos |
+| 2026-09-04 | `.claude/settings.json` | Created — tool allow-list + RTK `PreToolUse` hook | Hsantos |
+| 2026-09-04 | `.claude/RTK.md` | Created — RTK reference for Claude Code | Hsantos |
+| 2026-09-04 | RTK ↔ Claude Code | Integrated (project hook `rtk hook claude`) for parity with OpenCode plugin | Hsantos |
 
 ---
 
@@ -355,37 +428,52 @@ powershell -ExecutionPolicy Bypass -File _bmad-output/scripts/install-windows.ps
 
 ```bash
 # Check all installed tools
-node --version && python3 --version && uv --version && git --version && rtk --version && crewai --version
+node --version && python3 --version && uv --version && git --version \
+  && rtk --version && crewai version && gh --version | head -1
 
-# List all BMAD skills
-rtk ls .agents/skills/
+# Check both coding agents
+opencode --version && claude --version
+
+# List all BMAD skills (either tree — kept identical)
+rtk ls .claude/skills/          # Claude Code
+rtk ls .agents/skills/          # OpenCode
 
 # List all OpenCode commands
 rtk ls .opencode/commands/
 
-# Check RTK savings
+# Check RTK savings (works in both agents)
 rtk gain
 
+# Verify RTK wiring for both agents
+rtk init --show
+
 # Render a skill
+uv run _bmad/scripts/render_skill.py --project-root /home/hsantos/app --skill .claude/skills/<skill-name>
 uv run _bmad/scripts/render_skill.py --project-root /home/hsantos/app --skill .agents/skills/<skill-name>
 
-# Install/update BMAD
+# Install/update BMAD (regenerates both skill trees + OpenCode commands)
 npx bmad-method install
 
+# Wire RTK into both agents on a new machine
+rtk init -g --auto-patch --opencode
+
 # CrewAI commands
-crewai --version
+crewai version
 crewai create crew <project-name>
 crewai run
 ```
 
 ### Prerequisites
 
-| Tool | Required Version | Status |
-|------|-----------------|--------|
-| Node.js | >= 20.12 | ✅ v24.20.0 |
-| Python | >= 3.10, < 3.14 | ✅ 3.12.3 |
-| uv | >= 0.12 | ✅ 0.12.9 |
-| Git | Any | ✅ 2.43.0 |
-| RTK | Any | ✅ 0.47.0 |
-| ripgrep | Any | ✅ 14.1.1 |
-| CrewAI | >= 1.15 | ✅ 1.15.18 |
+| Tool | Required Version | Status | Available to |
+|------|-----------------|--------|--------------|
+| Node.js | >= 20.12 | ✅ v24.20.0 | both agents |
+| Python | >= 3.10, < 3.14 | ✅ 3.12.3 | both agents |
+| uv | >= 0.12 | ✅ 0.12.9 | both agents |
+| Git | Any | ✅ 2.43.0 | both agents |
+| GitHub CLI (`gh`) | Any | ✅ 2.73.0 | both agents |
+| RTK | Any | ✅ 0.47.0 | both agents (OpenCode plugin + Claude hook) |
+| ripgrep | Any | ✅ 14.1.1 | both agents |
+| CrewAI | >= 1.15 | ✅ 1.15.18 | both agents |
+| OpenCode | Any | ✅ 1.18.27 | — |
+| Claude Code | Any | ✅ 2.1.260 | — |

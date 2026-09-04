@@ -1,11 +1,14 @@
 # ═══════════════════════════════════════════════════════════════════
 # BMAD Method — Automated Installation Script for Windows 10/11
 # ═══════════════════════════════════════════════════════════════════
-# Version: 1.0.0
+# Version: 1.1.0
 # Author: Hsantos
-# Date: 2026-09-03
+# Date: 2026-09-04
 # Usage: Right-click → Run with PowerShell (as Administrator)
 #        Or: powershell -ExecutionPolicy Bypass -File install-windows.ps1
+#
+# v1.1.0 — installs + wires RTK into BOTH coding agents (OpenCode plugin +
+#          Claude Code PreToolUse hook); registers GitHub CLI (gh).
 # ═══════════════════════════════════════════════════════════════════
 
 #Requires -RunAsAdministrator
@@ -173,6 +176,23 @@ if (Test-Command claude) {
     }
 }
 
+# ─── Phase 7b: RTK <-> Coding Agents ─────────────────────────────
+Write-Step "Phase 7b: RTK integration (OpenCode + Claude Code)"
+
+if (Test-Command rtk) {
+    # Wires the global Claude Code PreToolUse hook AND the OpenCode plugin.
+    try {
+        rtk init -g --auto-patch --opencode | Out-Null
+        Write-OK "RTK wired into both agents (rtk init -g --auto-patch --opencode)"
+    } catch {
+        Write-Warn "rtk init failed - run manually: rtk init -g --auto-patch --opencode"
+    }
+} else {
+    Write-Warn "RTK not installed - skipping agent integration"
+}
+# Note: the repo also ships an in-repo Claude Code hook at .claude/settings.json,
+# so RTK compression works in this project even without the global step above.
+
 # ─── Phase 8: Project Directory ───────────────────────────────────
 Write-Step "Phase 8: Project Directory"
 
@@ -305,6 +325,17 @@ if (Test-Command rg) {
     Write-Warn "ripgrep: Not installed (recommended)"
 }
 
+# Check GitHub CLI
+if (Test-Command gh) {
+    Write-OK "gh: $(gh --version | Select-Object -First 1)"
+} else {
+    Write-Warn "gh: Not installed"
+}
+
+# Check coding agents
+if (Test-Command opencode) { Write-OK "OpenCode: installed" } else { Write-Warn "OpenCode: not installed" }
+if (Test-Command claude)   { Write-OK "Claude Code: installed" } else { Write-Warn "Claude Code: not installed" }
+
 # Check BMAD
 if (Test-Path "_bmad") {
     Write-OK "BMAD Method: Installed"
@@ -313,14 +344,37 @@ if (Test-Path "_bmad") {
     $Errors++
 }
 
-# Count skills
-$SkillsCount = (Get-ChildItem -Path ".agents\skills\bmad-*" -Directory -ErrorAction SilentlyContinue).Count
+# Count skills — both trees must match
+$AgentsSkills = (Get-ChildItem -Path ".agents\skills\bmad-*" -Directory -ErrorAction SilentlyContinue).Count
+$ClaudeSkills = (Get-ChildItem -Path ".claude\skills\bmad-*" -Directory -ErrorAction SilentlyContinue).Count
 $CommandsCount = (Get-ChildItem -Path ".opencode\commands\bmad-*.md" -File -ErrorAction SilentlyContinue).Count
 
 Write-Host ""
 Write-Summary "Skills Installed"
-Write-Host "Skills: $SkillsCount"
-Write-Host "Commands: $CommandsCount"
+Write-Host ".agents\skills\ (OpenCode):    $AgentsSkills"
+Write-Host ".claude\skills\ (Claude Code): $ClaudeSkills"
+Write-Host ".opencode\commands\:           $CommandsCount"
+if ($AgentsSkills -eq $ClaudeSkills -and $AgentsSkills -gt 0) {
+    Write-OK "Skill trees match across both agents"
+} else {
+    Write-Warn "Skill trees differ — run: npx bmad-method install"
+}
+
+Write-Host ""
+Write-Summary "Agent Config"
+if (Test-Path "AGENTS.md")            { Write-OK "AGENTS.md (OpenCode)" }            else { Write-Warn "AGENTS.md missing" }
+if (Test-Path "CLAUDE.md")            { Write-OK "CLAUDE.md (Claude Code)" }         else { Write-Warn "CLAUDE.md missing" }
+if (Test-Path ".claude\settings.json") { Write-OK ".claude\settings.json" }          else { Write-Warn ".claude\settings.json missing" }
+if ((Test-Path ".claude\settings.json") -and (Select-String -Path ".claude\settings.json" -Pattern "rtk hook claude" -Quiet)) {
+    Write-OK "RTK hook (Claude Code, in-repo)"
+} else {
+    Write-Warn "RTK hook (Claude Code) not in .claude\settings.json"
+}
+if (Test-Path "$env:USERPROFILE\.config\opencode\plugins\rtk.ts") {
+    Write-OK "RTK plugin (OpenCode)"
+} else {
+    Write-Warn "RTK plugin (OpenCode) not installed"
+}
 
 Write-Host ""
 if ($Errors -eq 0) {
@@ -337,8 +391,9 @@ Write-Host ""
 Write-Host "Next Steps:" -ForegroundColor Cyan
 Write-Host "1. Configure your API keys (Anthropic, OpenAI, etc.)"
 Write-Host "2. Open a new terminal and run: cd $ProjectDir"
-Write-Host "3. Run: opencode"
-Write-Host "4. In OpenCode, use: /bmad-help"
+Write-Host "3. Start either coding agent:  opencode   OR   claude"
+Write-Host "4. In either agent, use: /bmad-help"
+Write-Host "5. (If skipped) wire RTK for both agents: rtk init -g --auto-patch --opencode"
 Write-Host ""
 Write-Host "Documentation:" -ForegroundColor Cyan
 Write-Host "- AGENTS.md: Project documentation"
