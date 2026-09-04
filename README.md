@@ -3,13 +3,14 @@
 ![Version](https://img.shields.io/badge/version-6.11.0-blue)
 ![Skills](https://img.shields.io/badge/skills-57-green)
 ![CrewAI](https://img.shields.io/badge/CrewAI-1.15.18-purple)
+![Coolify](https://img.shields.io/badge/Coolify-4.3.14-orange)
 ![License](https://img.shields.io/badge/license-MIT-yellow)
 
 ---
 
 ## Overview
 
-BMAD Method (Breakthrough Method for Agile Development) is an AI-powered development framework that integrates specialized agents and skills into your development workflow. This project provides a complete environment for agile software development using AI assistants.
+BMAD Method (Breakthrough Method for Agile Development) is an AI-powered development framework that integrates specialized agents and skills into your development workflow. This project provides a complete environment for agile software development using AI assistants, with **Coolify deployment** support for self-hosted PaaS infrastructure.
 
 **Key Features:**
 - 57 specialized skills for different development tasks
@@ -18,6 +19,7 @@ BMAD Method (Breakthrough Method for Agile Development) is an AI-powered develop
 - Automated validation and rendering scripts
 - Token compression via RTK
 - **CrewAI integration** for multi-agent orchestration
+- **Coolify deployment** guides and automation scripts
 
 ---
 
@@ -77,8 +79,25 @@ opencode
 │   ├── config.toml          # Main config
 │   └── config.user.toml     # User config
 ├── _bmad-output/            # Implementation artifacts
-│   ├── scripts/             # Installation scripts
-│   └── *.md                 # Documentation
+│   ├── coolify-deploy-guide.md         # Coolify deploy overview
+│   ├── coolify-github-deploy-guide.md  # GitHub repo deploy guide
+│   ├── coolify-local-deploy-guide.md   # Local deploy guide (no Git)
+│   ├── crewai-integration-guide.md     # CrewAI + BMAD integration
+│   ├── docker-skill-implementation.md  # Docker agent docs
+│   ├── php84-skill-implementation.md   # PHP 8.4 agent docs
+│   ├── postgres18-skill-implementation.md  # PostgreSQL 18 docs
+│   ├── project-replication-guide.md    # Full setup guide
+│   ├── python314-skill-implementation.md   # Python 3.14 docs
+│   ├── rtk-installation-guide.md       # RTK setup
+│   ├── tools-registry.md              # Tools inventory
+│   └── scripts/
+│       ├── coolify-deploy.sh           # Coolify deploy automation
+│       ├── install-linux.sh            # Linux installation
+│       ├── install-windows.ps1         # Windows installation
+│       ├── installation-validation-report.md
+│       ├── README.md
+│       ├── test-local.sh              # Local testing
+│       └── windows-script-validation-report.md
 ├── docs/                    # Project knowledge
 ├── AGENTS.md                # Project instructions
 └── README.md                # This file
@@ -191,6 +210,52 @@ For detailed integration guide, see `_bmad-output/crewai-integration-guide.md`.
 
 ---
 
+## Coolify Deployment
+
+Self-hosted PaaS deployment using **Coolify v4.3.14**. Deploy applications via Git repositories or locally without Git.
+
+### Deployment Methods
+
+| Method | Source | Auth | Best For |
+|--------|--------|------|----------|
+| **Public Repository** | Git HTTPS URL | None | Open source projects |
+| **Deploy Key** | Git SSH URL | SSH key | Single private repo |
+| **GitHub App** | Git (multi-repo) | OAuth + Webhook | Teams, multiple repos |
+| **Docker Image** | Registry (Docker Hub/GHCR) | None/Token | Pre-built images |
+| **Dockerfile** | Pasted in Coolify UI | None | Simple apps without Git |
+| **Docker Compose Empty** | Pasted in Coolify UI | None | Multi-service stacks |
+| **Service One-Click** | Coolify templates | None | Popular apps (300+) |
+
+### Quick Deploy via CLI
+
+```bash
+# Install Coolify CLI
+curl -fsSL https://raw.githubusercontent.com/coollabsio/coolify-cli/main/scripts/install.sh | bash
+
+# Configure context
+coolify context add -d production https://coolify.seudominio.com <TOKEN>
+
+# Deploy from public Git repo
+./_bmad-output/scripts/coolify-deploy.sh \
+  --name my-app \
+  --repo https://github.com/user/repo \
+  --port 3000
+
+# Deploy Docker image
+./_bmad-output/scripts/coolify-deploy.sh \
+  --name nginx \
+  --docker-image nginx:alpine \
+  --port 80
+```
+
+### Guides
+
+- **Overview**: `_bmad-output/coolify-deploy-guide.md` (12 sections, 26K)
+- **GitHub repos**: `_bmad-output/coolify-github-deploy-guide.md` (9 sections, 18.5K)
+- **Local deploy**: `_bmad-output/coolify-local-deploy-guide.md` (10 sections, 18.8K)
+
+---
+
 ## Technology Stack
 
 ### Docker Agent & Skill
@@ -241,17 +306,43 @@ See `_bmad-output/scripts/README.md` for detailed instructions.
 
 ## Documentation
 
+### Core Documentation
+
 | Document | Location | Description |
 |----------|----------|-------------|
 | AGENTS.md | `/AGENTS.md` | Project instructions |
-| Tools Registry | `_bmad-output/tools-registry.md` | Tools inventory |
+| Tools Registry | `_bmad-output/tools-registry.md` | Tools inventory (v1.2.0) |
 | Replication Guide | `_bmad-output/project-replication-guide.md` | Full setup guide |
 | CrewAI Integration | `_bmad-output/crewai-integration-guide.md` | CrewAI + BMAD integration |
-| Docker Implementation | `_bmad-output/docker-skill-implementation.md` | Docker docs |
-| Python 3.14 Implementation | `_bmad-output/python314-skill-implementation.md` | Python docs |
-| PHP 8.4 Implementation | `_bmad-output/php84-skill-implementation.md` | PHP docs |
-| PostgreSQL 18 Implementation | `_bmad-output/postgres18-skill-implementation.md` | Postgres docs |
+
+### Technology Agents
+
+| Document | Location | Description |
+|----------|----------|-------------|
+| Docker Implementation | `_bmad-output/docker-skill-implementation.md` | Docker agent docs |
+| Python 3.14 Implementation | `_bmad-output/python314-skill-implementation.md` | Python 3.14 docs |
+| PHP 8.4 Implementation | `_bmad-output/php84-skill-implementation.md` | PHP 8.4 docs |
+| PostgreSQL 18 Implementation | `_bmad-output/postgres18-skill-implementation.md` | PostgreSQL 18 docs |
 | RTK Installation | `_bmad-output/rtk-installation-guide.md` | RTK setup |
+
+### Coolify Deployment
+
+| Document | Location | Description |
+|----------|----------|-------------|
+| Coolify Deploy Guide | `_bmad-output/coolify-deploy-guide.md` | Overview, preparation, CLI, step-by-step (12 sections) |
+| GitHub Deploy Guide | `_bmad-output/coolify-github-deploy-guide.md` | Public repo, Deploy Key, GitHub App (9 sections) |
+| Local Deploy Guide | `_bmad-output/coolify-local-deploy-guide.md` | Docker Image, Dockerfile, Compose Empty, Service (10 sections) |
+| Deploy Script | `_bmad-output/scripts/coolify-deploy.sh` | Automatizado CLI (Git + Docker Image) |
+
+### Installation & Validation
+
+| Document | Location | Description |
+|----------|----------|-------------|
+| Linux Installation | `_bmad-output/scripts/install-linux.sh` | Automated Linux setup |
+| Windows Installation | `_bmad-output/scripts/install-windows.ps1` | Automated Windows setup |
+| Windows Validation | `_bmad-output/scripts/windows-script-validation-report.md` | 73 test cases for Windows script |
+| Installation Validation | `_bmad-output/scripts/installation-validation-report.md` | Environment validation |
+| Local Test | `_bmad-output/scripts/test-local.sh` | Local installation testing |
 
 ---
 

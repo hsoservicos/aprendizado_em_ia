@@ -1,8 +1,8 @@
 # Tools Registry — Inventário de Ferramentas do Projeto
 
-**Last Updated**: 2026-09-03T23:30:00Z  
+**Last Updated**: 2026-09-04T01:30:00Z  
 **Maintainer**: Hsantos  
-**Version**: 1.1.0
+**Version**: 1.2.0
 
 ---
 
@@ -222,8 +222,17 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | `php84-skill-implementation.md` | 3.8K | PHP 8.4 Agent & Skill docs |
 | `postgres18-skill-implementation.md` | 3.8K | PostgreSQL 18 Agent & Skill docs |
 | `rtk-installation-guide.md` | 7.1K | RTK installation & config docs |
+| `coolify-deploy-guide.md` | 26.0K | Coolify deploy guide (12 sections) |
+| `coolify-github-deploy-guide.md` | 18.5K | GitHub repo types: public, deploy-key, github-app |
+| `coolify-local-deploy-guide.md` | 18.8K | Local deploy: Docker Image, Dockerfile, Compose Empty, Service |
 
-### 5.2 Project Documentation
+### 5.2 Deployment Scripts
+
+| File | Executable | Description |
+|------|------------|-------------|
+| `scripts/coolify-deploy.sh` | ✅ | Coolify deploy automation (public + private repos) |
+
+### 5.3 Project Documentation
 
 | File | Purpose |
 |------|---------|
@@ -247,6 +256,25 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 │   ├── config.toml          # Main config
 │   └── config.user.toml     # User config
 ├── _bmad-output/            # Implementation artifacts
+│   ├── coolify-deploy-guide.md      # Coolify deploy guide
+│   ├── coolify-github-deploy-guide.md  # GitHub repo deploy guide
+│   ├── coolify-local-deploy-guide.md   # Local deploy guide (no Git)
+│   ├── crewai-integration-guide.md
+│   ├── docker-skill-implementation.md
+│   ├── php84-skill-implementation.md
+│   ├── postgres18-skill-implementation.md
+│   ├── project-replication-guide.md
+│   ├── python314-skill-implementation.md
+│   ├── rtk-installation-guide.md
+│   ├── tools-registry.md
+│   └── scripts/
+│       ├── coolify-deploy.sh     # Deploy automation script
+│       ├── install-linux.sh
+│       ├── install-windows.ps1
+│       ├── installation-validation-report.md
+│       ├── README.md
+│       ├── test-local.sh
+│       └── windows-script-validation-report.md
 ├── AGENTS.md                # Project instructions
 └── docs/                    # Project knowledge (empty)
 ```
@@ -273,6 +301,10 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | 2026-09-03 | bmad-postgres18 | Created | Hsantos |
 | 2026-09-03 | bmad-agent-postgres18 | Created | Hsantos |
 | 2026-09-03 | CrewAI v1.15.18 | Installed via uv | Hsantos |
+| 2026-09-03 | coolify-deploy-guide.md | Created (26K) | Hsantos |
+| 2026-09-04 | coolify-github-deploy-guide.md | Created (18.5K) | Hsantos |
+| 2026-09-04 | coolify-deploy.sh | Updated (private repos) | Hsantos |
+| 2026-09-04 | coolify-local-deploy-guide.md | Created (18.8K) | Hsantos |
 
 ---
 
