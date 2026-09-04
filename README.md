@@ -6,6 +6,8 @@
 ![Coolify](https://img.shields.io/badge/Coolify-4.3.14-orange)
 ![License](https://img.shields.io/badge/license-MIT-yellow)
 
+**Languages:** English | [Português Brasil](README.pt-BR.md) | [Español](README.es.md)
+
 ---
 
 ## Overview
@@ -311,6 +313,8 @@ See `_bmad-output/scripts/README.md` for detailed instructions.
 | Document | Location | Description |
 |----------|----------|-------------|
 | **Project Lifecycle Guide** | `_bmad-output/bmad-project-lifecycle-guide.md` | **Complete step-by-step: 5 phases from idea to production** |
+| **README (Português)** | `README.pt-BR.md` | Documentação em Português do Brasil |
+| **README (Español)** | `README.es.md` | Documentación en Español |
 | AGENTS.md | `/AGENTS.md` | Project instructions |
 | Tools Registry | `_bmad-output/tools-registry.md` | Tools inventory (v1.2.0) |
 | Replication Guide | `_bmad-output/project-replication-guide.md` | Full setup guide |
