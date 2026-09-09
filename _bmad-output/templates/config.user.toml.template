@@ -1,0 +1,11 @@
+# BMAD Method — Configuração do Usuário
+# Template para _bmad/config.user.toml
+# Gerado automaticamente pelo questionário de inicialização
+# ATENÇÃO: Este arquivo é pessoal e NÃO deve ser commitado
+
+[core]
+user_name = "{{USER_NAME}}"
+communication_language = "{{LANGUAGE}}"
+
+[modules.bmm]
+user_skill_level = "{{SKILL_LEVEL}}"

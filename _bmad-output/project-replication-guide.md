@@ -54,7 +54,7 @@ Este guia documenta o processo completo para replicar o ambiente de desenvolvime
 | Software | Minimum Version | Purpose |
 |----------|----------------|---------|
 | Node.js | >= 20.12 | JavaScript runtime, BMAD installer |
-| Python | >= 3.10, < 3.14 | Script execution, skill rendering |
+| Python | >= 3.12 | Script execution, skill rendering |
 | Git | >= 2.30 | Version control |
 | uv | >= 0.12 | Python package management |
 | GitHub CLI (`gh`) | any | Repo / PR / release operations |

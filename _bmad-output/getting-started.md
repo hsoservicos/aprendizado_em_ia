@@ -39,7 +39,7 @@ Ambiente exigido (instale o que faltar — o script automatizado faz tudo):
 | Ferramenta | Versão | Verificar |
 |------------|--------|-----------|
 | Node.js | >= 20.12 | `node --version` |
-| Python | >= 3.10, < 3.14 | `python3 --version` |
+| Python | >= 3.12 | `python3 --version` |
 | uv | >= 0.12 | `uv --version` |
 | Git | >= 2.30 | `git --version` |
 | GitHub CLI (`gh`) | qualquer | `gh --version` |
@@ -62,6 +62,41 @@ powershell -ExecutionPolicy Bypass -File _bmad-output/scripts/install-windows.ps
 O script instala toolchain + os dois agentes, roda `npx bmad-method install` e
 conecta o RTK aos dois agentes. Setup manual detalhado:
 **`_bmad-output/project-replication-guide.md`**.
+
+---
+
+## Passo 0.5 — Questionário de Inicialização (Novos Projetos)
+
+> **Este passo é apenas para quem está iniciando um projeto NOVO a partir deste template.**
+> Para projetos legados, pule para o Passo 1.
+
+Após clonar o template, execute o questionário para configurar o projeto:
+
+```bash
+python3 _bmad-output/scripts/project-init-questionnaire.py
+```
+
+O questionário irá:
+1. Perguntar o nome e tipo do projeto (novo/legado)
+2. Identificar o stack tecnológico
+3. Configurar idioma e usuário
+4. Gerar automaticamente: `AGENTS.md`, `CLAUDE.md`, `_bmad/custom/config.toml`, `_bmad/config.user.toml`
+
+**Saída esperada:**
+```
+✅ CONFIGURAÇÃO CONCLUÍDA!
+
+📁 Arquivos gerados:
+   ✓ _bmad/custom/config.toml
+   ✓ _bmad/config.user.toml
+   ✓ AGENTS.md
+   ✓ CLAUDE.md
+
+🚀 Próximos passos:
+   1. Abra o agente: opencode OU claude
+   2. Execute: /bmad-help
+   3. Siga a Trilha A (Projeto Novo)
+```
 
 ---
 
@@ -283,6 +318,7 @@ Trilha B — Projeto legado
 | Documento | Localização | Para quê |
 |-----------|-------------|----------|
 | **Este guia** | `_bmad-output/getting-started.md` | Primeiros passos (você está aqui) |
+| **Questionário de Inicialização** | `_bmad-output/scripts/project-init-questionnaire.py` | Configurar novo projeto a partir do template |
 | **Manual de Implementação** | `_bmad-output/implementation-playbook.md` | Passo a passo detalhado e sem jargão — Parte A (novo) e Parte B (legado) |
 | Guia de Replicação | `_bmad-output/project-replication-guide.md` | Preparar a máquina em detalhe |
 | Ciclo de Vida (5 fases) | `_bmad-output/bmad-project-lifecycle-guide.md` | Referência de operação e rotina diária |

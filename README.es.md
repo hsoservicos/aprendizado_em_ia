@@ -75,7 +75,7 @@ equipo **sin importar su formación en Ingeniería de Software**:
 | Herramienta | Versión Mínima | Propósito |
 |-------------|----------------|-----------|
 | Node.js | >= 20.12 | Runtime JavaScript |
-| Python | >= 3.10, < 3.14 | Ejecución de scripts |
+| Python | >= 3.12 | Ejecución de scripts |
 | uv | >= 0.12 | Gestor de paquetes Python |
 | Git | Cualquier | Control de versiones |
 | GitHub CLI (`gh`) | Cualquier | Operaciones de repositorio / PR / release |
@@ -471,7 +471,7 @@ detallado y autoritativo (versiones, rutas, historial) es
 |-------------|---------|------|-----------|----------------|
 | **Node.js** | v24.20.0 | nvm | Runtime JS; ejecuta `npx bmad-method`, OpenCode | `project-replication-guide.md` |
 | **npm** | 12.0.2 | con Node | Gestor de paquetes | — |
-| **Python** | 3.12.3 | sistema | Scripts BMAD y renderizado de skills (necesita `>=3.10,<3.14`) | `project-replication-guide.md` |
+| **Python** | 3.12.3+ | sistema | Scripts BMAD y renderizado de skills (necesita `>=3.12`) | `project-replication-guide.md` |
 | **uv** | 0.12.9 | `~/.local/bin/uv` | Runner Python rápido — `uv run` renderiza skills; `uv tool install` | `tools-registry.md` §1.4 |
 | **Git** | 2.43.0 | sistema | Control de versiones | — |
 | **GitHub CLI (`gh`)** | 2.73.0 | `~/.local/bin/gh` | Ops de repo / PR / release; `gh auth setup-git` para push | `tools-registry.md` §1.7 |

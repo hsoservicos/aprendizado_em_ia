@@ -1,0 +1,17 @@
+# BMAD Method — Configuração do Projeto
+# Template para _bmad/custom/config.toml
+# Gerado automaticamente pelo questionário de inicialização
+
+[core]
+project_name = "{{PROJECT_NAME}}"
+project_description = "{{PROJECT_DESCRIPTION}}"
+document_output_language = "{{LANGUAGE}}"
+output_folder = "_bmad-output"
+
+[project]
+type = "{{PROJECT_TYPE}}"
+stack = {{STACK}}
+slug = "{{PROJECT_SLUG}}"
+
+[project.context]
+objective = "{{OBJECTIVE}}"

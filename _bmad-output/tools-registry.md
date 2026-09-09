@@ -81,7 +81,7 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | **Installed** | 2026-09-03 via `uv tool install crewai` |
 | **Used By** | BMAD-CrewAI integration, automated workflows |
 | **Status** | ✅ Active |
-| **Python** | >= 3.10, < 3.14 |
+| **Python** | >= 3.12 |
 | **Dependencies** | 134 packages (auto-installed) |
 | **Available to** | OpenCode + Claude Code (allow-listed in `.claude/settings.json`) |
 
@@ -478,12 +478,12 @@ crewai run
 
 | Tool | Required Version | Status | Available to |
 |------|-----------------|--------|--------------|
-| Node.js | >= 20.12 | ✅ v24.20.0 | both agents |
-| Python | >= 3.10, < 3.14 | ✅ 3.12.3 | both agents |
+| Node.js | >= 22 | ✅ v24.20.0 | both agents |
+| Python | >= 3.12 | ✅ 3.12.3 / 3.14.6 | both agents |
 | uv | >= 0.12 | ✅ 0.12.9 | both agents |
 | Git | Any | ✅ 2.43.0 | both agents |
-| GitHub CLI (`gh`) | Any | ✅ 2.73.0 | both agents |
-| RTK | Any | ✅ 0.47.0 | both agents (OpenCode plugin + Claude hook) |
+| GitHub CLI (`gh`) | Any | ✅ 2.99.0 | both agents |
+| RTK | Any | ✅ 0.48.0 | both agents (OpenCode plugin + Claude hook) |
 | ripgrep | Any | ✅ 14.1.1 | both agents |
 | CrewAI | >= 1.15 | ✅ 1.15.18 | both agents |
 | OpenCode | Any | ✅ 1.18.27 | — |

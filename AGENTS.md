@@ -100,18 +100,18 @@ Small changes can skip straight to build. Complex work follows the full path.
 
 ## Prerequisites
 
-- **Node.js** >= 20.12 (currently v24.20)
-- **Python** >= 3.10, < 3.14 (currently 3.12)
-- **uv** (0.12.9) — required for rendering skills; install at `~/.local/bin/uv`
+- **Node.js** >= 22 (LTS) — currently v24.20
+- **Python** >= 3.12 — currently 3.12 (3.14 available via Deadsnakes PPA)
+- **uv** — required for rendering skills; install at `~/.local/bin/uv`
 - **Git** — required for updates and external modules
-- **GitHub CLI** (`gh`, 2.73.0) — repo / PR / release operations; `~/.local/bin/gh`
-- **ripgrep** (14.1.1) — fast search, RTK dependency; `~/.local/bin/rg`
-- **CrewAI** (1.15.18) — multi-agent orchestration; `~/.local/bin/crewai`
-- **RTK** (0.47.0) — token compression proxy; `~/.local/bin/rtk`. Wired into
+- **GitHub CLI** (`gh`) — repo / PR / release operations; `~/.local/bin/gh`
+- **ripgrep** — fast search, RTK dependency; `~/.local/bin/rg`
+- **CrewAI** — multi-agent orchestration; `~/.local/bin/crewai`
+- **RTK** — token compression proxy; `~/.local/bin/rtk`. Wired into
   **both** agents — OpenCode via `~/.config/opencode/plugins/rtk.ts`, Claude Code
   via the `PreToolUse` hook in `.claude/settings.json`. Per-machine setup for
   both at once: `rtk init -g --auto-patch --opencode`.
-- **Coding agent**: OpenCode (1.18.27) and/or Claude Code (2.1.260)
+- **Coding agent**: OpenCode and/or Claude Code
 
 Every tool above is available from **both** OpenCode and Claude Code. Claude Code
 pre-approves `uv`, `rtk`, `rg`, `gh`, `crewai`, and `npx bmad-method` in

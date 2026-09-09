@@ -50,7 +50,7 @@ Este guia apresenta o **passo a passo completo** para criação de novos projeto
 | Ferramenta | Versão Mínima | Comando de Verificação | Propósito |
 |------------|---------------|------------------------|-----------|
 | Node.js | >= 20.12 | `node --version` | Runtime JavaScript |
-| Python | >= 3.10, < 3.14 | `python3 --version` | Scripts BMAD |
+| Python | >= 3.12 | `python3 --version` | Scripts BMAD |
 | uv | >= 0.12 | `uv --version` | Gerenciador de pacotes Python |
 | Git | Qualquer | `git --version` | Controle de versão |
 | Agente de codificação | OpenCode >= 1.18 **e/ou** Claude Code >= 2.1 | `opencode --version` / `claude --version` | Roda os comandos `/bmad-*` |

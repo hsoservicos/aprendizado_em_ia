@@ -74,7 +74,7 @@ engineering background**:
 | Tool | Required Version | Purpose |
 |------|-----------------|---------|
 | Node.js | >= 20.12 | JavaScript runtime |
-| Python | >= 3.10, < 3.14 | Script execution |
+| Python | >= 3.12 | Script execution |
 | uv | >= 0.12 | Python package management |
 | Git | Any | Version control |
 | GitHub CLI (`gh`) | Any | Repo / PR / release operations |
@@ -483,7 +483,7 @@ install log) is **`_bmad-output/tools-registry.md`** (v1.3.3).
 |------|---------|------|---------|------------|
 | **Node.js** | v24.20.0 | nvm | JS runtime; runs `npx bmad-method`, OpenCode | `project-replication-guide.md` |
 | **npm** | 12.0.2 | with Node | Package manager | — |
-| **Python** | 3.12.3 | system | Runs BMAD scripts & skill rendering (needs `>=3.10,<3.14`) | `project-replication-guide.md` |
+| **Python** | 3.12.3+ | system | Runs BMAD scripts & skill rendering (needs `>=3.12`) | `project-replication-guide.md` |
 | **uv** | 0.12.9 | `~/.local/bin/uv` | Fast Python runner — `uv run` renders skills; `uv tool install` | `tools-registry.md` §1.4 |
 | **Git** | 2.43.0 | system | Version control | — |
 | **GitHub CLI (`gh`)** | 2.73.0 | `~/.local/bin/gh` | Repo / PR / release ops; `gh auth setup-git` for push | `tools-registry.md` §1.7 |

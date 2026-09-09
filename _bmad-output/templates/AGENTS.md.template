@@ -1,0 +1,110 @@
+# AGENTS.md
+
+BMAD Method project — {{PROJECT_DESCRIPTION}}
+
+This file is read by **OpenCode**; **Claude Code** reads `CLAUDE.md`,
+which imports this file. Both coding agents are first-class and share
+one configuration, skill set, and toolchain.
+
+## Project Setup
+
+- **Project**: {{PROJECT_NAME}}
+- **Type**: {{PROJECT_TYPE}}
+- **User**: {{USER_NAME}}
+- **Communication language**: {{LANGUAGE}}
+- **Artifacts output**: `_bmad-output/`
+- **Project knowledge**: `docs/`
+- **Config files**: `_bmad/config.toml`, `_bmad/config.user.toml`
+- **Agent instructions**: `AGENTS.md` (OpenCode) + `CLAUDE.md` (Claude Code)
+- **Claude Code settings**: `.claude/settings.json`
+- **Tools Registry**: `_bmad-output/tools-registry.md`
+
+## Stack
+
+{{STACK_LIST}}
+
+## Coding Agents
+
+| Concern | OpenCode | Claude Code |
+|---------|----------|-------------|
+| Instructions | `AGENTS.md` | `CLAUDE.md` → `@AGENTS.md` |
+| Skill source | `.agents/skills/` (57) | `.claude/skills/` (57) |
+| Skill invocation | `.opencode/commands/*.md` wrappers | native discovery |
+| Tool allow-list | inherits shell | `.claude/settings.json` |
+| RTK token compression | `~/.config/opencode/plugins/rtk.ts` | `.claude/settings.json` → `PreToolUse` hook |
+
+## Onboarding — first steps
+
+Anyone using this repo must run the pre-flight in
+**`_bmad-output/getting-started.md`** first, then follow one of two tracks:
+
+- **Track A — greenfield**: `/bmad-help` → the 5-phase lifecycle
+- **Track B — brownfield / legacy**: `/bmad-project-context` → `/bmad-code-review` → `/bmad-build`
+
+## BMAD Skills
+
+57 skills, installed once and exposed to **both** agents.
+Entry points are identical from either agent.
+
+### Entry Points
+
+| Command | Purpose |
+|---------|---------|
+| `bmad-help` | Start here — orient to workflow |
+| `bmad-build` | Main code implementation |
+| `bmad-build-auto` | Autonomous unattended build loop |
+| `bmad-brainstorming` | Ideation and creative exploration |
+| `bmad-forge-idea` | Pressure-test an idea |
+| `bmad-create-prd` | Product requirements document |
+| `bmad-architecture` | System architecture design |
+| `bmad-ux` | UX patterns and design specs |
+| `bmad-create-epics-and-stories` | Break work into trackable stories |
+| `bmad-sprint-planning` | Sprint readiness and status |
+| `bmad-code-review` | Adversarial code review |
+| `bmad-retrospective` | Epic retrospective |
+| `bmad-docker` | Docker containerization |
+| `bmad-python314` | Python 3.14+ features |
+| `bmad-php84` | PHP 8.4 features |
+| `bmad-postgres18` | PostgreSQL 18 features |
+
+### Skill Invocation Rule
+
+Skills must be rendered via the shared script:
+
+```bash
+# Claude Code
+uv run _bmad/scripts/render_skill.py --project-root {{PROJECT_ROOT}} --skill .claude/skills/<skill-name>
+# OpenCode
+uv run _bmad/scripts/render_skill.py --project-root {{PROJECT_ROOT}} --skill .agents/skills/<skill-name>
+```
+
+### BMAD Workflow Phases
+
+1. **Clarify** — `bmad-help`, `bmad-brainstorming`, `bmad-forge-idea`
+2. **Plan** — `bmad-create-prd`, `bmad-architecture`, `bmad-ux`, `bmad-create-epics-and-stories`
+3. **Build** — `bmad-build`, `bmad-build-auto`
+4. **Review** — `bmad-code-review`, `bmad-checkpoint-preview`
+5. **Learn** — `bmad-retrospective`
+
+## Prerequisites
+
+- **Node.js** >= 22 (LTS)
+- **Python** >= 3.12
+- **uv** — required for rendering skills
+- **Git** — required for updates
+- **GitHub CLI** (`gh`) — repo / PR / release operations
+- **ripgrep** — fast search, RTK dependency
+- **RTK** — token compression proxy
+- **Coding agent**: OpenCode and/or Claude Code
+
+## Updating BMAD
+
+```bash
+npx bmad-method install
+```
+
+## Project State
+
+This is a **{{PROJECT_TYPE}}** project.
+New here? Run the pre-flight in `_bmad-output/getting-started.md`,
+then `/bmad-help` to begin.

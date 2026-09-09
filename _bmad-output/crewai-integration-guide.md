@@ -36,7 +36,7 @@ CrewAI is an open-source Python framework for orchestrating role-playing, autono
 
 | Component | BMAD | CrewAI | Compatible |
 |-----------|------|--------|------------|
-| Python | >= 3.10 | >= 3.10, < 3.14 | ✅ Yes |
+| Python | >= 3.10 | >= 3.12 | ✅ Yes |
 | Package Manager | uv | uv | ✅ Yes |
 | LLM Support | OpenCode, Claude | OpenAI, Ollama, etc. | ✅ Yes |
 | Agent Framework | Skills-based | Role-based | ✅ Complementary |
@@ -78,7 +78,7 @@ CrewAI is an open-source Python framework for orchestrating role-playing, autono
 ### 3.1 Prerequisites
 
 Ensure you have:
-- Python >= 3.10, < 3.14
+- Python >= 3.12
 - uv package manager
 - BMAD Method installed
 
@@ -576,7 +576,7 @@ workflows:
 | Issue | Solution |
 |-------|----------|
 | CrewAI not found | Run `uv tool install crewai` |
-| Python version error | Ensure Python >= 3.10, < 3.14 |
+| Python version error | Ensure Python >= 3.12 |
 | API key errors | Check `.env` file configuration |
 | Import errors | Run `crewai install` in project directory |
 | BMAD skill not found | Verify skill exists in `.agents/skills/` |
