@@ -162,6 +162,7 @@ machine: `rtk init -g --auto-patch --opencode`.
 │   ├── coolify-deploy-guide.md         # Coolify deploy overview
 │   ├── coolify-github-deploy-guide.md  # GitHub repo deploy guide
 │   ├── coolify-local-deploy-guide.md   # Local deploy guide (no Git)
+│   ├── coolify-cloudflare-tunnel-deploy-playbook.md  # Cloudflare tunnel playbook
 │   ├── crewai-integration-guide.md     # CrewAI + BMAD integration
 │   ├── docker-skill-implementation.md  # Docker agent docs
 │   ├── php84-skill-implementation.md   # PHP 8.4 agent docs
@@ -348,6 +349,7 @@ coolify context add -d production https://coolify.seudominio.com <TOKEN>
 - **Overview**: `_bmad-output/coolify-deploy-guide.md` (12 sections, 26K)
 - **GitHub repos**: `_bmad-output/coolify-github-deploy-guide.md` (9 sections, 18.5K)
 - **Local deploy**: `_bmad-output/coolify-local-deploy-guide.md` (10 sections, 18.8K)
+- **Cloudflare tunnel playbook**: `_bmad-output/coolify-cloudflare-tunnel-deploy-playbook.md` (10 sections) — **real execution learnings**; read before publishing behind a Cloudflare tunnel
 
 ---
 
@@ -439,6 +441,7 @@ install log) is **`_bmad-output/tools-registry.md`** (v1.3.3).
 | `_bmad-output/coolify-deploy-guide.md` | Overview + preparation + CLI + step-by-step (12 sections). Start here for deployment. |
 | `_bmad-output/coolify-github-deploy-guide.md` | GitHub sources: public repo, Deploy Key, GitHub App (9 sections). |
 | `_bmad-output/coolify-local-deploy-guide.md` | No-Git sources: Docker Image, pasted Dockerfile, Compose Empty, one-click Service (10 sections). |
+| `_bmad-output/coolify-cloudflare-tunnel-deploy-playbook.md` | **Reusable playbook** for publishing behind a Cloudflare tunnel: topology, API/token, `http://` scheme (critical rule), Docker/nginx packaging, checklist, troubleshooting. |
 | `_bmad-output/scripts/coolify-deploy.sh` | Executable — automated Coolify deploy via CLI (public + private repos, Docker image). |
 
 ### 5. Installation scripts & validation

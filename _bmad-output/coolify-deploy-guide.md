@@ -813,5 +813,27 @@ coolify deploy uuid <app-uuid> --force
 
 ---
 
-**Status**: Documento pronto para uso  
+---
+
+## 13. Errata e aprendizados de execução (2026-10-05)
+
+Validado em instância self-hosted **Coolify v4.3.23** com **Traefik v3.7** e
+**túnel Cloudflare**. Os pontos abaixo **não estavam cobertos** neste guia e
+foram aprendidos em publicação real. Guia completo:
+**`coolify-cloudflare-tunnel-deploy-playbook.md`**.
+
+| # | Aprendizado | Detalhe |
+|---|-------------|---------|
+| 1 | **Domínio com túnel Cloudflare deve ser `http://`** | Registrar como `https://` gera **loop de redirect 307** — o Traefik força HTTPS, mas o túnel encaminha HTTP. O TLS é terminado pelo Cloudflare. |
+| 2 | **A API vem desabilitada** | `GET /api/v1/version` responde `{"message":"API is disabled."}` até `instance_settings.is_api_enabled = true`. |
+| 3 | **Token de API exige `team_id`** | `personal_access_tokens.team_id` é NOT NULL; sem ele, falha de validação ao criar via API/tinker. |
+| 4 | **`tokenable_type` = `App\Models\User` (barra única)** | Escapes errados geram `Class "App\Models\User" not found` (HTTP 500). |
+| 5 | **`--base-directory` exige barra inicial** | `web` → `422`; `/web` → `201`. |
+| 6 | **Auto-deploy não está no CLI** | Desativar via `PATCH /api/v1/applications/{uuid}` com `is_auto_deploy_enabled: false`. |
+| 7 | **Versões desta instância** | Coolify **4.3.23** · Traefik **v3.7** (este guia documentava 4.3.14 / v3.6). |
+
+**Próximo passo**: para publicação com túnel Cloudflare, seguir o
+**`coolify-cloudflare-tunnel-deploy-playbook.md`**.
+
+**Status**: Documento pronto para uso (com errata de 2026-10-05)
 **Próximo passo**: Executar `coolify context verify` e iniciar o deploy

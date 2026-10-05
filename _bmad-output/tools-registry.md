@@ -1,8 +1,8 @@
 # Tools Registry — Inventário de Ferramentas do Projeto
 
-**Last Updated**: 2026-09-04T07:30:00Z  
+**Last Updated**: 2026-10-05T01:10:00Z  
 **Maintainer**: Hsantos  
-**Version**: 1.3.3
+**Version**: 1.4.0
 
 ---
 
@@ -19,7 +19,7 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | Property | Value |
 |----------|-------|
 | **Name** | Node.js |
-| **Version** | v24.20.0 |
+| **Version** | v24.21.0 |
 | **Path** | System PATH |
 | **Purpose** | JavaScript runtime, package management, BMAD installer |
 | **Installed** | Pre-existing |
@@ -30,7 +30,7 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | Property | Value |
 |----------|-------|
 | **Name** | npm |
-| **Version** | 12.0.2 |
+| **Version** | 12.2.0 |
 | **Path** | System PATH |
 | **Purpose** | Package management, script execution |
 | **Installed** | With Node.js |
@@ -52,7 +52,7 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | Property | Value |
 |----------|-------|
 | **Name** | uv |
-| **Version** | 0.12.9 |
+| **Version** | 0.12.23 |
 | **Path** | `~/.local/bin/uv` |
 | **Purpose** | Fast Python package installation, script execution |
 | **Installed** | Manual |
@@ -75,7 +75,7 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | Property | Value |
 |----------|-------|
 | **Name** | CrewAI |
-| **Version** | 1.15.18 |
+| **Version** | 1.15.23 |
 | **Path** | `~/.local/bin/crewai` |
 | **Purpose** | Multi-agent orchestration framework |
 | **Installed** | 2026-09-03 via `uv tool install crewai` |
@@ -90,7 +90,7 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | Property | Value |
 |----------|-------|
 | **Name** | GitHub CLI |
-| **Version** | 2.73.0 |
+| **Version** | 2.102.0 |
 | **Path** | `~/.local/bin/gh` |
 | **Purpose** | Repository, PR, issue and release operations against GitHub |
 | **Installed** | Manual |
@@ -102,10 +102,17 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 
 | Agent | Version | Path | Config surface | RTK integration |
 |-------|---------|------|----------------|-----------------|
-| **OpenCode** | 1.18.27 | `~/.opencode/bin/opencode` | `AGENTS.md`, `.opencode/commands/`, `.agents/skills/` | `~/.config/opencode/plugins/rtk.ts` |
-| **Claude Code** | 2.1.260 | `~/.local/bin/claude` | `CLAUDE.md`, `.claude/settings.json`, `.claude/skills/` | `PreToolUse` hook in `.claude/settings.json` (`rtk hook claude`) + `.claude/RTK.md` |
+| **OpenCode** | 1.18.34 | `~/.opencode/bin/opencode` | `AGENTS.md`, `.opencode/commands/`, `.agents/skills/` | `~/.config/opencode/plugins/rtk.ts` |
+| **Claude Code** | 2.1.289 | `~/.local/bin/claude` | `CLAUDE.md`, `.claude/settings.json`, `.claude/skills/` | `PreToolUse` hook in `.claude/settings.json` (`rtk hook claude`) + `.claude/RTK.md` |
 
 Both agents run the **same 57 BMAD skills** and the **same toolchain**. See §3.
+
+> **Atualizado em 2026-10-05** (sessão de transferência de conhecimento):
+> toolchain validado — Node **v24.21.0** · npm **12.2.0** · uv **0.12.23** ·
+> CrewAI **1.15.23** · gh **2.102.0** · RTK **0.51.0** · OpenCode **1.18.34** ·
+> Claude Code **2.1.289** · ripgrep 15.2.0 · Git 2.43.0.
+> Instância Coolify **4.3.23** · Traefik **v3.7**.
+
 
 ---
 
