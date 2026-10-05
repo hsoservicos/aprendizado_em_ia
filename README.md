@@ -350,6 +350,7 @@ coolify context add -d production https://coolify.seudominio.com <TOKEN>
 - **GitHub repos**: `_bmad-output/coolify-github-deploy-guide.md` (9 sections, 18.5K)
 - **Local deploy**: `_bmad-output/coolify-local-deploy-guide.md` (10 sections, 18.8K)
 - **Cloudflare tunnel playbook**: `_bmad-output/coolify-cloudflare-tunnel-deploy-playbook.md` (10 sections) — **real execution learnings**; read before publishing behind a Cloudflare tunnel
+- **Proxy layer (Traefik × nginx)**: `_bmad-output/proxy-layer-traefik-nginx-guide.md` (10 sections) — redundancy, performance and proxy decision matrix
 
 ---
 
@@ -442,6 +443,7 @@ install log) is **`_bmad-output/tools-registry.md`** (v1.3.3).
 | `_bmad-output/coolify-github-deploy-guide.md` | GitHub sources: public repo, Deploy Key, GitHub App (9 sections). |
 | `_bmad-output/coolify-local-deploy-guide.md` | No-Git sources: Docker Image, pasted Dockerfile, Compose Empty, one-click Service (10 sections). |
 | `_bmad-output/coolify-cloudflare-tunnel-deploy-playbook.md` | **Reusable playbook** for publishing behind a Cloudflare tunnel: topology, API/token, `http://` scheme (critical rule), Docker/nginx packaging, checklist, troubleshooting. |
+| `_bmad-output/proxy-layer-traefik-nginx-guide.md` | **Proxy layer**: Traefik × nginx roles, evidence (Traefik cannot serve statics), performance measurements, "each function once" rule and audit checklist. |
 | `_bmad-output/scripts/coolify-deploy.sh` | Executable — automated Coolify deploy via CLI (public + private repos, Docker image). |
 
 ### 5. Installation scripts & validation

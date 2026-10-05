@@ -103,3 +103,41 @@ para não contaminar este template:
 
 **Próximo passo**: usar `coolify-cloudflare-tunnel-deploy-playbook.md` como
 referência de publicação em novos projetos.
+
+
+---
+
+## Adendo — mesma data, segunda rodada (proxy layer)
+
+**Objetivo:** registrar a análise **Traefik × nginx** (redundância, boas práticas,
+desempenho) e a decisão de camada de proxy para publicações no Coolify.
+
+### Aprendizado consolidado
+
+| Tema | Achado |
+|------|--------|
+| `fileServer` no Traefik | **Não existe** em v3.7 — Traefik não serve estáticos |
+| Build pack `static` do Coolify | Gera configuração **nginx** (`defaultNginxConfiguration`) |
+| Custo do hop Traefik | ~0,7 ms · ~21% de throughput (1072 → 845 req/s) |
+| Custo do nginx | ~3 MiB RAM · imagem ~75 MB |
+| Gargalo real | **Rede/Cloudflare (~200 ms)** — não a pilha de proxy |
+| Redundância real | **Somente** em aplicações dinâmicas com nginx no meio |
+| Anti-padrão comum | `gzip` no nginx **e** `compress` no Traefik = compressão duplicada |
+
+### Conteúdo registrado nesta rodada
+
+| Arquivo | Tipo | Conteúdo |
+|---------|------|----------|
+| `proxy-layer-traefik-nginx-guide.md` | **NOVO** | Guia de camada de proxy: papéis, evidências, medições, regra de ouro "cada função uma vez", matriz de decisão, checklist de auditoria |
+| `README.md` / `README.pt-BR.md` / `README.es.md` | **ATUALIZADOS** | Referência ao novo guia |
+
+### Decisão de padrão adotada
+
+```text
+ESTÁTICO:   Cloudflare → Traefik → nginx (arquivos)
+API:        Cloudflare → Traefik → aplicação            ← sem nginx
+SPA + API:  Cloudflare → Traefik → nginx (SPA) / app (/api)
+```
+
+Funções de proxy centralizadas no **Traefik**: redirect, headers, compressão.
+nginx mantido **somente** para estáticos (cache de assets, `try_files`, `/healthz`).

@@ -342,6 +342,7 @@ coolify context add -d production https://coolify.seudominio.com <TOKEN>
 - **Repos GitHub**: `_bmad-output/coolify-github-deploy-guide.md` (9 seções, 18.5K)
 - **Deploy local**: `_bmad-output/coolify-local-deploy-guide.md` (10 seções, 18.8K)
 - **Playbook túnel Cloudflare**: `_bmad-output/coolify-cloudflare-tunnel-deploy-playbook.md` (10 seções) — **aprendizados de execução real**; leia antes de publicar com túnel Cloudflare
+- **Camada de proxy (Traefik × nginx)**: `_bmad-output/proxy-layer-traefik-nginx-guide.md` (10 seções) — redundância, desempenho e matriz de decisão de proxy
 
 ---
 
@@ -430,6 +431,7 @@ autoritativo (versões, caminhos, histórico) é **`_bmad-output/tools-registry.
 | `_bmad-output/coolify-github-deploy-guide.md` | Fontes GitHub: repo público, Deploy Key, GitHub App (9 seções). |
 | `_bmad-output/coolify-local-deploy-guide.md` | Fontes sem Git: Docker Image, Dockerfile colado, Compose Empty, Service one-click (10 seções). |
 | `_bmad-output/coolify-cloudflare-tunnel-deploy-playbook.md` | **Playbook reutilizável** de publicação com túnel Cloudflare: topologia, API/token, esquema `http://` (regra crítica), empacotamento Docker/nginx, checklist e solução de problemas. |
+| `_bmad-output/proxy-layer-traefik-nginx-guide.md` | **Camada de proxy**: papéis Traefik × nginx, evidências (Traefik não serve estáticos), medições de desempenho, regra "cada função uma vez" e checklist de auditoria. |
 | `_bmad-output/scripts/coolify-deploy.sh` | Executável — deploy Coolify automatizado via CLI (repos públicos + privados, imagem Docker). |
 
 ### 5. Scripts de instalação e validação
