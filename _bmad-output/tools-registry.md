@@ -1,8 +1,8 @@
 # Tools Registry — Inventário de Ferramentas do Projeto
 
-**Last Updated**: 2026-10-05T01:10:00Z  
-**Maintainer**: Hsantos  
-**Version**: 1.4.0
+**Last Updated**: 2026-10-12T00:00:00Z
+**Maintainer**: Hsantos
+**Version**: 1.6.0
 
 ---
 
@@ -41,7 +41,7 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | Property | Value |
 |----------|-------|
 | **Name** | Python |
-| **Version** | 3.12.3 |
+| **Version** | 3.14.4 |
 | **Path** | System PATH |
 | **Purpose** | Script execution, BMAD skill rendering |
 | **Installed** | System |
@@ -64,7 +64,7 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | Property | Value |
 |----------|-------|
 | **Name** | Git |
-| **Version** | 2.43.0 |
+| **Version** | 2.53.0 |
 | **Path** | System PATH |
 | **Purpose** | Version control, repository management |
 | **Installed** | System |
@@ -75,7 +75,7 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | Property | Value |
 |----------|-------|
 | **Name** | CrewAI |
-| **Version** | 1.15.23 |
+| **Version** | 1.15.25 |
 | **Path** | `~/.local/bin/crewai` |
 | **Purpose** | Multi-agent orchestration framework |
 | **Installed** | 2026-09-03 via `uv tool install crewai` |
@@ -102,10 +102,10 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 
 | Agent | Version | Path | Config surface | RTK integration |
 |-------|---------|------|----------------|-----------------|
-| **OpenCode** | 1.18.34 | `~/.opencode/bin/opencode` | `AGENTS.md`, `.opencode/commands/`, `.agents/skills/` | `~/.config/opencode/plugins/rtk.ts` |
+| **OpenCode** | 1.18.35 | `~/.opencode/bin/opencode` | `AGENTS.md`, `.opencode/commands/`, `.agents/skills/` | `~/.config/opencode/plugins/rtk.ts` |
 | **Claude Code** | 2.1.289 | `~/.local/bin/claude` | `CLAUDE.md`, `.claude/settings.json`, `.claude/skills/` | `PreToolUse` hook in `.claude/settings.json` (`rtk hook claude`) + `.claude/RTK.md` |
 
-Both agents run the **same 57 BMAD skills** and the **same toolchain**. See §3.
+Both agents run the **same 55 skills** and the **same toolchain**. See §3.
 
 > **Atualizado em 2026-10-05** (sessão de transferência de conhecimento):
 > toolchain validado — Node **v24.21.0** · npm **12.2.0** · uv **0.12.23** ·
@@ -123,31 +123,35 @@ Both agents run the **same 57 BMAD skills** and the **same toolchain**. See §3.
 | Property | Value |
 |----------|-------|
 | **Name** | BMAD Method |
-| **Version** | 6.11.0 |
+| **Version** | 6.12.1 |
 | **Install Date** | 2026-09-02T13:16:32.974Z |
-| **Modules** | `core` (6.11.0), `bmm` (6.11.0) |
+| **Last Update** | 2026-10-07 (`--action quick-update`) |
+| **Modules** | `core` (6.12.1), `bmm` (6.12.1) |
 | **IDEs** | opencode, claude-code |
 | **Config** | `_bmad/config.toml`, `_bmad/config.user.toml` |
 | **Manifest** | `_bmad/_config/manifest.yaml` |
 | **Status** | ✅ Active |
 
-### 2.2 BMAD Skills (57 Total)
+### 2.2 Skills (55 Total)
 
 | Category | Count | Location |
 |----------|-------|----------|
-| **Core Skills** | 24 | `_bmad/core/` |
-| **BMM Skills** | 25 | `_bmad/bmm/` |
-| **Custom Skills** | 8 | `.agents/skills/`, `.claude/skills/` |
-| **Total** | 57 | `.agents/skills/`, `.claude/skills/` |
+| **Official BMAD skills** | 50 | `_bmad/core/`, `_bmad/bmm/` (incl. 21 deprecated v6-shims) |
+| **Custom skills (Technology Agents)** | 4 | `.agents/skills/`, `.claude/skills/` |
+| **Impeccable (design)** | 1 | `.agents/skills/`, `.claude/skills/`, `.opencode/skills/` |
+| **Total** | 55 | `.agents/skills/`, `.claude/skills/` (byte-identical, parity verified 2026-10-07) |
 
 #### Custom Skills Created (Technology Agents)
 
 | Skill | Agent | Features |
 |-------|-------|----------|
-| `bmad-docker` | `bmad-agent-docker` | Dockerfile, Compose, BuildKit, security |
-| `bmad-python314` | `bmad-agent-python314` | Free-threading, t-strings, subinterpreters |
-| `bmad-php84` | `bmad-agent-php84` | Property Hooks, Asymmetric Visibility, DOM API |
-| `bmad-postgres18` | `bmad-agent-postgres18` | AIO, Skip Scan, UUIDv7, pgvector |
+| `bmad-angular21` | `bmad-agent-angular21` | Standalone APIs, signals, new control flow, SSR/hydration |
+| `bmad-java21` | `bmad-agent-java21` | Virtual threads, pattern matching, sequenced collections, records |
+
+> **Removed in `d6e8139` (2026-09):** `bmad-docker`, `bmad-python314`,
+> `bmad-php84`, `bmad-postgres18` and their `bmad-agent-*` counterparts. Their
+> implementation docs survive in `§5.1`; the Docker validators survive in
+> `§2.3`. `_bmad/render/bmad-docker/` is a stale gitignored render artifact.
 
 ### 2.3 BMAD Scripts
 
@@ -166,7 +170,7 @@ Both agents run the **same 57 BMAD skills** and the **same toolchain**. See §3.
 
 | File | Purpose |
 |------|---------|
-| `_bmad/_config/skill-manifest.csv` | All registered skills (57 entries) |
+| `_bmad/_config/skill-manifest.csv` | All registered skills (50 entries) |
 | `_bmad/_config/files-manifest.csv` | File tracking (36.6K) |
 | `_bmad/_config/bmad-help.csv` | Help system data |
 | `_bmad/_config/manifest.yaml` | Installation metadata |
@@ -180,32 +184,32 @@ Every capability in this registry is reachable from **both** OpenCode and Claude
 | Surface | OpenCode | Claude Code |
 |---------|----------|-------------|
 | Instructions file | `AGENTS.md` | `CLAUDE.md` (imports `AGENTS.md`) |
-| Skill tree | `.agents/skills/` (57) | `.claude/skills/` (57) — byte-identical mirror |
+| Skill tree | `.agents/skills/` (55) | `.claude/skills/` (55) — byte-identical mirror |
 | Skill invocation | `.opencode/commands/*.md` (`/bmad-*`) | native skill discovery (`/bmad-*`) |
 | Tool allow-list | shell `PATH` | `.claude/settings.json` → `permissions.allow` |
 | RTK compression | `~/.config/opencode/plugins/rtk.ts` | `.claude/settings.json` → `PreToolUse` hook |
 | RTK reference | — | `.claude/RTK.md` |
 
-### 3.1 OpenCode Commands (57 Total)
+### 3.1 OpenCode Commands (55 Total)
 
 | Category | Count |
 |----------|-------|
-| **Core Commands** | 49 |
-| **Custom Commands** | 8 |
-| **Total** | 57 |
+| **Core Commands** | 50 |
+| **Custom Commands** | 5 |
+| **Total** | 55 |
 
 #### Custom Commands Created
 
 | Command | File | Purpose |
 |---------|------|---------|
-| `bmad-docker` | `.opencode/commands/bmad-docker.md` | Docker skill |
-| `bmad-agent-docker` | `.opencode/commands/bmad-agent-docker.md` | Docker agent |
-| `bmad-python314` | `.opencode/commands/bmad-python314.md` | Python 3.14 skill |
-| `bmad-agent-python314` | `.opencode/commands/bmad-agent-python314.md` | Python 3.14 agent |
-| `bmad-php84` | `.opencode/commands/bmad-php84.md` | PHP 8.4 skill |
-| `bmad-agent-php84` | `.opencode/commands/bmad-agent-php84.md` | PHP 8.4 agent |
-| `bmad-postgres18` | `.opencode/commands/bmad-postgres18.md` | PostgreSQL 18 skill |
-| `bmad-agent-postgres18` | `.opencode/commands/bmad-agent-postgres18.md` | PostgreSQL 18 agent |
+| `bmad-angular21` | `.opencode/commands/bmad-angular21.md` | Angular 21 skill |
+| `bmad-agent-angular21` | `.opencode/commands/bmad-agent-angular21.md` | Angular 21 agent |
+| `bmad-java21` | `.opencode/commands/bmad-java21.md` | Java 21 skill |
+| `bmad-agent-java21` | `.opencode/commands/bmad-agent-java21.md` | Java 21 agent |
+| `impeccable` | `.opencode/commands/impeccable.md` | Design skill + UI anti-pattern detector |
+
+Removed in `d6e8139`: `bmad-docker`, `bmad-python314`, `bmad-php84`,
+`bmad-postgres18` + their `bmad-agent-*` wrappers.
 
 ### 3.2 Claude Code Integration
 
@@ -213,15 +217,169 @@ Every capability in this registry is reachable from **both** OpenCode and Claude
 |-----------|----------|---------|
 | **Instructions** | `CLAUDE.md` | Entry point; `@AGENTS.md` import + Claude-specific notes |
 | **Settings** | `.claude/settings.json` | Tool allow-list (`uv`, `rtk`, `rg`, `gh`, `crewai`, `npx bmad-method`) + RTK `PreToolUse` hook |
+| **Settings (local)** | `.claude/settings.local.json` | Impeccable hooks (gitignored, per-machine) |
 | **RTK reference** | `.claude/RTK.md` | RTK command reference for the agent |
-| **Skills** | `.claude/skills/` (57) | Auto-discovered; invoked as `/bmad-*` or model-selected |
+| **Skills** | `.claude/skills/` (55) | Auto-discovered; invoked as `/bmad-*`, `/impeccable`, or model-selected |
+| **Subagents** | `.claude/agents/impeccable-*.md` (4) | asset-producer, documenter, finish-reviewer, manual-edit-applier |
 
 Skills are **not** duplicated as command files for Claude Code — it discovers
-`.claude/skills/` natively, so `/bmad-help`, `/bmad-build`, `/bmad-agent-docker`,
-etc. work with no wrapper. The 57 skills in `.claude/skills/` are kept identical
-to `.agents/skills/`; `npx bmad-method install` regenerates both.
+`.claude/skills/` natively, so `/bmad-help`, `/bmad-build`, `/impeccable`, etc.
+work with no wrapper. The 55 skills in `.claude/skills/` are kept identical
+to `.agents/skills/`; `npx bmad-method install` regenerates both (but drops
+custom skills — see §8).
 
 **Per-machine RTK wiring (both agents):** `rtk init -g --auto-patch --opencode`
+
+### 3.3 Impeccable — Design Skill & UI Anti-Pattern Detector
+
+| Property | Value |
+|----------|-------|
+| **Name** | Impeccable (Paul Bakaus) |
+| **Version** | CLI 4.1.0 · engine v0.1.11 · skill 11.8K |
+| **License** | Apache-2.0 |
+| **Site / Repo** | <https://impeccable.style> · `pbakaus/impeccable` |
+| **Install Date** | 2026-10-07 (`npx impeccable install -y --providers=claude,opencode --scope=project`) |
+| **Purpose** | Shared design vocabulary + deterministic (LLM-free) detector of AI-generated UI anti-patterns |
+| **Detector rules** | 61 deterministic, no API key |
+| **Status** | ✅ Active |
+
+**Layout:**
+
+| Component | Location |
+|-----------|----------|
+| Skill (parity tree) | `.agents/skills/impeccable/`, `.claude/skills/impeccable/` |
+| Skill (OpenCode native) | `.opencode/skills/impeccable/` |
+| OpenCode wrapper | `.opencode/commands/impeccable.md` |
+| Subagents (Claude Code) | `.claude/agents/impeccable-{asset-producer,documenter,finish-reviewer,manual-edit-applier}.md` |
+| Hook manifest | `.claude/settings.local.json` (`SessionStart`, `PostToolUse` Edit\|Write, `Stop`) |
+| Project config | `.impeccable/config.json` (tracked), `.impeccable/config.local.json` (gitignored) |
+| Product / design truth | `PRODUCT.md`, `DESIGN.md` (written by `/impeccable init`, `/impeccable document`) |
+
+**Detector CLI exit codes:** `0` clean · `2` primary findings · `1` target not
+scannable. Findings → stderr; `--json` → stdout.
+
+**Usage — greenfield:** `npx impeccable install …` → `/impeccable init` →
+`/impeccable shape <surface>` → `/impeccable <free-form>`.
+**Usage — legacy:** `npx impeccable detect <dir|url>` (baseline) →
+`/impeccable document` → `/impeccable critique|audit|harden|polish <surface>`.
+**CI gate:** `npx impeccable detect --json src/ > impeccable-report.json`
+(exit 2 fails the build).
+
+**Maintenance:** BMAD's installer deletes skill folders outside its manifest.
+After every `npx bmad-method install`/`quick-update`, re-run
+`npx impeccable install -y --providers=claude,opencode --scope=project --force`,
+restore the 4 custom skills from git and re-mirror
+`.opencode/skills/impeccable` → `.agents/skills/impeccable`. See `AGENTS.md`.
+
+### 3.4 Superpowers — SDLC Methodology & Skill Framework
+
+| Property | Value |
+|----------|-------|
+| **Name** | Superpowers (obra / Prime Radiant) |
+| **Version** | plugin 6.4.1 (Claude marketplace) / 6.4.2 (git HEAD) |
+| **License** | MIT |
+| **Repo** | <https://github.com/obra/superpowers> |
+| **Install Date** | 2026-10-07 |
+| **Purpose** | Engineering methodology for coding agents (TDD, debugging, worktrees, subagent-driven development) |
+| **Skills** | 15 |
+| **Always-on cost** | ~703 tok/sessão |
+| **Status** | ✅ Active |
+
+**Layout:**
+
+| Component | Location |
+|-----------|----------|
+| Plugin OpenCode | `.opencode/opencode.json` (`superpowers@git+https://github.com/obra/superpowers.git`) |
+| Plugin Claude Code | `~/.claude/plugins/cache/claude-plugins-official/superpowers/6.4.1/` |
+| Registry | `~/.claude/plugins/installed_plugins.json` |
+| Hook | `SessionStart` (matcher `startup\|clear\|compact`) |
+| Telemetry | off via `.claude/settings.json` env (`SUPERPOWERS_DISABLE_TELEMETRY=1`) |
+| Docs | `AGENTS.md` (seção Superpowers) |
+
+**Skills (15) e triggers:**
+
+| Skill | Trigger |
+|-------|---------|
+| `using-superpowers` | Bootstrap do SessionStart — escolher skill antes de agir |
+| `brainstorming` | Antes de qualquer trabalho criativo |
+| `writing-plans` | Spec aprovada, antes do código — tasks de 2–5 min |
+| `executing-plans` | Executar um plano inline (loop de execução) |
+| `subagent-driven-development` | Tasks independentes via subagentes (review de 2 etapas) |
+| `test-driven-development` | Feature/bugfix — ciclo RED-GREEN-REFACTOR |
+| `systematic-debugging` | Bug/comportamento inesperado — causa-raiz |
+| `verification-before-completion` | Antes de dizer "pronto" — citar saída real dos comandos |
+| `requesting-code-review` | Tarefa completa, pré-merge |
+| `receiving-code-review` | Ao receber feedback de review |
+| `using-git-worktrees` | Feature que precisa de isolamento |
+| `finishing-a-development-branch` | Implementação completa, testes verdes |
+| `dispatching-parallel-agents` | 2+ problemas independentes |
+| `writing-skills` | Autorar/editar skills |
+| `diagnosing-superpowers` | Sessão do Superpowers com mau comportamento |
+
+**Precedence:** BMAD owns the SDLC phase; Superpowers owns TDD/debug/worktree/
+branch-finish/verification; Impeccable owns design. Never run
+`subagent-driven-development` and `bmad-build-auto` in the same session.
+See `AGENTS.md` (seção "Precedence — BMAD × Superpowers × Impeccable").
+
+**Maintenance:** after `npx bmad-method install`, Superpowers is unaffected (it
+lives outside the skill trees) — but confirm with `claude plugin list` and
+`cat .opencode/opencode.json`. Never copy it into `.agents/skills/` /
+`.claude/skills/` (the BMAD installer deletes unknown folders).
+
+### 3.5 REA — Reverse Engineer Anything (MCP)
+
+| Property | Value |
+|----------|-------|
+| **Name** | REA (Reverse Engineer Anything) |
+| **Version** | `rea-agents` 6.4.0 (npm) · skill v37 · 170 tools |
+| **License** | MIT |
+| **Repo / Site** | <https://github.com/morluto/rea> · <https://rea.tools> |
+| **Install Date** | 2026-10-12 (`npx rea-agents@latest setup --client opencode --client claude_code --yes`) |
+| **Purpose** | MCP server + skill de engenharia reversa: binários nativos, JS/Electron, .NET, APK/Android, websites, capturas de rede, SQLite, WASM/EVM, etc. — análise local, resultados com evidências |
+| **Status** | ✅ Active (registrations aligned; providers nativos não configurados) |
+
+**Layout (user-level — fora do repo, imune ao `bmad-method install`):**
+
+| Component | Location |
+|-----------|----------|
+| MCP registration (OpenCode) | `~/.config/opencode/opencode.jsonc` → `mcp.rea` (`npx -y rea-agents@6.4.0 mcp`) |
+| MCP registration (Claude Code) | `~/.claude.json` → `mcpServers.rea` (mesmo comando, pinado em 6.4.0) |
+| Skill (shared / OpenCode) | `~/.agents/skills/reverse-engineer-anything/` |
+| Skill (Claude Code) | `~/.claude/skills/reverse-engineer-anything/` |
+| Backups | `*.rea.backup` ao lado de cada config alterada |
+| Cache / state | `~/.rea` (removível com `rea uninstall --purge-data`) |
+
+**Providers nativos (opcionais, não instalados):** Hopper (comercial/demo —
+instalável via setup com aprovação explícita `--install-hopper`), Ghidra
+(`GHIDRA_INSTALL_DIR`), IDA (`REA_IDA_MCP_CONFIG`). Sem eles, JS/Electron,
+.NET, Go/Rust/WASM/EVM/SQLite, APK e websites continuam funcionando.
+
+> ⚠️ **Requisito obrigatório para operações nativas (binários):** antes de usar
+> o MCP REA em qualquer análise de binário nativo, é **obrigatório configurar e
+> ativar ao menos um provider** — **Hopper**, **Ghidra** ou **IDA** (ou todos).
+> Sem um provider ativo, `open_binary`/decompilação/assembly **não funcionam**;
+> apenas as análises estáticas (JS/Electron, .NET, Go/Rust/WASM/EVM/SQLite,
+> APK, websites) operam sem provider. Nenhum provider está configurado nesta
+> máquina (2026-10-12) — configurar antes de qualquer trabalho nativo:
+>
+> | Provider | Configuração | Validação |
+> |----------|--------------|-----------|
+> | Hopper | `npx rea-agents@latest setup --install-hopper` (aprovação explícita; demo ou licença do operador) | `rea doctor --provider hopper --json` |
+> | Ghidra 12.1.x | `export GHIDRA_INSTALL_DIR=/abs/path/ghidra_12.1.x_PUBLIC` (+ JDK 21+) | `rea doctor --provider ghidra --json` |
+> | IDA | `export REA_IDA_MCP_CONFIG=/path/ida-mcp.json` (ver `docs/ida-provider.md`) | `rea doctor --provider ida --json` |
+>
+> Depois de configurar, rodar `npx rea-agents@latest doctor --json` e
+> **reiniciar o agente**. Também registrado em `AGENTS.md` (seção REA).
+
+**CLI:** `npx rea-agents@latest <cmd>` ou `npm install --global rea-agents` →
+`rea <cmd>`. Diagnóstico: `rea doctor --json` (read-only). Update:
+`npx rea-agents@latest setup` (re-registra e atualiza a skill). Uninstall:
+`rea uninstall` (preserva Hopper/skills de terceiros).
+
+**Maintenance:** as skills do REA ficam em `~/.agents/skills/` e
+`~/.claude/skills/` (home), **não** em `.agents/skills/`/`.claude/skills/` do
+projeto — logo, o `npx bmad-method install` não as apaga. Para atualizar,
+re-executar o setup e reiniciar os agentes.
 
 ---
 
@@ -232,7 +390,7 @@ to `.agents/skills/`; `npx bmad-method install` regenerates both.
 | Property | Value |
 |----------|-------|
 | **Name** | RTK |
-| **Version** | 0.47.0 |
+| **Version** | 0.51.0 |
 | **Path** | `~/.local/bin/rtk` |
 | **Purpose** | CLI proxy for token compression (60-90% savings) |
 | **Platform** | Ubuntu 24.04.4 LTS (x86_64) |
@@ -242,7 +400,7 @@ to `.agents/skills/`; `npx bmad-method install` regenerates both.
 
 | Dependency | Version | Path |
 |------------|---------|------|
-| ripgrep (`rg`) | 14.1.1 | `~/.local/bin/rg` |
+| ripgrep (`rg`) | 15.2.0 | `~/.local/bin/rg` |
 
 ### 4.3 RTK Integration
 
@@ -396,6 +554,23 @@ One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --open
 | 2026-09-04 | `getting-started.md` | Created — onboarding: pre-flight + Track A (greenfield) & Track B (legacy modernization) | Hsantos |
 | 2026-09-04 | `implementation-playbook.md` | Created — detailed jargon-free step-by-step for new & legacy projects (Parts A & B), any skill level | Hsantos |
 | 2026-09-04 | README (EN/PT-BR/ES) | Added "Project Materials & Tools" index; CrewAI stated as integrated with BMAD; CrewAI registered in the Support section (upstream repo + docs); trilingual parity restored | Hsantos |
+| 2026-10-07 | BMAD Method v6.12.1 | `--action quick-update` (core 6.11.0→6.12.1, bmm 6.11.0→6.12.1); 50 official skills refreshed | OpenCode |
+| 2026-10-07 | Custom skills (angular21/java21) | Restored from git after BMAD installer deleted them (they are not in the BMAD manifest) | OpenCode |
+| 2026-10-07 | CrewAI v1.15.25 | Repaired — uv tool env was corrupted (`Failed find package 'crewai'`); `uv tool install crewai --force` | OpenCode |
+| 2026-10-07 | Python 3.14.4 / Node v24.21.0 / uv 0.12.23 / Git 2.53.0 / gh 2.102.0 / rg 15.2.0 / RTK 0.51.0 | Version audit — registry refreshed | OpenCode |
+| 2026-10-07 | Impeccable CLI 4.1.0 + engine v0.1.11 | Installed via `npx impeccable install -y --providers=claude,opencode --scope=project` | OpenCode |
+| 2026-10-07 | Impeccable skill | Mirrored to `.agents/skills/` for tree parity (installer only wrote `.claude/` + `.opencode/`) | OpenCode |
+| 2026-10-07 | Impeccable hooks | `.claude/settings.local.json` — SessionStart + PostToolUse(Edit\|Write) + Stop | OpenCode |
+| 2026-10-07 | `bmad-docker` / `bmad-python314` / `bmad-php84` / `bmad-postgres18` | Confirmed **removed** in `d6e8139` (2026-09); docs corrected (were still listed as installed) | OpenCode |
+| 2026-10-07 | Registry v1.4.0 | Full audit + Impeccable section (§3.3) | OpenCode |
+| 2026-10-07 | Superpowers plugin (OpenCode) | Instalado via `opencode plugin` em `.opencode/opencode.json` (projeto) | OpenCode |
+| 2026-10-07 | Superpowers plugin (Claude Code) | Instalado via `claude plugin install superpowers@claude-plugins-official` (usuário, v6.4.1) | OpenCode |
+| 2026-10-07 | Superpowers telemetry | Desligado (`SUPERPOWERS_DISABLE_TELEMETRY=1`) em `.claude/settings.json` env | OpenCode |
+| 2026-10-07 | toolchain-installation-guide.md | Criado — instalação/ativação/uso de BMAD + Impeccable + Superpowers | OpenCode |
+| 2026-10-07 | superpowers-study-2026-10-07.md | Criado — estudo/auditoria do obra/superpowers | OpenCode |
+| 2026-10-07 | Registry v1.5.0 | Seção 3.4 Superpowers + toolchain completa | OpenCode |
+| 2026-10-12 | REA (`rea-agents` 6.4.0) | Instalado via `npx rea-agents@latest setup --client opencode --client claude_code --yes` — MCP registrado em `~/.config/opencode/opencode.jsonc` e `~/.claude.json`; skill v37 (170 tools) em `~/.agents/skills/` + `~/.claude/skills/` | OpenCode |
+| 2026-10-12 | Registry v1.6.0 | Seção 3.5 REA | OpenCode |
 
 ---
 
@@ -416,6 +591,32 @@ One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --open
 - [ ] Increment version if major change
 - [ ] Update `Last Updated` timestamp
 - [ ] Commit with descriptive message
+
+### After every `npx bmad-method install` / `--action quick-update`
+
+The BMAD installer **removes skill folders it does not know about** (proven on
+2026-10-07: it wiped `bmad-angular21`, `bmad-java21`, `bmad-agent-angular21`,
+`bmad-agent-java21`). Always run this recovery sequence, then re-verify parity:
+
+```bash
+# 1. restore the custom Technology-Agent skills the installer deleted
+git checkout -- .agents/skills/bmad-angular21 .agents/skills/bmad-java21 \
+  .agents/skills/bmad-agent-angular21 .agents/skills/bmad-agent-java21 \
+  .claude/skills/bmad-angular21 .claude/skills/bmad-java21 \
+  .claude/skills/bmad-agent-angular21 .claude/skills/bmad-agent-java21 \
+  .opencode/commands/bmad-angular21.md .opencode/commands/bmad-java21.md \
+  .opencode/commands/bmad-agent-angular21.md .opencode/commands/bmad-agent-java21.md
+
+# 2. re-install Impeccable (skill + hooks + subagents) and re-mirror the tree
+npx impeccable install -y --providers=claude,opencode --scope=project --force
+cp -r .opencode/skills/impeccable .agents/skills/impeccable
+
+# 3. verify parity between the two skill trees
+diff <(ls .agents/skills) <(ls .claude/skills) && echo PARITY_OK
+```
+
+If a `git checkout` cannot recover a deleted custom skill (not committed),
+re-create it from `_bmad/custom/` or restore from a backup before continuing.
 
 ---
 
@@ -485,13 +686,16 @@ crewai run
 
 | Tool | Required Version | Status | Available to |
 |------|-----------------|--------|--------------|
-| Node.js | >= 22 | ✅ v24.20.0 | both agents |
-| Python | >= 3.12 | ✅ 3.12.3 / 3.14.6 | both agents |
-| uv | >= 0.12 | ✅ 0.12.9 | both agents |
-| Git | Any | ✅ 2.43.0 | both agents |
-| GitHub CLI (`gh`) | Any | ✅ 2.99.0 | both agents |
-| RTK | Any | ✅ 0.48.0 | both agents (OpenCode plugin + Claude hook) |
-| ripgrep | Any | ✅ 14.1.1 | both agents |
-| CrewAI | >= 1.15 | ✅ 1.15.18 | both agents |
-| OpenCode | Any | ✅ 1.18.27 | — |
-| Claude Code | Any | ✅ 2.1.260 | — |
+| Node.js | >= 22 | ✅ v24.21.0 | both agents |
+| Python | >= 3.12 | ✅ 3.14.4 | both agents |
+| uv | >= 0.12 | ✅ 0.12.23 | both agents |
+| Git | Any | ✅ 2.53.0 | both agents |
+| GitHub CLI (`gh`) | Any | ✅ 2.102.0 | both agents |
+| RTK | Any | ✅ 0.51.0 | both agents (OpenCode plugin + Claude hook) |
+| ripgrep | Any | ✅ 15.2.0 | both agents |
+| CrewAI | >= 1.15 | ✅ 1.15.25 | both agents |
+| OpenCode | Any | ✅ 1.18.35 | — |
+| Claude Code | Any | ✅ 2.1.289 | — |
+| Impeccable CLI | >= 4.1 | ✅ 4.1.0 (engine v0.1.11) | both agents + CI |
+| Superpowers | >= 6.4 | ✅ 6.4.1 (Claude) / 6.4.2 (OpenCode) | both agents |
+| REA (`rea-agents`) | >= 6.4 | ✅ 6.4.0 (skill v37) | both agents (MCP) |

@@ -13,6 +13,19 @@ Thumbs.db
 .claude/settings.local.json
 _bmad/render/
 
+# Impeccable — working state (keep config.json, design.json, live/config.json,
+# surfaces/*.md and critique/*.md tracked; ignore the rest)
+# impeccable-ignore-start
+.impeccable/*
+!.impeccable/config.json
+!.impeccable/config.local.json.example
+!.impeccable/design.json
+!.impeccable/critique/
+!.impeccable/surfaces/
+!.impeccable/live/
+!.impeccable/live/config.json
+# impeccable-ignore-end
+
 # Node
 node_modules/
 npm-debug.log*

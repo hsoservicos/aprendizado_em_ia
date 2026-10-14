@@ -1,7 +1,7 @@
 # Manual de Implementação — Passo a Passo para Projetos Novos e Legados
 
-**Versão**: 1.0.0
-**Data**: 2026-09-04
+**Versão**: 1.2.0
+**Data**: 2026-10-07
 **Autor**: Hsantos
 **Público-alvo**: **Qualquer membro da equipe** — inclusive quem não tem formação
 ou afinidade com Engenharia de Software. Ao seguir este manual você consegue
@@ -24,6 +24,10 @@ conduzir a construção de um projeto **novo** ou a modernização de um projeto
 10. [Solução de problemas (FAQ)](#10-solução-de-problemas-faq)
 11. [Glossário de comandos](#11-glossário-de-comandos)
 12. [Referências](#12-referências)
+
+> **Guia relacionado:** `_bmad-output/toolchain-installation-guide.md` —
+> instalação, ativação e uso da toolchain completa (BMAD + Impeccable +
+> Superpowers).
 
 ---
 
@@ -109,6 +113,10 @@ npx bmad-method install
 diff -rq .agents/skills .claude/skills && echo "skills OK"   # árvores idênticas
 rtk init --show                                              # RTK nos 2 agentes
 node --version && python3 --version && uv --version && git --version && rtk --version
+claude plugin list | grep -i superpowers    # Superpowers no Claude Code
+cat .opencode/opencode.json                 # Superpowers no OpenCode (plugin)
+npx impeccable detect --version             # Impeccable CLI
+test -f .claude/settings.local.json && echo "Impeccable hooks OK"
 
 # 4. Configurar o projeto
 #    _bmad/custom/config.toml   -> project_name, document_output_language, output_folder
@@ -189,6 +197,9 @@ git status                       # deve estar limpo
 git checkout -b feat/mvp         # branch de trabalho
 mkdir -p docs                    # conhecimento do projeto
 ```
+
+**Superpowers:** para trabalho isolado, use `using-git-worktrees` — worktree e
+branch dedicadas em vez de alterar a árvore principal.
 
 Confirme no `_bmad/custom/config.toml` que `project_name` e
 `document_output_language` estão como você quer.
@@ -322,6 +333,16 @@ idioma (os documentos saem no idioma errado).
 
 ### A3 — Fase BUILD: construir, uma story por vez
 
+**Disciplina de engenharia (Superpowers):**
+
+- **`test-driven-development`** — ciclo RED-GREEN-REFACTOR: escreva primeiro o
+  teste falhando. Código de produção escrito **antes** do teste é **deletado**.
+- **`verification-before-completion`** — só diga "pronto" **citando a saída real**
+  do comando de teste/build que foi executado (evidência, não afirmação).
+- **Escolha UM loop de execução:** `executing-plans` **ou**
+  `subagent-driven-development` — nunca os dois, e nunca junto com
+  `bmad-build-auto`.
+
 #### A3.1 — Implementar uma story
 
 - **Objetivo:** código funcionando para **uma** story, seguindo a arquitetura.
@@ -368,6 +389,14 @@ Uma story ≈ um (ou poucos) commits, cada um descrito em uma frase.
 ---
 
 ### A4 — Fase REVIEW: garantir qualidade
+
+**Superpowers + Impeccable:**
+
+- **`requesting-code-review`** (pré-merge) e **`receiving-code-review`** (aplicar
+  o feedback de verdade — implementação verificada, sem concordância
+  performática).
+- **Gate determinístico:** `npx impeccable detect --json src/ > impeccable-report.json`
+  — exit `0` limpo, exit `2` com achados: corrija antes de fechar.
 
 #### A4.1 — Code review adversarial
 
@@ -473,6 +502,10 @@ git status                          # tem que estar limpo
 git checkout -b feat/modernizacao   # todo trabalho vai aqui
 ```
 
+**Superpowers:** em legado o isolamento é ainda mais importante — use
+`using-git-worktrees` para cada bloco de modernização (worktree/branch própria,
+reversível), sem sujar a árvore principal.
+
 Integre o material BMAD ao repositório legado (copie `_bmad/`, `.agents/`,
 `.claude/`, `.opencode/`, `AGENTS.md`, `CLAUDE.md` e `_bmad-output/scripts/`,
 depois rode `npx bmad-method install`). Faça o **pré-flight** da [§3](#3-antes-de-tudo-o-pré-flight).
@@ -560,6 +593,16 @@ mais dois itens específicos de legado:
 
 **Objetivo:** modernizar em passos pequenos, cada um verificado e reversível.
 
+**Disciplina de engenharia (Superpowers):**
+
+- **`test-driven-development`** — ciclo RED-GREEN-REFACTOR: escreva primeiro o
+  teste falhando. Código de produção escrito **antes** do teste é **deletado**.
+- **`verification-before-completion`** — só diga "pronto" **citando a saída real**
+  do comando de teste/build que foi executado (evidência, não afirmação).
+- **Escolha UM loop de execução:** `executing-plans` **ou**
+  `subagent-driven-development` — nunca os dois, e nunca junto com
+  `bmad-build-auto`.
+
 **O loop, para cada incremento:**
 
 ```
@@ -589,6 +632,13 @@ achados deve cair.
 ---
 
 ### B5 — Consolidar e entregar
+
+**Superpowers + Impeccable:**
+
+- **`requesting-code-review`** / **`receiving-code-review`** — review pré-merge e
+  aplicação **verificada** do feedback (não concordância performática).
+- **Gate determinístico:** `npx impeccable detect --json src/ > impeccable-report.json`
+  — exit `2` = achados: corrija antes de consolidar.
 
 - **Retrospectiva:** `> /bmad-retrospective` — o que a modernização entregou,
   verificado contra evidências, com veredito de aceite.
@@ -772,6 +822,8 @@ reporte a saída e **pare**.
 | Registro de Ferramentas | `_bmad-output/tools-registry.md` | Inventário do que está instalado |
 | Integração CrewAI | `_bmad-output/crewai-integration-guide.md` | Orquestração multi-agente |
 | Deploy Coolify | `_bmad-output/coolify-deploy-guide.md` (+ github / local) | Entrega em produção |
+| Guia de Instalação da Toolchain | `_bmad-output/toolchain-installation-guide.md` | Instalar/ativar/usar BMAD + Impeccable + Superpowers |
+| Estudo do Superpowers | `_bmad-output/superpowers-study-2026-10-07.md` | Estudo/auditoria do obra/superpowers |
 | Instruções dos agentes | `AGENTS.md` (OpenCode) / `CLAUDE.md` (Claude Code) | Contrato de trabalho dos agentes |
 
 ---

@@ -2,7 +2,8 @@
 
 Claude Code's entry point for this repository. It is the Claude Code counterpart
 of `AGENTS.md` (which OpenCode reads). **Both coding agents are first-class here**
-and share one source of truth, the same 57 BMAD skills, and the same tooling.
+and share one source of truth, the same 55 skills (54 BMAD + 1 Impeccable), and
+the same tooling.
 
 @AGENTS.md
 
@@ -13,8 +14,8 @@ and share one source of truth, the same 57 BMAD skills, and the same tooling.
 | Concern | OpenCode | Claude Code |
 |---------|----------|-------------|
 | Instructions | `AGENTS.md` | `CLAUDE.md` → imports `AGENTS.md` |
-| BMAD skills | `.agents/skills/` (57) via `.opencode/commands/*.md` | `.claude/skills/` (57), auto-discovered |
-| Slash commands | `/bmad-*` (command files) | `/bmad-*` (native skill discovery) |
+| BMAD skills | `.agents/skills/` (55) via `.opencode/commands/*.md` | `.claude/skills/` (55), auto-discovered |
+| Slash commands | `/bmad-*`, `/impeccable` (command files) | `/bmad-*`, `/impeccable` (native skill discovery) |
 | Tool allow-list | inherits shell | `.claude/settings.json` → `permissions.allow` |
 | RTK token compression | `~/.config/opencode/plugins/rtk.ts` | `.claude/settings.json` → `PreToolUse` hook (`rtk hook claude`) |
 | RTK reference | — | `.claude/RTK.md` |
@@ -38,6 +39,30 @@ change to one must be mirrored to the other (BMAD's installer does this on
   (except `node`/`npm` via nvm) and must be on `PATH`.
 - **RTK**: Bash output is auto-compressed by the `PreToolUse` hook. See
   `@.claude/RTK.md`. For a raw command: `RTK_DISABLED=1 <cmd>`.
+- **Impeccable** (design skill + UI anti-pattern detector): skill at
+  `.claude/skills/impeccable/`, four helper subagents in `.claude/agents/
+  impeccable-*.md`, and hooks in `.claude/settings.local.json`
+  (`SessionStart` / `PostToolUse` on Edit|Write / `Stop`) running
+  `.claude/skills/impeccable/scripts/impeccable hook`. Invoke as
+  `/impeccable <cmd>` (`init`, `document`, `critique`, `audit`, `harden`,
+  `polish`, …) or scan from the shell with `npx impeccable detect <dir|url>`.
+  Full usage, greenfield/brownfield recipes and the post-BMAD-update restore
+  steps live in `@AGENTS.md` → *Impeccable* section. `settings.local.json` is
+  gitignored — re-run `npx impeccable install -y --providers=claude,opencode
+  --scope=project` on a new machine to get the hooks.
+- **Superpowers** (SDLC methodology + 15 skills): user plugin
+  `superpowers@claude-plugins-official` (cache
+  `~/.claude/plugins/cache/claude-plugins-official/superpowers/6.4.1/`).
+  Its `SessionStart` hook injects `skills/using-superpowers/SKILL.md` in
+  `<EXTREMELY_IMPORTANT>` (matcher `startup|clear|compact`) — that bootstrap is
+  what makes `brainstorming`, `test-driven-development`, `systematic-debugging`,
+  etc. auto-trigger. **Precedence with BMAD is binding**: `@AGENTS.md` →
+  *Precedence — BMAD × Superpowers × Impeccable*. Short version — BMAD owns the
+  SDLC phase; Superpowers owns TDD, root-cause debugging, worktrees, branch
+  finish and the verification gate; Impeccable owns design. Never run
+  `subagent-driven-development` and `bmad-build-auto` in the same session.
+  Telemetry is disabled via `env.SUPERPOWERS_DISABLE_TELEMETRY=1` in
+  `.claude/settings.json`. Update with `claude plugin update superpowers`.
 - **Per-machine setup** for both agents at once:
   `rtk init -g --auto-patch --opencode`.
 

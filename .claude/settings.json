@@ -1,5 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "SUPERPOWERS_DISABLE_TELEMETRY": "1",
+    "DISABLE_TELEMETRY": "1",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  },
   "permissions": {
     "allow": [
       "Bash(uv run:*)",
@@ -10,9 +15,25 @@
       "Bash(gh:*)",
       "Bash(npx bmad-method:*)",
       "Bash(npx bmad-method@*:*)",
+      "Bash(npx impeccable:*)",
       "Bash(crewai:*)",
       "Bash(python:*)",
-      "Bash(pip:*)"
+      "Bash(pip:*)",
+      "Bash(git worktree:*)",
+      "Bash(git switch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git rebase:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git stash:*)",
+      "Bash(git branch:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run:*)",
+      "Bash(pytest:*)"
     ],
     "deny": []
   },

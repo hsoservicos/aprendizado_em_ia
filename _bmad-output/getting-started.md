@@ -1,7 +1,7 @@
 # Primeiros Passos — Onboarding do Repositório
 
-**Versão**: 1.0.0
-**Data**: 2026-09-04
+**Versão**: 1.1.0
+**Data**: 2026-10-07
 **Autor**: Hsantos
 **Público-alvo**: Membro da equipe que vai usar este repositório para **implementar um projeto novo** ou **modernizar/atualizar um projeto legado**.
 
@@ -47,6 +47,7 @@ Ambiente exigido (instale o que faltar — o script automatizado faz tudo):
 | RTK | >= 0.47 | `rtk --version` |
 | CrewAI | >= 1.15 (opcional) | `crewai version` |
 | Agente | OpenCode >= 1.18 **e/ou** Claude Code >= 2.1 | `opencode --version` / `claude --version` |
+| Superpowers | >= 6.4 (plugin — sem binário próprio) | `claude plugin list` / `cat .opencode/opencode.json` |
 
 **Setup automatizado (recomendado):**
 
@@ -129,6 +130,21 @@ npx bmad-method install
 Detecta instalação existente e oferece update. Regenera as duas árvores de skills
 (`.agents/skills/` e `.claude/skills/`) e os comandos do OpenCode.
 
+### Passo 2.5 — Instalar Impeccable e Superpowers
+
+```bash
+# Impeccable (design + detector de UI)
+npx impeccable install -y --providers=claude,opencode --scope=project
+cp -r .opencode/skills/impeccable .agents/skills/impeccable
+
+# Superpowers (metodologia de engenharia)
+opencode plugin superpowers@git+https://github.com/obra/superpowers.git
+claude plugin install superpowers@claude-plugins-official
+```
+
+> **Nota:** Superpowers fica no plugin cache, nunca em `.agents/skills/` — o
+> instalador do BMAD apaga pastas fora do manifesto.
+
 ---
 
 ## Passo 3 — Verificar toolchain + os dois agentes + RTK
@@ -153,6 +169,14 @@ rtk init --show
 # Se algo faltar, conecte o RTK aos dois de uma vez (uma vez por máquina):
 rtk init -g --auto-patch          # hook global do Claude Code
 rtk init -g --auto-patch --opencode  # plugin do OpenCode
+
+# Superpowers (metodologia de engenharia) — plugin nos dois agentes
+claude plugin list | grep -i superpowers   # esperado: superpowers@claude-plugins-official
+cat .opencode/opencode.json                # esperado: superpowers@git+.../obra/superpowers.git
+
+# Impeccable (design + detector) — CLI + hooks
+npx impeccable detect --version            # CLI respondendo
+test -f .claude/settings.local.json && echo "OK: hooks Impeccable"
 ```
 
 Checklist rápido: **`_bmad-output/scripts/installation-validation-report.md`**.
@@ -218,6 +242,16 @@ Você tem uma ideia e nenhum código. Siga o **ciclo de vida de 5 fases**:
 | 4 | **Review** | `/bmad-code-review` → `/bmad-qa-generate-e2e-tests` | Código validado |
 | 5 | **Learn** | `/bmad-retrospective` → deploy (Coolify) | Lições + Produção |
 
+**Superpowers por fase** (disciplina de engenharia que acompanha cada fase):
+
+| Fase | Skill Superpowers |
+|------|-------------------|
+| 1 Clarify | `brainstorming` |
+| 2 Plan | `writing-plans` |
+| 3 Build | `test-driven-development` + `verification-before-completion` |
+| 4 Review | `requesting-code-review` / `receiving-code-review` |
+| 5 Learn | `finishing-a-development-branch` |
+
 **Mudanças pequenas** podem ir direto para `/bmad-build`.
 
 📖 **Passo a passo detalhado, sem jargão, com exemplos e checklists de qualidade:**
@@ -276,6 +310,16 @@ Selecionar escopo → /bmad-build → /bmad-code-review → commit → repetir
 Uma unidade de mudança por vez. Cada commit referencia a story/issue.
 Ao fechar um épico: `/bmad-retrospective`.
 
+**Superpowers por etapa** (disciplina de engenharia no legado):
+
+| Etapa | Skill Superpowers |
+|-------|-------------------|
+| B.1 Linha de base | `using-git-worktrees` |
+| B.2 Contexto do legado | `writing-plans` |
+| B.3 Diagnóstico | `systematic-debugging` |
+| B.4 Enquadramento | `subagent-driven-development` (alternativa ao `bmad-build-auto`) |
+| B.5 Ciclos curtos | `test-driven-development` + `verification-before-completion` |
+
 📖 **Passo a passo detalhado do trabalho em legado** (mapear, diagnosticar,
 estratégia por incremento, testes de caracterização, ciclos curtos):
 **`_bmad-output/implementation-playbook.md`** → Parte B. As Fases 2–5 do
@@ -290,6 +334,9 @@ Pré-flight (uma vez)
 [ ] Passo 0  Pré-requisitos instalados (node, python, uv, git, gh, rg, rtk)
 [ ] Passo 1  Repositório clonado/integrado + branch de trabalho criada
 [ ] Passo 2  npx bmad-method install executado
+[ ] Passo 2.5 Impeccable instalado (skill + hooks) e espelhado em .agents/skills
+[ ] Passo 2.5 Superpowers instalado (plugin OpenCode .opencode/opencode.json + plugin Claude)
+[ ] Passo 2.5 Superpowers telemetry OFF (SUPERPOWERS_DISABLE_TELEMETRY=1)
 [ ] Passo 3  diff .agents/skills .claude/skills == idêntico
 [ ] Passo 3  rtk init --show → OpenCode plugin + Claude hook OK
 [ ] Passo 4  _bmad/custom/config.toml (projeto) e config.user.toml (pessoal) ajustados
@@ -327,6 +374,8 @@ Trilha B — Projeto legado
 | Instruções do projeto | `AGENTS.md` (OpenCode) / `CLAUDE.md` (Claude Code) | Contrato dos agentes |
 | Scripts de instalação | `_bmad-output/scripts/README.md` | Automação Linux/Windows |
 | Deploy | `_bmad-output/coolify-deploy-guide.md` | Entrega em produção |
+| Guia de Instalação da Toolchain | `_bmad-output/toolchain-installation-guide.md` | Instalar/ativar/usar BMAD + Impeccable + Superpowers |
+| Estudo do Superpowers | `_bmad-output/superpowers-study-2026-10-07.md` | Estudo/auditoria do obra/superpowers |
 
 ---
 
