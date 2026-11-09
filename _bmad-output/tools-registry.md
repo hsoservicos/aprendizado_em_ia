@@ -102,15 +102,15 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 
 | Agent | Version | Path | Config surface | RTK integration |
 |-------|---------|------|----------------|-----------------|
-| **OpenCode** | v2.2.5 | `~/.opencode/bin/opencode` | `AGENTS.md`, `.opencode/commands/`, `.agents/skills/` | `~/.config/opencode/plugins/rtk.ts` |
-| **Claude Code** | 2.1.289 | `~/.local/bin/claude` | `CLAUDE.md`, `.claude/settings.json`, `.claude/skills/` | `PreToolUse` hook in `.claude/settings.json` (`rtk hook claude`) + `.claude/RTK.md` |
+| **OpenCode** | v2.2.6 | `~/.opencode/bin/opencode` | `AGENTS.md`, `.opencode/commands/`, `.agents/skills/` | `~/.config/opencode/plugins/rtk.ts` |
+| **Claude Code** | 2.1.319 | `~/.local/bin/claude` | `CLAUDE.md`, `.claude/settings.json`, `.claude/skills/` | `PreToolUse` hook in `.claude/settings.json` (`rtk hook claude`) + `.claude/RTK.md` |
 
 Both agents run the **same 55 skills** and the **same toolchain**. See §3.
 
 > **Atualizado em 2026-11-09** (sessão de verificação de atualizações):
 > toolchain validado — Node **v24.22.2** · npm **12.2.2** · uv **0.13.7** ·
-> CrewAI **1.15.39** · gh **2.103.3** · RTK **1.1.0** · OpenCode **v2.2.5** ·
-> Claude Code **2.1.289** · ripgrep 15.2.0 · Git 2.53.0 · Python 3.14.4.
+> CrewAI **1.15.39** · gh **2.103.3** · RTK **1.1.0** · OpenCode **v2.2.6** ·
+> Claude Code **2.1.319** · ripgrep 15.2.0 · Git 2.53.0 · Python 3.14.4.
 > BMAD **6.12.4** · Impeccable **4.8.1** (engine v0.1.19) ·
 > Superpowers **7.0.x** · REA **6.8.0** (skill v49 · 229 tools).
 
@@ -580,6 +580,7 @@ One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --open
 | 2026-11-09 | Superpowers v7 | Claude `claude plugin update` 6.4.1→7.0.0 (marketplace); OpenCode já em v7.0.2 (git HEAD 22f0b46) | OpenCode |
 | 2026-11-09 | uv 0.13.7 / CrewAI 1.15.39 / npm 12.2.2 / gh 2.103.3 | `uv self update`; `uv tool upgrade crewai`; `npm i -g npm@latest`; download do binário do release do gh | OpenCode |
 | 2026-11-09 | Registry v1.7.0 | Versões auditadas + atualizadas (toolchain + frameworks) | OpenCode |
+| 2026-11-09 | OpenCode v2.2.6 | `opencode upgrade` (2.2.5 → 2.2.6); Claude Code 2.1.319 via `claude update` | OpenCode |
 
 ---
 
@@ -703,8 +704,8 @@ crewai run
 | RTK | Any | ✅ 1.1.0 | both agents (OpenCode plugin + Claude hook) |
 | ripgrep | Any | ✅ 15.2.0 | both agents |
 | CrewAI | >= 1.15 | ✅ 1.15.39 | both agents |
-| OpenCode | Any | ✅ v2.2.5 | — |
-| Claude Code | Any | ✅ 2.1.289 | — |
+| OpenCode | Any | ✅ v2.2.6 | — |
+| Claude Code | Any | ✅ 2.1.319 | — |
 | Impeccable CLI | >= 4.1 | ✅ 4.8.1 (engine v0.1.19) | both agents + CI |
 | Superpowers | >= 7.0 | ✅ 7.0.0 (Claude) / 7.0.2 (OpenCode) | both agents |
 | REA (`rea-agents`) | >= 6.8 | ✅ 6.8.0 (skill v49) | both agents (MCP) |

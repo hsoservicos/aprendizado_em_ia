@@ -32,7 +32,7 @@ skills de forma nativa.
 
 | Item | Valor |
 |------|-------|
-| **OpenCode nesta máquina (Hsantos)** | **v2.2.5** (linha v2) |
+| **OpenCode nesta máquina (Hsantos)** | **v2.2.6** (linha v2) |
 | **Terminais ainda em v1** | compatíveis — sem ação obrigatória |
 | **Skills** | 55 (50 BMAD + 4 tecnologia + 1 impeccable), idênticas nas duas árvores |
 | **Toolchain** | Node v24.22.2 · npm 12.2.2 · Python 3.14.4 · uv 0.13.7 · Git 2.53.0 · gh 2.103.3 · ripgrep 15.2.0 · RTK 1.1.0 · CrewAI 1.15.39 |
