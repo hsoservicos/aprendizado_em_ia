@@ -1,0 +1,5 @@
+💽 <b>Disco quase cheio</b>
+
+<b>Servidor:</b> servitec-local
+<b>Uso:</b> 87% (limite 80%)
+<b>Quando:</b> 09/11/2026 08:30

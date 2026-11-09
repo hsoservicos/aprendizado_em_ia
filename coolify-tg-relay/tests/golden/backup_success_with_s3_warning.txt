@@ -1,0 +1,7 @@
+⚠️ <b>Backup local OK — envio S3 falhou</b>
+
+<b>Banco:</b> servicetec-postgres
+<b>Frequência:</b> Diário às 03:00
+<b>Erro S3:</b> <pre>Access Denied</pre>
+<b>Armazenamento:</b> https://s3.example.com/backups
+<b>Quando:</b> 09/11/2026 08:30

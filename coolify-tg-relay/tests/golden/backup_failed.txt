@@ -1,0 +1,7 @@
+🚨 <b>Falha no backup</b>
+
+<b>Banco:</b> servicetec-postgres
+<b>Tipo:</b> postgresql
+<b>Frequência:</b> Diário às 03:00
+<b>Erro:</b> <pre>pg_dump: error: connection to server at "10.0.3.5" failed: Connection refused</pre>
+<b>Quando:</b> 09/11/2026 08:30

@@ -1,0 +1,8 @@
+❌ <b>Tarefa agendada falhou</b>
+
+<b>Tarefa:</b> resumo-estagnacao
+<b>Saída:</b>
+<pre>Traceback (most recent call last):
+  File "manage.py", line 21
+ValueError: configuração ausente</pre>
+<b>Quando:</b> 09/11/2026 08:30

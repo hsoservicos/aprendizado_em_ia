@@ -1,0 +1,7 @@
+🧩 <b>Atualizações de SO disponíveis</b>
+
+<b>Servidor:</b> servitec-local
+<b>Sistema:</b> ubuntu · <b>Gerenciador:</b> apt
+<b>Atualizações:</b> 12
+<b>Críticas:</b> 2
+<b>Quando:</b> 09/11/2026 08:30

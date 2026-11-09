@@ -1,0 +1,190 @@
+version: 1
+
+events:
+  deployment_success:
+    title: "✅ <b>Deploy concluído</b>"
+    body:
+      - "<b>Aplicação:</b> {application_name}"
+      - "<b>Projeto:</b> {project} · <b>Ambiente:</b> {environment}"
+      - "<b>Commit:</b> <code>{commit_short}</code> {commit_message}"
+      - "<b>Pull request:</b> #{pull_request_id}"
+      - "<b>Duração:</b> {duration}"
+      - "<b>Concluído em:</b> {finished_at_brt}"
+    buttons:
+      - {text: "Abrir aplicação", url: "{fqdn}"}
+      - {text: "Ver logs do deploy", url: "{deployment_url}"}
+
+  deployment_failed:
+    title: "❌ <b>Falha no deploy</b>"
+    body:
+      - "<b>Aplicação:</b> {application_name}"
+      - "<b>Projeto:</b> {project} · <b>Ambiente:</b> {environment}"
+      - "<b>Commit:</b> <code>{commit_short}</code> {commit_message}"
+      - "<b>Pull request:</b> #{pull_request_id}"
+      - "<b>Motivo:</b> {error_summary}"
+      - "<b>Falhou em:</b> {finished_at_brt}"
+    buttons:
+      - {text: "Ver logs do deploy", url: "{deployment_url}"}
+      - {text: "Abrir aplicação", url: "{fqdn}"}
+
+  status_changed:
+    title: "⛔ <b>Recurso parou inesperadamente</b>"
+    body:
+      - "<b>Recurso:</b> {resource_label}"
+      - "<b>Projeto:</b> {project} · <b>Ambiente:</b> {environment}"
+      - "<b>Domínio:</b> {fqdn}"
+      - "<b>Quando:</b> {now_brt}"
+    buttons:
+      - {text: "Abrir no Coolify", url: "{url}"}
+
+  container_restarted:
+    title: "🔄 <b>Recurso reiniciado automaticamente</b>"
+    body:
+      - "<b>Container:</b> {container_name}"
+      - "<b>Servidor:</b> {server_name}"
+      - "<b>Quando:</b> {now_brt}"
+    buttons:
+      - {text: "Abrir no Coolify", url: "{url}"}
+
+  restart_limit_reached:
+    title: "🚫 <b>Limite de reinícios atingido</b>"
+    body:
+      - "<b>Aplicação:</b> {application_name}"
+      - "<b>Projeto:</b> {project} · <b>Ambiente:</b> {environment}"
+      - "<b>Reinícios:</b> {restart_count} de {max_restart_count}"
+      - "<b>Situação:</b> recurso parado até intervenção manual"
+      - "<b>Quando:</b> {now_brt}"
+    buttons:
+      - {text: "Abrir no Coolify", url: "{url}"}
+
+  backup_success:
+    title: "💾 <b>Backup concluído</b>"
+    body:
+      - "<b>Banco:</b> {database_name}"
+      - "<b>Tipo:</b> {database_type}"
+      - "<b>Frequência:</b> {frequency}"
+      - "<b>Concluído em:</b> {now_brt}"
+    buttons:
+      - {text: "Abrir no Coolify", url: "{url}"}
+
+  backup_failed:
+    title: "🚨 <b>Falha no backup</b>"
+    body:
+      - "<b>Banco:</b> {database_name}"
+      - "<b>Tipo:</b> {database_type}"
+      - "<b>Frequência:</b> {frequency}"
+      - "<b>Erro:</b> <pre>{error_short}</pre>"
+      - "<b>Quando:</b> {now_brt}"
+    buttons:
+      - {text: "Abrir no Coolify", url: "{url}"}
+
+  backup_success_with_s3_warning:
+    title: "⚠️ <b>Backup local OK — envio S3 falhou</b>"
+    body:
+      - "<b>Banco:</b> {database_name}"
+      - "<b>Frequência:</b> {frequency}"
+      - "<b>Erro S3:</b> <pre>{s3_error_short}</pre>"
+      - "<b>Armazenamento:</b> {s3_storage_url}"
+      - "<b>Quando:</b> {now_brt}"
+    buttons:
+      - {text: "Abrir no Coolify", url: "{url}"}
+
+  task_success:
+    title: "✅ <b>Tarefa agendada concluída</b>"
+    body:
+      - "<b>Tarefa:</b> {task_name}"
+      - "<b>Saída:</b>\n<pre>{task_output_short}</pre>"
+      - "<b>Concluída em:</b> {now_brt}"
+    buttons:
+      - {text: "Abrir no Coolify", url: "{url}"}
+
+  task_failed:
+    title: "❌ <b>Tarefa agendada falhou</b>"
+    body:
+      - "<b>Tarefa:</b> {task_name}"
+      - "<b>Saída:</b>\n<pre>{task_output_short}</pre>"
+      - "<b>Quando:</b> {now_brt}"
+    buttons:
+      - {text: "Abrir no Coolify", url: "{url}"}
+
+  docker_cleanup_success:
+    title: "🧹 <b>Limpeza Docker concluída</b>"
+    body:
+      - "<b>Servidor:</b> {server_name}"
+      - "<b>Resultado:</b> {cleanup_short}"
+      - "<b>Concluída em:</b> {now_brt}"
+    buttons:
+      - {text: "Abrir servidor", url: "{url}"}
+
+  docker_cleanup_failed:
+    title: "🧹❌ <b>Falha na limpeza Docker</b>"
+    body:
+      - "<b>Servidor:</b> {server_name}"
+      - "<b>Erro:</b> <pre>{error_short}</pre>"
+      - "<b>Quando:</b> {now_brt}"
+    buttons:
+      - {text: "Abrir servidor", url: "{url}"}
+
+  server_reachable:
+    title: "🟢 <b>Servidor voltou a responder</b>"
+    body:
+      - "<b>Servidor:</b> {server_name}"
+      - "<b>Quando:</b> {now_brt}"
+    buttons:
+      - {text: "Abrir servidor", url: "{url}"}
+
+  server_unreachable:
+    title: "🔴 <b>Servidor inacessível</b>"
+    body:
+      - "<b>Servidor:</b> {server_name}"
+      - "<b>Automações:</b> desligadas enquanto o servidor não responder"
+      - "<b>Quando:</b> {now_brt}"
+    buttons:
+      - {text: "Abrir servidor", url: "{url}"}
+
+  high_disk_usage:
+    title: "💽 <b>Disco quase cheio</b>"
+    body:
+      - "<b>Servidor:</b> {server_name}"
+      - "<b>Uso:</b> {disk_usage}% (limite {threshold}%)"
+      - "<b>Quando:</b> {now_brt}"
+    buttons:
+      - {text: "Abrir servidor", url: "{url}"}
+
+  server_patch_check:
+    title: "🧩 <b>Atualizações de SO disponíveis</b>"
+    body:
+      - "<b>Servidor:</b> {server_name}"
+      - "<b>Sistema:</b> {os_id} · <b>Gerenciador:</b> {package_manager}"
+      - "<b>Atualizações:</b> {total_updates}"
+      - "<b>Críticas:</b> {critical_packages_count}"
+      - "<b>Quando:</b> {now_brt}"
+    buttons:
+      - {text: "Abrir servidor", url: "{url}"}
+
+  server_patch_check_error:
+    title: "⚠️ <b>Falha ao verificar atualizações</b>"
+    body:
+      - "<b>Servidor:</b> {server_name}"
+      - "<b>Sistema:</b> {os_id} · <b>Gerenciador:</b> {package_manager}"
+      - "<b>Erro:</b> <pre>{error_short}</pre>"
+      - "<b>Quando:</b> {now_brt}"
+    buttons:
+      - {text: "Abrir servidor", url: "{url}"}
+
+  traefik_version_outdated:
+    title: "🌐 <b>Traefik desatualizado</b>"
+    body:
+      - "<b>Servidores afetados:</b> {affected_servers_count}"
+      - "<b>Servidor:</b> {server_name}"
+      - "<b>Versão:</b> {current_version} → {latest_version}"
+      - "<b>Quando:</b> {now_brt}"
+
+  test:
+    title: "🧪 <b>Teste de notificação</b>"
+    body:
+      - "Se esta mensagem chegou, o relay está configurado corretamente."
+      - "<b>Origem:</b> Coolify"
+      - "<b>Quando:</b> {now_brt}"
+    buttons:
+      - {text: "Abrir dashboard", url: "{url}"}

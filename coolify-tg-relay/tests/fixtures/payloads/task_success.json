@@ -1,0 +1,10 @@
+{
+  "success": true,
+  "event": "task_success",
+  "message": "Scheduled task succeeded",
+  "task_name": "resumo-estagnacao",
+  "task_uuid": "task-1",
+  "output": "Resumo enviado: 12 clientes",
+  "application_uuid": "app-5",
+  "url": "https://coolify.example.com/project/p1/environment/e1/application/app-1/app-5"
+}

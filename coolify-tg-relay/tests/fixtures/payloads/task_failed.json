@@ -1,0 +1,10 @@
+{
+  "success": false,
+  "event": "task_failed",
+  "message": "Scheduled task failed",
+  "task_name": "resumo-estagnacao",
+  "task_uuid": "task-1",
+  "output": "Traceback (most recent call last):\n  File \"manage.py\", line 21\nValueError: configuração ausente",
+  "application_uuid": "app-5",
+  "url": "https://coolify.example.com/project/p1/environment/e1/application/app-1/app-5"
+}

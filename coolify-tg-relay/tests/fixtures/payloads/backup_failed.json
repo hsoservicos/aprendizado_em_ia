@@ -1,0 +1,11 @@
+{
+  "success": false,
+  "event": "backup_failed",
+  "message": "Database backup failed",
+  "database_name": "servicetec-postgres",
+  "database_uuid": "db-1",
+  "database_type": "postgresql",
+  "frequency": "Diário às 03:00",
+  "error_output": "pg_dump: error: connection to server at \"10.0.3.5\" failed: Connection refused",
+  "url": "https://coolify.example.com/project/p1/environment/e1/application/app-1/db-1"
+}

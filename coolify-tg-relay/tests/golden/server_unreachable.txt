@@ -1,0 +1,5 @@
+🔴 <b>Servidor inacessível</b>
+
+<b>Servidor:</b> servitec-local
+<b>Automações:</b> desligadas enquanto o servidor não responder
+<b>Quando:</b> 09/11/2026 08:30

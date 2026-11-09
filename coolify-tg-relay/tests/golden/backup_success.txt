@@ -1,0 +1,6 @@
+💾 <b>Backup concluído</b>
+
+<b>Banco:</b> servicetec-postgres
+<b>Tipo:</b> postgresql
+<b>Frequência:</b> Diário às 03:00
+<b>Concluído em:</b> 09/11/2026 08:30

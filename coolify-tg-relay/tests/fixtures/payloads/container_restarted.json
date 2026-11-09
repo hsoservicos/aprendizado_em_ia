@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "event": "container_restarted",
+  "message": "Resource restarted automatically",
+  "container_name": "wordpress-rrlljn3no4ydy2vdkjppdqfe",
+  "server_name": "servitec-local",
+  "server_uuid": "srv-1",
+  "url": "https://coolify.example.com/server/srv-1"
+}

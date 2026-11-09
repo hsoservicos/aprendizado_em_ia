@@ -1,0 +1,6 @@
+✅ <b>Tarefa agendada concluída</b>
+
+<b>Tarefa:</b> resumo-estagnacao
+<b>Saída:</b>
+<pre>Resumo enviado: 12 clientes</pre>
+<b>Concluída em:</b> 09/11/2026 08:30

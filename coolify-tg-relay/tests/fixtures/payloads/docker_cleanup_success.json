@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "event": "docker_cleanup_success",
+  "message": "Docker cleanup job succeeded",
+  "server_name": "servitec-local",
+  "server_uuid": "srv-1",
+  "cleanup_message": "Removidas 12 imagens, 3 volumes e 1,2 GB liberados",
+  "url": "https://coolify.example.com/server/srv-1"
+}

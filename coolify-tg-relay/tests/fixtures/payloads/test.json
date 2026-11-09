@@ -1,0 +1,6 @@
+{
+  "success": true,
+  "event": "test",
+  "message": "This is a test webhook notification from Coolify.",
+  "url": "https://coolify.example.com"
+}

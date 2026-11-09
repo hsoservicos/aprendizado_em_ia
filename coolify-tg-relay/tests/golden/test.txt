@@ -1,0 +1,5 @@
+🧪 <b>Teste de notificação</b>
+
+Se esta mensagem chegou, o relay está configurado corretamente.
+<b>Origem:</b> Coolify
+<b>Quando:</b> 09/11/2026 08:30

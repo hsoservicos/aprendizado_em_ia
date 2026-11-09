@@ -1,0 +1,21 @@
+services:
+  relay:
+    build: .
+    image: coolify-tg-relay:local
+    container_name: coolify-tg-relay
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - relay-data:/data
+    networks:
+      - coolify
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  relay-data:
+
+networks:
+  coolify:
+    external: true

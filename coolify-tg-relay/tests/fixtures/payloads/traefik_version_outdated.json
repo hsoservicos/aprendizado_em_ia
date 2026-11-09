@@ -1,0 +1,15 @@
+{
+  "success": false,
+  "event": "traefik_version_outdated",
+  "message": "Traefik proxy outdated",
+  "affected_servers_count": 1,
+  "servers": [
+    {
+      "name": "servitec-local",
+      "uuid": "srv-1",
+      "current_version": "v3.1.0",
+      "latest_version": "v3.1.4",
+      "update_type": "patch_update"
+    }
+  ]
+}

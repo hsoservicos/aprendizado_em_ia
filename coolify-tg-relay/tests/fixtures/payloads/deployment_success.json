@@ -1,0 +1,16 @@
+{
+  "success": true,
+  "event": "deployment_success",
+  "message": "New version successfully deployed",
+  "application_name": "sound-music-app",
+  "application_uuid": "app-1",
+  "deployment_uuid": "dep-0001",
+  "deployment_url": "https://coolify.example.com/project/p1/environment/e1/application/app-1/deployment/dep-0001",
+  "project": "Serviços",
+  "environment": "production",
+  "fqdn": "https://sound.appservice.tec.br",
+  "commit": "bb24bb9185a7470f18900e9a0835fc9b14966db1",
+  "commit_message": "fix: corrige reprodução de faixas",
+  "created_at": "2026-11-08T03:22:09Z",
+  "finished_at": "2026-11-08T03:24:53Z"
+}

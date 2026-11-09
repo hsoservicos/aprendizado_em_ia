@@ -1,0 +1,12 @@
+{
+  "success": true,
+  "event": "backup_success_with_s3_warning",
+  "message": "Database backup succeeded locally, S3 upload failed",
+  "database_name": "servicetec-postgres",
+  "database_uuid": "db-1",
+  "database_type": "postgresql",
+  "frequency": "Diário às 03:00",
+  "s3_error": "Access Denied",
+  "s3_storage_url": "https://s3.example.com/backups",
+  "url": "https://coolify.example.com/project/p1/environment/e1/application/app-1/db-1"
+}

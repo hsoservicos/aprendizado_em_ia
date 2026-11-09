@@ -1,0 +1,5 @@
+🧹❌ <b>Falha na limpeza Docker</b>
+
+<b>Servidor:</b> servitec-local
+<b>Erro:</b> <pre>permission denied while trying to connect to the Docker daemon</pre>
+<b>Quando:</b> 09/11/2026 08:30

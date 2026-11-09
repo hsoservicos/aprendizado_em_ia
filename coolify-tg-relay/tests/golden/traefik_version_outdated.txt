@@ -1,0 +1,6 @@
+🌐 <b>Traefik desatualizado</b>
+
+<b>Servidores afetados:</b> 1
+<b>Servidor:</b> servitec-local
+<b>Versão:</b> v3.1.0 → v3.1.4
+<b>Quando:</b> 09/11/2026 08:30

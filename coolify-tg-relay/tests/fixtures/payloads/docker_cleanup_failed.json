@@ -1,0 +1,9 @@
+{
+  "success": false,
+  "event": "docker_cleanup_failed",
+  "message": "Docker cleanup job failed",
+  "server_name": "servitec-local",
+  "server_uuid": "srv-1",
+  "error_message": "permission denied while trying to connect to the Docker daemon",
+  "url": "https://coolify.example.com/server/srv-1"
+}

@@ -1,0 +1,16 @@
+{
+  "success": false,
+  "event": "deployment_failed",
+  "message": "Deployment failed",
+  "application_name": "markdown-studio",
+  "application_uuid": "app-2",
+  "deployment_uuid": "dep-0002",
+  "deployment_url": "https://coolify.example.com/project/p1/environment/e1/application/app-1/deployment/dep-0002",
+  "project": "Ferramentas",
+  "environment": "production",
+  "commit": "0ce3635a1234567890abcdef1234567890abcdef",
+  "commit_message": "feat: novo editor",
+  "error_summary": "Script falhou no passo de build (exit 1)",
+  "created_at": "2026-11-08T03:10:00Z",
+  "finished_at": "2026-11-08T03:11:12Z"
+}

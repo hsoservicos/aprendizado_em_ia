@@ -1,0 +1,13 @@
+{
+  "success": false,
+  "event": "restart_limit_reached",
+  "message": "Restart limit reached",
+  "application_name": "servicetec-apresentacao",
+  "application_uuid": "app-4",
+  "restart_count": 10,
+  "max_restart_count": 10,
+  "project": "Institucional",
+  "environment": "production",
+  "fqdn": "https://servicetec.appservice.tec.br",
+  "url": "https://coolify.example.com/project/p1/environment/e1/application/app-1/app-4"
+}

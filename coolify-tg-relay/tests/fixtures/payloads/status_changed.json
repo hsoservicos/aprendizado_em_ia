@@ -1,0 +1,11 @@
+{
+  "success": false,
+  "event": "status_changed",
+  "message": "Application stopped",
+  "application_name": "hsoservicos",
+  "application_uuid": "app-3",
+  "project": "Institucional",
+  "environment": "production",
+  "fqdn": "https://hsoservicos.com.br",
+  "url": "https://coolify.example.com/project/p1/environment/e1/application/app-1/app-3"
+}

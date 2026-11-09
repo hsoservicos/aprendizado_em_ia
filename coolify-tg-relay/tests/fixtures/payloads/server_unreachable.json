@@ -1,0 +1,8 @@
+{
+  "success": false,
+  "event": "server_unreachable",
+  "message": "Server unreachable",
+  "server_name": "servitec-local",
+  "server_uuid": "srv-1",
+  "url": "https://coolify.example.com/server/srv-1"
+}

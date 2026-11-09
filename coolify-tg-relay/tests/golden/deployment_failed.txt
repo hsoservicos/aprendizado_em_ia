@@ -1,0 +1,7 @@
+❌ <b>Falha no deploy</b>
+
+<b>Aplicação:</b> markdown-studio
+<b>Projeto:</b> Ferramentas · <b>Ambiente:</b> production
+<b>Commit:</b> <code>0ce3635a</code> feat: novo editor
+<b>Motivo:</b> Script falhou no passo de build (exit 1)
+<b>Falhou em:</b> 08/11/2026 00:11

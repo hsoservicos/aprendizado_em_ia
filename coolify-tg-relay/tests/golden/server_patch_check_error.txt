@@ -1,0 +1,6 @@
+⚠️ <b>Falha ao verificar atualizações</b>
+
+<b>Servidor:</b> servitec-local
+<b>Sistema:</b> ubuntu · <b>Gerenciador:</b> apt
+<b>Erro:</b> <pre>apt update falhou: Could not resolve archive.ubuntu.com</pre>
+<b>Quando:</b> 09/11/2026 08:30

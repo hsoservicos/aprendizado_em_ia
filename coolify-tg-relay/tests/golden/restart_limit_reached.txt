@@ -1,0 +1,7 @@
+🚫 <b>Limite de reinícios atingido</b>
+
+<b>Aplicação:</b> servicetec-apresentacao
+<b>Projeto:</b> Institucional · <b>Ambiente:</b> production
+<b>Reinícios:</b> 10 de 10
+<b>Situação:</b> recurso parado até intervenção manual
+<b>Quando:</b> 09/11/2026 08:30

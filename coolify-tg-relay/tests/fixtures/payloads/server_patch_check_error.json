@@ -1,0 +1,11 @@
+{
+  "success": false,
+  "event": "server_patch_check_error",
+  "message": "Failed to check patches",
+  "server_name": "servitec-local",
+  "server_uuid": "srv-1",
+  "os_id": "ubuntu",
+  "package_manager": "apt",
+  "error": "apt update falhou: Could not resolve archive.ubuntu.com",
+  "url": "https://coolify.example.com/server/srv-1"
+}

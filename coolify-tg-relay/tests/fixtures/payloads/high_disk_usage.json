@@ -1,0 +1,10 @@
+{
+  "success": false,
+  "event": "high_disk_usage",
+  "message": "High disk usage detected",
+  "server_name": "servitec-local",
+  "server_uuid": "srv-1",
+  "disk_usage": 87,
+  "threshold": 80,
+  "url": "https://coolify.example.com/server/srv-1"
+}

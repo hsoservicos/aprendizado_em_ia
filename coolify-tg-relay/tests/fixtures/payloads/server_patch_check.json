@@ -1,0 +1,12 @@
+{
+  "success": false,
+  "event": "server_patch_check",
+  "message": "Server patches available",
+  "server_name": "servitec-local",
+  "server_uuid": "srv-1",
+  "total_updates": 12,
+  "os_id": "ubuntu",
+  "package_manager": "apt",
+  "critical_packages_count": 2,
+  "url": "https://coolify.example.com/server/srv-1"
+}

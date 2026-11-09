@@ -1,0 +1,6 @@
+⛔ <b>Recurso parou inesperadamente</b>
+
+<b>Recurso:</b> hsoservicos
+<b>Projeto:</b> Institucional · <b>Ambiente:</b> production
+<b>Domínio:</b> https://hsoservicos.com.br
+<b>Quando:</b> 09/11/2026 08:30
