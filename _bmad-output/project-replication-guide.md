@@ -361,54 +361,38 @@ Commit all three (`AGENTS.md`, `CLAUDE.md`, `.claude/settings.json`, plus
 
 ## 5. Custom Skills Installation
 
-The project includes 4 custom technology agents. To replicate them:
+The project includes 4 custom technology skills (2 agents: Angular 21 and Java
+21). To replicate them:
 
-### 5.1 Docker Agent & Skill
+### 5.1 Angular 21 Agent & Skill
 
 ```bash
 # Files to copy (from reference project)
-mkdir -p .agents/skills/bmad-docker/references
-mkdir -p .agents/skills/bmad-agent-docker
-mkdir -p .claude/skills/bmad-docker/references
-mkdir -p .claude/skills/bmad-agent-docker
+mkdir -p .agents/skills/bmad-angular21/references
+mkdir -p .agents/skills/bmad-agent-angular21
+mkdir -p .claude/skills/bmad-angular21/references
+mkdir -p .claude/skills/bmad-agent-angular21
 mkdir -p .opencode/commands
 
 # Copy files from reference project or create new
-# See: _bmad-output/docker-skill-implementation.md
+# See: AGENTS.md (Custom Skills section)
 ```
 
-### 5.2 Python 3.14 Agent & Skill
+### 5.2 Java 21 Agent & Skill
 
 ```bash
-mkdir -p .agents/skills/bmad-python314/references
-mkdir -p .agents/skills/bmad-agent-python314
-mkdir -p .claude/skills/bmad-python314/references
-mkdir -p .claude/skills/bmad-agent-python314
+mkdir -p .agents/skills/bmad-java21/references
+mkdir -p .agents/skills/bmad-agent-java21
+mkdir -p .claude/skills/bmad-java21/references
+mkdir -p .claude/skills/bmad-agent-java21
 
-# See: _bmad-output/python314-skill-implementation.md
+# See: AGENTS.md (Custom Skills section)
 ```
 
-### 5.3 PHP 8.4 Agent & Skill
-
-```bash
-mkdir -p .agents/skills/bmad-php84/references
-mkdir -p .agents/skills/bmad-agent-php84
-mkdir -p .claude/skills/bmad-php84/references
-mkdir -p .claude/skills/bmad-agent-php84
-
-# See: _bmad-output/php84-skill-implementation.md
-```
-
-### 5.4 PostgreSQL 18 Agent & Skill
-
-```bash
-mkdir -p .agents/skills/bmad-postgres18/references
-mkdir -p .agents/skills/bmad-agent-postgres18
-mkdir -p .claude/skills/bmad-postgres18/references
-mkdir -p .claude/skills/bmad-agent-postgres18
-
-# See: _bmad-output/postgres18-skill-implementation.md
-```
+> **Note:** the previous technology skills (`bmad-docker`, `bmad-python314`,
+> `bmad-php84`, `bmad-postgres18` and their `bmad-agent-*` counterparts) were
+> removed in commit `d6e8139` (2026-09). Their implementation docs survive in
+> `_bmad-output/*-skill-implementation.md`.
 
 ---
 

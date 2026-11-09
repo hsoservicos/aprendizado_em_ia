@@ -27,8 +27,8 @@ change to one must be mirrored to the other (BMAD's installer does this on
 ## Claude Code specifics
 
 - **Skills**: invoke with `/bmad-help`, `/bmad-build`, `/bmad-code-review`, the
-  technology agents (`/bmad-agent-docker`, `/bmad-agent-python314`,
-  `/bmad-agent-php84`, `/bmad-agent-postgres18`), etc. — or let the model pick.
+  technology agents (`/bmad-agent-angular21`, `/bmad-agent-java21`), etc. — or
+  let the model pick.
 - **Skill rendering** (never run workflow files directly):
   ```bash
   uv run _bmad/scripts/render_skill.py --project-root /home/hsantos/app --skill .claude/skills/<skill-name>
@@ -52,7 +52,7 @@ change to one must be mirrored to the other (BMAD's installer does this on
   --scope=project` on a new machine to get the hooks.
 - **Superpowers** (SDLC methodology + 15 skills): user plugin
   `superpowers@claude-plugins-official` (cache
-  `~/.claude/plugins/cache/claude-plugins-official/superpowers/6.4.1/`).
+  `~/.claude/plugins/cache/claude-plugins-official/superpowers/7.0.0/`).
   Its `SessionStart` hook injects `skills/using-superpowers/SKILL.md` in
   `<EXTREMELY_IMPORTANT>` (matcher `startup|clear|compact`) — that bootstrap is
   what makes `brainstorming`, `test-driven-development`, `systematic-debugging`,

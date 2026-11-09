@@ -2,7 +2,7 @@
 
 **Last Updated**: 2026-11-09T00:00:00Z
 **Maintainer**: Hsantos
-**Version**: 1.7.0
+**Version**: 1.8.0
 
 ---
 
@@ -109,7 +109,7 @@ Both agents run the **same 55 skills** and the **same toolchain**. See §3.
 
 > **Atualizado em 2026-11-09** (sessão de verificação de atualizações):
 > toolchain validado — Node **v24.22.2** · npm **12.2.2** · uv **0.13.7** ·
-> CrewAI **1.15.39** · gh **2.103.3** · RTK **1.1.0** · OpenCode **v2.2.6** ·
+> CrewAI **1.15.39** · gh **2.103.3** · RTK **1.2.0** · OpenCode **v2.2.6** ·
 > Claude Code **2.1.319** · ripgrep 15.2.0 · Git 2.53.0 · Python 3.14.4.
 > BMAD **6.12.4** · Impeccable **4.8.1** (engine v0.1.19) ·
 > Superpowers **7.0.x** · REA **6.8.0** (skill v49 · 229 tools).
@@ -391,7 +391,7 @@ re-executar o setup e reiniciar os agentes.
 | Property | Value |
 |----------|-------|
 | **Name** | RTK |
-| **Version** | 1.1.0 |
+| **Version** | 1.2.0 |
 | **Path** | `~/.local/bin/rtk` |
 | **Purpose** | CLI proxy for token compression (60-90% savings) |
 | **Platform** | Ubuntu 24.04.4 LTS (x86_64) |
@@ -581,6 +581,7 @@ One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --open
 | 2026-11-09 | uv 0.13.7 / CrewAI 1.15.39 / npm 12.2.2 / gh 2.103.3 | `uv self update`; `uv tool upgrade crewai`; `npm i -g npm@latest`; download do binário do release do gh | OpenCode |
 | 2026-11-09 | Registry v1.7.0 | Versões auditadas + atualizadas (toolchain + frameworks) | OpenCode |
 | 2026-11-09 | OpenCode v2.2.6 | `opencode upgrade` (2.2.5 → 2.2.6); Claude Code 2.1.319 via `claude update` | OpenCode |
+| 2026-11-09 | RTK 1.2.0 | binário atualizado de 1.1.0 (release `rtk-ai/rtk` v1.2.0); backup em `~/.local/share/rtk/backups/rtk-1.1.0` | OpenCode |
 
 ---
 
@@ -701,7 +702,7 @@ crewai run
 | uv | >= 0.12 | ✅ 0.13.7 | both agents |
 | Git | Any | ✅ 2.53.0 | both agents |
 | GitHub CLI (`gh`) | Any | ✅ 2.103.3 | both agents |
-| RTK | Any | ✅ 1.1.0 | both agents (OpenCode plugin + Claude hook) |
+| RTK | Any | ✅ 1.2.0 | both agents (OpenCode plugin + Claude hook) |
 | ripgrep | Any | ✅ 15.2.0 | both agents |
 | CrewAI | >= 1.15 | ✅ 1.15.39 | both agents |
 | OpenCode | Any | ✅ v2.2.6 | — |

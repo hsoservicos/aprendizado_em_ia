@@ -1,8 +1,8 @@
 # BMAD Method — Desarrollo Ágil con Inteligencia Artificial
 
-![Versión](https://img.shields.io/badge/version-6.11.0-blue)
-![Skills](https://img.shields.io/badge/skills-57-green)
-![CrewAI](https://img.shields.io/badge/CrewAI-1.15.18-purple)
+![Versión](https://img.shields.io/badge/version-6.12.4-blue)
+![Skills](https://img.shields.io/badge/skills-55-green)
+![CrewAI](https://img.shields.io/badge/CrewAI-1.15.39-purple)
 ![Coolify](https://img.shields.io/badge/Coolify-4.3.14-orange)
 ![Licencia](https://img.shields.io/badge/license-MIT-yellow)
 
@@ -15,8 +15,8 @@
 BMAD Method (Breakthrough Method for Agile Development) es un framework de desarrollo impulsado por IA que integra agentes especializados y skills en su flujo de trabajo. Este proyecto proporciona un ambiente completo para desarrollo ágil con asistentes de IA, con soporte de **deploy mediante Coolify** para infraestructura PaaS self-hosted.
 
 **Características Principales:**
-- 57 skills especializadas para diferentes tareas de desarrollo
-- 4 agentes específicos por tecnología (Docker, Python 3.14, PHP 8.4, PostgreSQL 18)
+- 55 skills especializadas para diferentes tareas de desarrollo
+- 2 agentes específicos por tecnología (Angular 21, Java 21)
 - Integración con IDEs OpenCode y Claude Code
 - Scripts automatizados de validación y renderización
 - Compresión de tokens mediante RTK
@@ -124,7 +124,7 @@ Cada skill, comando y herramienta funciona igual en ambos.
 | Aspecto | OpenCode | Claude Code |
 |---------|----------|-------------|
 | Instrucciones | `AGENTS.md` | `CLAUDE.md` (importa `AGENTS.md`) |
-| Skills (57) | `.agents/skills/` + `.opencode/commands/*.md` | `.claude/skills/` (descubrimiento nativo) |
+| Skills (55) | `.agents/skills/` + `.opencode/commands/*.md` | `.claude/skills/` (descubrimiento nativo) |
 | Invocación | `/bmad-help`, `/bmad-build`, … | `/bmad-help`, `/bmad-build`, … |
 | Allow-list de herramientas | `PATH` del shell | `.claude/settings.json` → `permissions.allow` |
 | Compresión de tokens RTK | `~/.config/opencode/plugins/rtk.ts` | hook `PreToolUse` en `.claude/settings.json` (`rtk hook claude`) |
@@ -140,12 +140,12 @@ agentes en una máquina nueva: `rtk init -g --auto-patch --opencode`.
 
 ```
 /home/hsantos/app/
-├── .agents/skills/          # 57 skills BMAD (OpenCode)
+├── .agents/skills/          # 55 skills BMAD (OpenCode)
 ├── .claude/                 # Integración Claude Code
-│   ├── skills/              # 57 skills BMAD (espejo idéntico)
+│   ├── skills/              # 55 skills BMAD (espejo idéntico)
 │   ├── settings.json        # allow-list de herramientas + hook RTK PreToolUse
 │   └── RTK.md               # referencia de comandos RTK para el agente
-├── .opencode/commands/      # 57 wrappers de comando OpenCode
+├── .opencode/commands/      # 55 wrappers de comando OpenCode
 ├── .git/                    # Repositorio Git
 ├── AGENTS.md                # Instrucciones OpenCode
 ├── CLAUDE.md                # Instrucciones Claude Code (importa AGENTS.md)
@@ -183,7 +183,7 @@ agentes en una máquina nueva: `rtk init -g --auto-patch --opencode`.
 
 ---
 
-## Skills BMAD (57 Total)
+## Skills BMAD (55 Total)
 
 ### Skills Core (24)
 
@@ -201,20 +201,16 @@ agentes en una máquina nueva: `rtk init -g --auto-patch --opencode`.
 | `bmad-sprint-planning` | Preparación del sprint |
 | `bmad-code-review` | Review adversarial de código |
 | `bmad-retrospective` | Retrospectiva del épico |
-| `bmad-docker` | Contenedorización Docker |
-| `bmad-python314` | Funcionalidades Python 3.14 |
-| `bmad-php84` | Funcionalidades PHP 8.4 |
-| `bmad-postgres18` | Funcionalidades PostgreSQL 18 |
+| `bmad-angular21` | Angular 21: standalone APIs, signals, nuevo control flow |
+| `bmad-java21` | Java 21: virtual threads, pattern matching, records |
 | ... | y más |
 
-### Agentes de Tecnología (4)
+### Agentes de Tecnología (2)
 
 | Agente | Skills | Enfoque |
 |--------|--------|---------|
-| `bmad-agent-docker` | 1 | Contenedorización, Dockerfile, Compose |
-| `bmad-agent-python314` | 1 | Free-threading, t-strings, subinterpreters |
-| `bmad-agent-php84` | 3 | Arch-PHP, CodeRefactor-PHP, WebSec-PHP |
-| `bmad-agent-postgres18` | 5 | DDL, OPT, VEC, CONC, SEC |
+| `bmad-agent-angular21` | 1 | Standalone APIs, signals, nuevo control flow, SSR/hydration |
+| `bmad-agent-java21` | 1 | Virtual threads, pattern matching, sequenced collections, records |
 
 ---
 
@@ -237,7 +233,7 @@ BMAD Method.** No es una herramienta opcional aparte — es la **capa de
 orquestación multi-agente** sobre las skills de BMAD:
 
 - Instalado como CLI gestionada (`uv tool install crewai` → `~/.local/bin/crewai`,
-  v1.15.18) y registrado en `_bmad-output/tools-registry.md`.
+  v1.15.39) y registrado en `_bmad-output/tools-registry.md`.
 - Accesible desde **ambos** agentes de codificación (OpenCode y Claude Code) —
   `crewai` está en la lista de herramientas pre-aprobadas de `.claude/settings.json`.
 - Conectado a BMAD mediante el **bridge BMAD-CrewAI** (`BMADBridge`), que permite
@@ -245,7 +241,7 @@ orquestación multi-agente** sobre las skills de BMAD:
   automatizado.
 - Diseño, patrones y ejemplos completos: **`_bmad-output/crewai-integration-guide.md`**.
 
-**Cómo encajan los dos:** BMAD aporta el *método* (57 skills, ciclo de vida de 5
+**Cómo encajan los dos:** BMAD aporta el *método* (55 skills, ciclo de vida de 5
 fases, agentes de tecnología); CrewAI aporta la *automatización* (agentes por rol,
 flujos orientados a eventos, human-in-the-loop, checkpointing). Use las skills de
 BMAD de forma interactiva para el trabajo que exige criterio, y encapsule
@@ -264,7 +260,7 @@ CrewAI es un framework Python open-source para orquestar agentes de IA autónomo
 | Fortaleza de BMAD | Fortaleza de CrewAI | Beneficio combinado |
 |-------------------|---------------------|---------------------|
 | Experiencia en workflow de desarrollo | Orquestación multi-agente | Pipelines de desarrollo automatizados |
-| 57 skills especializadas | Colaboración de agentes por rol | Equipos de agentes especializados |
+| 55 skills especializadas | Colaboración de agentes por rol | Equipos de agentes especializados |
 | Agentes específicos por tecnología | Workflows orientados a eventos | Flujos de automatización complejos |
 
 ### Inicio Rápido con CrewAI
@@ -291,7 +287,7 @@ from bmad_crewai_bridge import BMADBridge
 
 bridge = BMADBridge(project_root="/home/hsantos/app")
 skills = bridge.list_skills()
-output = bridge.render_skill("bmad-docker")
+output = bridge.render_skill("bmad-angular21")
 ```
 
 Vea la guía completa en `_bmad-output/crewai-integration-guide.md`.
@@ -453,7 +449,7 @@ detallado y autoritativo (versiones, rutas, historial) es
 | `CLAUDE.md` | Punto de entrada leído por **Claude Code** — importa `AGENTS.md` + notas específicas. |
 | `.claude/settings.json` | Allow-list de herramientas de Claude Code (`uv`, `rtk`, `rg`, `gh`, `crewai`, `npx bmad-method`) + hook RTK `PreToolUse`. |
 | `.claude/RTK.md` | Referencia de comandos RTK para Claude Code. |
-| `.opencode/commands/*.md` | 57 wrappers de comando de OpenCode (`/bmad-*`) que apuntan a `.agents/skills/`. |
+| `.opencode/commands/*.md` | 55 wrappers de comando de OpenCode (`/bmad-*`) que apuntan a `.agents/skills/`. |
 | `_bmad/config.toml` | Config base gestionada por el instalador. **No editar.** |
 | `_bmad/config.user.toml` | Sus respuestas personales de instalación (nombre, idioma, nivel). En gitignore. |
 | `_bmad/custom/config.toml` | Overrides del equipo, commiteado — el lugar para fijar la configuración del proyecto. |
@@ -474,18 +470,18 @@ detallado y autoritativo (versiones, rutas, historial) es
 
 | Herramienta | Versión | Ruta | Propósito | Más información |
 |-------------|---------|------|-----------|----------------|
-| **Node.js** | v24.20.0 | nvm | Runtime JS; ejecuta `npx bmad-method`, OpenCode | `project-replication-guide.md` |
-| **npm** | 12.0.2 | con Node | Gestor de paquetes | — |
-| **Python** | 3.12.3+ | sistema | Scripts BMAD y renderizado de skills (necesita `>=3.12`) | `project-replication-guide.md` |
-| **uv** | 0.12.9 | `~/.local/bin/uv` | Runner Python rápido — `uv run` renderiza skills; `uv tool install` | `tools-registry.md` §1.4 |
-| **Git** | 2.43.0 | sistema | Control de versiones | — |
-| **GitHub CLI (`gh`)** | 2.73.0 | `~/.local/bin/gh` | Ops de repo / PR / release; `gh auth setup-git` para push | `tools-registry.md` §1.7 |
-| **ripgrep (`rg`)** | 14.1.1 | `~/.local/bin/rg` | Búsqueda rápida; dependencia de RTK | `rtk-installation-guide.md` |
-| **RTK** | 0.47.0 | `~/.local/bin/rtk` | Proxy de compresión de tokens — activo en **ambos** agentes (plugin OpenCode + hook `PreToolUse` de Claude). `RTK_DISABLED=1 <cmd>` para salida cruda. | `rtk-installation-guide.md` |
-| **CrewAI** | 1.15.18 | `~/.local/bin/crewai` | Orquestación multi-agente integrada con BMAD vía `BMADBridge` | `crewai-integration-guide.md` |
-| **OpenCode** | 1.18.27 | `~/.opencode/bin/opencode` | Agente de codificación — lee `AGENTS.md`, `.opencode/commands/`, `.agents/skills/` | `AGENTS.md` |
-| **Claude Code** | 2.1.260 | `~/.local/bin/claude` | Agente de codificación — lee `CLAUDE.md`, `.claude/settings.json`, `.claude/skills/` | `CLAUDE.md` |
-| **BMAD Method** | 6.11.0 | `_bmad/` | El framework — 57 skills, ciclo de 5 fases, agentes de tecnología | `AGENTS.md`, `tools-registry.md` §2 |
+| **Node.js** | v24.22.2 | nvm | Runtime JS; ejecuta `npx bmad-method`, OpenCode | `project-replication-guide.md` |
+| **npm** | 12.2.2 | con Node | Gestor de paquetes | — |
+| **Python** | 3.14.4 | sistema | Scripts BMAD y renderizado de skills (necesita `>=3.12`) | `project-replication-guide.md` |
+| **uv** | 0.13.7 | `~/.local/bin/uv` | Runner Python rápido — `uv run` renderiza skills; `uv tool install` | `tools-registry.md` §1.4 |
+| **Git** | 2.53.0 | sistema | Control de versiones | — |
+| **GitHub CLI (`gh`)** | 2.103.3 | `~/.local/bin/gh` | Ops de repo / PR / release; `gh auth setup-git` para push | `tools-registry.md` §1.7 |
+| **ripgrep (`rg`)** | 15.2.0 | `~/.local/bin/rg` | Búsqueda rápida; dependencia de RTK | `rtk-installation-guide.md` |
+| **RTK** | 1.2.0 | `~/.local/bin/rtk` | Proxy de compresión de tokens — activo en **ambos** agentes (plugin OpenCode + hook `PreToolUse` de Claude). `RTK_DISABLED=1 <cmd>` para salida cruda. | `rtk-installation-guide.md` |
+| **CrewAI** | 1.15.39 | `~/.local/bin/crewai` | Orquestación multi-agente integrada con BMAD vía `BMADBridge` | `crewai-integration-guide.md` |
+| **OpenCode** | v2.2.6 | `~/.opencode/bin/opencode` | Agente de codificación — lee `AGENTS.md`, `.opencode/commands/`, `.agents/skills/` | `AGENTS.md` |
+| **Claude Code** | 2.1.319 | `~/.local/bin/claude` | Agente de codificación — lee `CLAUDE.md`, `.claude/settings.json`, `.claude/skills/` | `CLAUDE.md` |
+| **BMAD Method** | 6.12.4 | `_bmad/` | El framework — 55 skills, ciclo de 5 fases, agentes de tecnología | `AGENTS.md`, `tools-registry.md` §2 |
 
 ### 9. "Quiero… → lea esto"
 
@@ -559,21 +555,13 @@ Para nuevos proyectos, siga el **ciclo de vida de 5 fases** documentado en la gu
 ### Usar Agentes de Tecnología
 
 ```
-# Tareas Docker
-/bmad-docker
-/bmad-agent-docker
+# Tareas Angular 21
+/bmad-angular21
+/bmad-agent-angular21
 
-# Tareas Python 3.14
-/bmad-python314
-/bmad-agent-python314
-
-# Tareas PHP 8.4
-/bmad-php84
-/bmad-agent-php84
-
-# Tareas PostgreSQL 18
-/bmad-postgres18
-/bmad-agent-postgres18
+# Tareas Java 21
+/bmad-java21
+/bmad-agent-java21
 ```
 
 ### Renderizar una Skill
@@ -582,12 +570,12 @@ Para nuevos proyectos, siga el **ciclo de vida de 5 fases** documentado en la gu
 # Claude Code
 uv run _bmad/scripts/render_skill.py \
   --project-root /home/hsantos/app \
-  --skill .claude/skills/bmad-docker
+  --skill .claude/skills/bmad-angular21
 
 # OpenCode
 uv run _bmad/scripts/render_skill.py \
   --project-root /home/hsantos/app \
-  --skill .agents/skills/bmad-docker
+  --skill .agents/skills/bmad-angular21
 ```
 
 ---
@@ -636,11 +624,11 @@ npm update -g opencode @anthropic-ai/claude-code
   [Índice de Materiales y Herramientas](#materiales-y-herramientas-del-proyecto-índice)
 - **Issues**: Abra una issue en el repositorio del proyecto
 - **BMAD Method**: https://github.com/bmadmethod/bmad-method — el framework
-  (57 skills, ciclo de vida de 5 fases, agentes de tecnología); instalado en
+  (55 skills, ciclo de vida de 5 fases, agentes de tecnología); instalado en
   `_bmad/`, actualizado con `npx bmad-method install`
 - **CrewAI**: https://github.com/crewAIInc/crewAI · docs https://docs.crewai.com
   — la capa de orquestación multi-agente **integrada con BMAD** en este proyecto
-  (v1.15.18 en `~/.local/bin/crewai`, conectada vía `BMADBridge`); vea
+  (v1.15.39 en `~/.local/bin/crewai`, conectada vía `BMADBridge`); vea
   [`_bmad-output/crewai-integration-guide.md`](_bmad-output/crewai-integration-guide.md)
 
 ---
