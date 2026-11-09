@@ -1,8 +1,8 @@
 # Tools Registry — Inventário de Ferramentas do Projeto
 
-**Last Updated**: 2026-10-12T00:00:00Z
+**Last Updated**: 2026-11-09T00:00:00Z
 **Maintainer**: Hsantos
-**Version**: 1.6.0
+**Version**: 1.7.0
 
 ---
 
@@ -19,7 +19,7 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | Property | Value |
 |----------|-------|
 | **Name** | Node.js |
-| **Version** | v24.21.0 |
+| **Version** | v24.22.2 |
 | **Path** | System PATH |
 | **Purpose** | JavaScript runtime, package management, BMAD installer |
 | **Installed** | Pre-existing |
@@ -30,7 +30,7 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | Property | Value |
 |----------|-------|
 | **Name** | npm |
-| **Version** | 12.2.0 |
+| **Version** | 12.2.2 |
 | **Path** | System PATH |
 | **Purpose** | Package management, script execution |
 | **Installed** | With Node.js |
@@ -52,7 +52,7 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | Property | Value |
 |----------|-------|
 | **Name** | uv |
-| **Version** | 0.12.23 |
+| **Version** | 0.13.7 |
 | **Path** | `~/.local/bin/uv` |
 | **Purpose** | Fast Python package installation, script execution |
 | **Installed** | Manual |
@@ -75,7 +75,7 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | Property | Value |
 |----------|-------|
 | **Name** | CrewAI |
-| **Version** | 1.15.25 |
+| **Version** | 1.15.39 |
 | **Path** | `~/.local/bin/crewai` |
 | **Purpose** | Multi-agent orchestration framework |
 | **Installed** | 2026-09-03 via `uv tool install crewai` |
@@ -90,7 +90,7 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | Property | Value |
 |----------|-------|
 | **Name** | GitHub CLI |
-| **Version** | 2.102.0 |
+| **Version** | 2.103.3 |
 | **Path** | `~/.local/bin/gh` |
 | **Purpose** | Repository, PR, issue and release operations against GitHub |
 | **Installed** | Manual |
@@ -102,16 +102,17 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 
 | Agent | Version | Path | Config surface | RTK integration |
 |-------|---------|------|----------------|-----------------|
-| **OpenCode** | 1.18.35 | `~/.opencode/bin/opencode` | `AGENTS.md`, `.opencode/commands/`, `.agents/skills/` | `~/.config/opencode/plugins/rtk.ts` |
+| **OpenCode** | v2.2.5 | `~/.opencode/bin/opencode` | `AGENTS.md`, `.opencode/commands/`, `.agents/skills/` | `~/.config/opencode/plugins/rtk.ts` |
 | **Claude Code** | 2.1.289 | `~/.local/bin/claude` | `CLAUDE.md`, `.claude/settings.json`, `.claude/skills/` | `PreToolUse` hook in `.claude/settings.json` (`rtk hook claude`) + `.claude/RTK.md` |
 
 Both agents run the **same 55 skills** and the **same toolchain**. See §3.
 
-> **Atualizado em 2026-10-05** (sessão de transferência de conhecimento):
-> toolchain validado — Node **v24.21.0** · npm **12.2.0** · uv **0.12.23** ·
-> CrewAI **1.15.23** · gh **2.102.0** · RTK **0.51.0** · OpenCode **1.18.34** ·
-> Claude Code **2.1.289** · ripgrep 15.2.0 · Git 2.43.0.
-> Instância Coolify **4.3.23** · Traefik **v3.7**.
+> **Atualizado em 2026-11-09** (sessão de verificação de atualizações):
+> toolchain validado — Node **v24.22.2** · npm **12.2.2** · uv **0.13.7** ·
+> CrewAI **1.15.39** · gh **2.103.3** · RTK **1.1.0** · OpenCode **v2.2.5** ·
+> Claude Code **2.1.289** · ripgrep 15.2.0 · Git 2.53.0 · Python 3.14.4.
+> BMAD **6.12.4** · Impeccable **4.8.1** (engine v0.1.19) ·
+> Superpowers **7.0.x** · REA **6.8.0** (skill v49 · 229 tools).
 
 
 ---
@@ -123,10 +124,10 @@ Both agents run the **same 55 skills** and the **same toolchain**. See §3.
 | Property | Value |
 |----------|-------|
 | **Name** | BMAD Method |
-| **Version** | 6.12.1 |
+| **Version** | 6.12.4 |
 | **Install Date** | 2026-09-02T13:16:32.974Z |
-| **Last Update** | 2026-10-07 (`--action quick-update`) |
-| **Modules** | `core` (6.12.1), `bmm` (6.12.1) |
+| **Last Update** | 2026-11-09 (`--action quick-update`) |
+| **Modules** | `core` (6.12.4), `bmm` (6.12.4) |
 | **IDEs** | opencode, claude-code |
 | **Config** | `_bmad/config.toml`, `_bmad/config.user.toml` |
 | **Manifest** | `_bmad/_config/manifest.yaml` |
@@ -235,7 +236,7 @@ custom skills — see §8).
 | Property | Value |
 |----------|-------|
 | **Name** | Impeccable (Paul Bakaus) |
-| **Version** | CLI 4.1.0 · engine v0.1.11 · skill 11.8K |
+| **Version** | CLI 4.8.1 · engine v0.1.19 · skill 11.8K |
 | **License** | Apache-2.0 |
 | **Site / Repo** | <https://impeccable.style> · `pbakaus/impeccable` |
 | **Install Date** | 2026-10-07 (`npx impeccable install -y --providers=claude,opencode --scope=project`) |
@@ -276,7 +277,7 @@ restore the 4 custom skills from git and re-mirror
 | Property | Value |
 |----------|-------|
 | **Name** | Superpowers (obra / Prime Radiant) |
-| **Version** | plugin 6.4.1 (Claude marketplace) / 6.4.2 (git HEAD) |
+| **Version** | plugin 7.0.0 (Claude marketplace) / 7.0.2 (OpenCode git HEAD) |
 | **License** | MIT |
 | **Repo** | <https://github.com/obra/superpowers> |
 | **Install Date** | 2026-10-07 |
@@ -331,7 +332,7 @@ lives outside the skill trees) — but confirm with `claude plugin list` and
 | Property | Value |
 |----------|-------|
 | **Name** | REA (Reverse Engineer Anything) |
-| **Version** | `rea-agents` 6.4.0 (npm) · skill v37 · 170 tools |
+| **Version** | `rea-agents` 6.8.0 (npm) · skill v49 · 229 tools |
 | **License** | MIT |
 | **Repo / Site** | <https://github.com/morluto/rea> · <https://rea.tools> |
 | **Install Date** | 2026-10-12 (`npx rea-agents@latest setup --client opencode --client claude_code --yes`) |
@@ -342,8 +343,8 @@ lives outside the skill trees) — but confirm with `claude plugin list` and
 
 | Component | Location |
 |-----------|----------|
-| MCP registration (OpenCode) | `~/.config/opencode/opencode.jsonc` → `mcp.rea` (`npx -y rea-agents@6.4.0 mcp`) |
-| MCP registration (Claude Code) | `~/.claude.json` → `mcpServers.rea` (mesmo comando, pinado em 6.4.0) |
+| MCP registration (OpenCode) | `~/.config/opencode/opencode.jsonc` → `mcp.rea` (`npx -y rea-agents@6.8.0 mcp`) |
+| MCP registration (Claude Code) | `~/.claude.json` → `mcpServers.rea` (mesmo comando, pinado em 6.8.0) |
 | Skill (shared / OpenCode) | `~/.agents/skills/reverse-engineer-anything/` |
 | Skill (Claude Code) | `~/.claude/skills/reverse-engineer-anything/` |
 | Backups | `*.rea.backup` ao lado de cada config alterada |
@@ -390,7 +391,7 @@ re-executar o setup e reiniciar os agentes.
 | Property | Value |
 |----------|-------|
 | **Name** | RTK |
-| **Version** | 0.51.0 |
+| **Version** | 1.1.0 |
 | **Path** | `~/.local/bin/rtk` |
 | **Purpose** | CLI proxy for token compression (60-90% savings) |
 | **Platform** | Ubuntu 24.04.4 LTS (x86_64) |
@@ -442,6 +443,7 @@ One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --open
 | File | Size | Description |
 |------|------|-------------|
 | `getting-started.md` | ~9K | First steps / onboarding — pre-flight + Track A (greenfield) & Track B (legacy modernization) |
+| `opencode-v1-v2-migration.md` | ~14K | Guia de continuidade da migração OpenCode v1→v2 (skills/comandos/config em ambas as versões) |
 | `implementation-playbook.md` | ~30K | Detailed, jargon-free step-by-step for a new OR legacy project (Parts A & B) — concepts, commands, Definition of Done, FAQ; for any skill level |
 | `bmad-project-lifecycle-guide.md` | ~20K | 5-phase lifecycle, step by step |
 | `project-replication-guide.md` | ~16K | Environment replication for a new machine (v1.1.0) |
@@ -571,6 +573,13 @@ One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --open
 | 2026-10-07 | Registry v1.5.0 | Seção 3.4 Superpowers + toolchain completa | OpenCode |
 | 2026-10-12 | REA (`rea-agents` 6.4.0) | Instalado via `npx rea-agents@latest setup --client opencode --client claude_code --yes` — MCP registrado em `~/.config/opencode/opencode.jsonc` e `~/.claude.json`; skill v37 (170 tools) em `~/.agents/skills/` + `~/.claude/skills/` | OpenCode |
 | 2026-10-12 | Registry v1.6.0 | Seção 3.5 REA | OpenCode |
+| 2026-11-09 | BMAD Method v6.12.4 | `--action quick-update` (core+bmm 6.12.1→6.12.4); skills customizadas preservadas pelo instalador (6 arquivos) | OpenCode |
+| 2026-11-09 | Impeccable CLI 4.8.1 + engine v0.1.19 | `npx impeccable install -y --providers=claude,opencode --scope=project --force`; re-espelhado para `.agents/skills/` | OpenCode |
+| 2026-11-09 | REA `rea-agents` 6.8.0 | `npx rea-agents@latest setup --client opencode --client claude_code --yes`; registros MCP atualizados de @6.4.0 → @6.8.0; skill v37→v49 (170→229 tools) | OpenCode |
+| 2026-11-09 | Node.js v24.22.2 | Patch dentro da v24 via nvm (requisito do REA 6.8.0: ≥ 24.22.1); default alias 24 | OpenCode |
+| 2026-11-09 | Superpowers v7 | Claude `claude plugin update` 6.4.1→7.0.0 (marketplace); OpenCode já em v7.0.2 (git HEAD 22f0b46) | OpenCode |
+| 2026-11-09 | uv 0.13.7 / CrewAI 1.15.39 / npm 12.2.2 / gh 2.103.3 | `uv self update`; `uv tool upgrade crewai`; `npm i -g npm@latest`; download do binário do release do gh | OpenCode |
+| 2026-11-09 | Registry v1.7.0 | Versões auditadas + atualizadas (toolchain + frameworks) | OpenCode |
 
 ---
 
@@ -686,16 +695,16 @@ crewai run
 
 | Tool | Required Version | Status | Available to |
 |------|-----------------|--------|--------------|
-| Node.js | >= 22 | ✅ v24.21.0 | both agents |
+| Node.js | >= 22 | ✅ v24.22.2 | both agents |
 | Python | >= 3.12 | ✅ 3.14.4 | both agents |
-| uv | >= 0.12 | ✅ 0.12.23 | both agents |
+| uv | >= 0.12 | ✅ 0.13.7 | both agents |
 | Git | Any | ✅ 2.53.0 | both agents |
-| GitHub CLI (`gh`) | Any | ✅ 2.102.0 | both agents |
-| RTK | Any | ✅ 0.51.0 | both agents (OpenCode plugin + Claude hook) |
+| GitHub CLI (`gh`) | Any | ✅ 2.103.3 | both agents |
+| RTK | Any | ✅ 1.1.0 | both agents (OpenCode plugin + Claude hook) |
 | ripgrep | Any | ✅ 15.2.0 | both agents |
-| CrewAI | >= 1.15 | ✅ 1.15.25 | both agents |
-| OpenCode | Any | ✅ 1.18.35 | — |
+| CrewAI | >= 1.15 | ✅ 1.15.39 | both agents |
+| OpenCode | Any | ✅ v2.2.5 | — |
 | Claude Code | Any | ✅ 2.1.289 | — |
-| Impeccable CLI | >= 4.1 | ✅ 4.1.0 (engine v0.1.11) | both agents + CI |
-| Superpowers | >= 6.4 | ✅ 6.4.1 (Claude) / 6.4.2 (OpenCode) | both agents |
-| REA (`rea-agents`) | >= 6.4 | ✅ 6.4.0 (skill v37) | both agents (MCP) |
+| Impeccable CLI | >= 4.1 | ✅ 4.8.1 (engine v0.1.19) | both agents + CI |
+| Superpowers | >= 7.0 | ✅ 7.0.0 (Claude) / 7.0.2 (OpenCode) | both agents |
+| REA (`rea-agents`) | >= 6.8 | ✅ 6.8.0 (skill v49) | both agents (MCP) |

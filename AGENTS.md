@@ -216,13 +216,13 @@ subagent-driven development, branch finishing).
 
 - **Site / repo**: <https://github.com/obra/superpowers> · docs
   `docs/README.opencode.md`
-- **Version**: plugin 6.4.1 (Claude Code marketplace) · 6.4.2 (git HEAD) · MIT
+- **Version**: plugin 7.0.0 (Claude Code marketplace) · 7.0.2 (OpenCode git HEAD) · MIT
 - **Installs** (both must exist for the two agents to share behaviour):
   - **OpenCode** — project plugin: `.opencode/opencode.json` →
     `superpowers@git+https://github.com/obra/superpowers.git`
   - **Claude Code** — user plugin: `superpowers@claude-plugins-official`
     (registry `~/.claude/plugins/installed_plugins.json`, cache
-    `~/.claude/plugins/cache/claude-plugins-official/superpowers/6.4.1/`)
+    `~/.claude/plugins/cache/claude-plugins-official/superpowers/7.0.0/`)
 - **Bootstrap**: `hooks/session-start` injects
   `skills/using-superpowers/SKILL.md` wrapped in `<EXTREMELY_IMPORTANT>` on
   `SessionStart` (matcher `startup|clear|compact` — re-injects after compaction).
@@ -317,9 +317,9 @@ use the harness-native plugin mechanism and load the bootstrap via
 
 ## REA — MCP de engenharia reversa
 
-Instalado em 2026-10-12 (`npx rea-agents@latest setup --client opencode
---client claude_code`). MCP server + skill `reverse-engineer-anything`
-(170 tools) para inspecionar binários nativos, apps JS/Electron, .NET,
+Instalado em 2026-10-12, atualizado em 2026-11-09 para v6.8.0 (`npx rea-agents@latest
+setup --client opencode --client claude_code`). MCP server + skill `reverse-engineer-anything`
+(229 tools) para inspecionar binários nativos, apps JS/Electron, .NET,
 APK/Android, websites, capturas de rede, SQLite, WASM/EVM e mais — análise
 local, resultados com evidências. Registro em `_bmad-output/tools-registry.md`
 (§3.5). As skills ficam em `~/.agents/skills/` e `~/.claude/skills/` (home) —
@@ -343,7 +343,7 @@ MCP só é carregada após **reiniciar** o agente.
 
 ## Prerequisites
 
-- **Node.js** >= 22 (LTS) — currently v24.21
+- **Node.js** >= 22 (LTS) — currently v24.22.2
 - **Python** >= 3.12 — currently 3.14.4
 - **uv** — required for rendering skills; install at `~/.local/bin/uv`
 - **Git** — required for updates and external modules
@@ -360,7 +360,7 @@ MCP só é carregada após **reiniciar** o agente.
 - **Superpowers** — SDLC methodology + 15 composable skills (obra/Prime Radiant,
   MIT); Claude Code plugin `superpowers@claude-plugins-official` + OpenCode
   plugin in `.opencode/opencode.json`. See the dedicated section below.
-- **REA** — MCP de engenharia reversa (`rea-agents` 6.4.0) + skill
+- **REA** — MCP de engenharia reversa (`rea-agents` 6.8.0) + skill
   `reverse-engineer-anything`; registrado em ambos os agentes via
   `npx rea-agents@latest setup`. **Análise nativa exige um provider
   (Hopper, Ghidra ou IDA) configurado** — ver seção dedicada acima.

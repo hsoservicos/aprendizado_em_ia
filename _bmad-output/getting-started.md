@@ -365,6 +365,7 @@ Trilha B — Projeto legado
 | Documento | Localização | Para quê |
 |-----------|-------------|----------|
 | **Este guia** | `_bmad-output/getting-started.md` | Primeiros passos (você está aqui) |
+| **Migração OpenCode v1→v2** | `_bmad-output/opencode-v1-v2-migration.md` | Continuidade entre terminais v1 e v2 |
 | **Questionário de Inicialização** | `_bmad-output/scripts/project-init-questionnaire.py` | Configurar novo projeto a partir do template |
 | **Manual de Implementação** | `_bmad-output/implementation-playbook.md` | Passo a passo detalhado e sem jargão — Parte A (novo) e Parte B (legado) |
 | Guia de Replicação | `_bmad-output/project-replication-guide.md` | Preparar a máquina em detalhe |
