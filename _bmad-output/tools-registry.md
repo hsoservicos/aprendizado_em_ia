@@ -710,3 +710,21 @@ crewai run
 | Impeccable CLI | >= 4.1 | ✅ 4.8.1 (engine v0.1.19) | both agents + CI |
 | Superpowers | >= 7.0 | ✅ 7.0.0 (Claude) / 7.0.2 (OpenCode) | both agents |
 | REA (`rea-agents`) | >= 6.8 | ✅ 6.8.0 (skill v49) | both agents (MCP) |
+
+---
+
+## 11. Atualizações adiadas (pendências para o futuro)
+
+**Registrado em 2026-11-09** — as versões atuais são adequadas para uso geral. As
+atualizações abaixo foram **intencionalmente adiadas** para evitar quebra de
+processos, implementações e builds em produção. Reavaliar em um ciclo futuro
+dedicado, com validação de REA e CrewAI antes do Node 26.
+
+| Ferramenta | Atual | Alvo futuro | Motivo do adiamento | Validação necessária |
+|---|---|---|---|---|
+| Node.js | v24.22.2 | LTS v26.13.0 (Lithium) | Salto major de linha LTS; risco de quebra de runtime/builds | Validar REA (≥ 24.22.1) + CrewAI + scripts |
+| Python | 3.14.4 | 3.14.10 (patch) / 3.15.2 / 3.16.0 | Mudança de minor/major; scripts BMAD (`render_skill.py`, validators) precisam de teste | Rodar validators + render de skills (smoke test) |
+| Git | 2.53.0 | 2.56.0 | Baixo risco (minor), sem necessidade imediata | Nenhum (quando conveniente) |
+
+> **Regra:** não aplicar durante ciclos ativos de desenvolvimento. Agendar como
+> tarefa isolada de manutenção quando não houver trabalho em andamento.
