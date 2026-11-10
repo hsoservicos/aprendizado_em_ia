@@ -5,3 +5,9 @@
 #
 # [agents.bmad-agent-pm]
 # description = "Prefers short, bulleted PRDs over narrative drafts."
+
+# Idioma do projeto (AGENTS.md: comunicação e artefatos em Português do Brasil).
+# Override de equipe: _bmad/config.toml é regenerado pelo instalador e fica em English.
+[core]
+communication_language = "Português do Brasil"
+document_output_language = "Português do Brasil"
