@@ -663,6 +663,8 @@ One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --open
 | 2026-11-10 | Impeccable CLI 4.8.2 + engine v0.1.21 | `npx impeccable install -y --providers=claude,opencode --scope=project --force` (skill 4.8.1 → 4.8.2); re-espelhado para `.agents/skills/` | Claude Code |
 | 2026-11-10 | Auditoria de versões | BMAD 6.12.4 = última no npm · uv 0.13.7 = última release · RTK 1.2.0 = última · rea-agents 6.8.0 = última · apt sem candidatos novos para `python3`/`git` | Claude Code |
 | 2026-11-10 | Registry v1.9.0 | Seção 3.6 Riaworks Waves; contagens 55 → 66; §8 passo 4; §11 reavaliação | Claude Code |
+| 2026-11-10 | `_bmad-output/scripts/waves-wire-project.sh` | Script reutilizável: `waves init` + espelho `.agents/skills` + wrappers OpenCode + `bmad-help.csv` + `_bmad/render` fora do git — aplicado em hsoservicos, infoservice, megasena, sound-music-app e aprendizado_em_ia | Claude Code |
+| 2026-11-10 | Outros projetos desta máquina | hsoservicos: BMAD 6.12.0→6.12.4 + Impeccable 4.8.2 + Waves + Superpowers(OpenCode) · infoservice: Impeccable 4.8.2 + Waves · megasena: Waves · sound-music-app: Impeccable 4.8.2 + Waves + Superpowers(OpenCode) · aprendizado_em_ia (clone deste repo): pull + install.sh do vendor. **Não tocados (árvore suja / BMAD antigo):** markdown-studio-live (6.11.0, 146 arquivos), servicetec (6.12.1, 15 arquivos) | Claude Code |
 | 2026-11-10 | **PENDENTE** `tmux` 3.6a + `libnotify-bin` | `sudo apt install -y tmux libnotify-bin` — aguarda aprovação do usuário (regra de sudo do `~/.claude/CLAUDE.md`) | — |
 
 ---
@@ -729,6 +731,7 @@ re-create it from `_bmad/custom/` or restore from a backup before continuing.
 | `_bmad-output/scripts/install-linux.sh` | Ubuntu/Debian | Automated installation for Linux |
 | `_bmad-output/scripts/install-windows.ps1` | Windows 10/11 | Automated installation for Windows |
 | `_bmad-output/scripts/README.md` | All | Documentation for scripts |
+| `_bmad-output/scripts/waves-wire-project.sh` | Linux/macOS/WSL | `sh waves-wire-project.sh <project>` — integra o Riaworks Waves a um projeto BMAD ≥ 6.12.4 para os dois agentes (init + espelho + wrappers + bmad-help + render fora do git); re-rodar após cada update do BMAD |
 
 ### Usage
 
