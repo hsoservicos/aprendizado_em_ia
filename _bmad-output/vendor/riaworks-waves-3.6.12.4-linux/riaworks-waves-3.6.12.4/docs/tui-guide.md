@@ -1,0 +1,898 @@
+# TUI guide
+
+`waves tui` is a live terminal dashboard for everything the orchestrator
+does: watching runs, launching new ones, resuming paused ones, answering sweep
+decisions, and editing policy. This guide covers every screen, key, and
+message. For the one-page summary, see the [TUI section of the
+README](../README.md#the-tui).
+
+## Installation and launch
+
+```bash
+uv sync --extra tui        # adds textual + tomlkit + pyte + rich; core stays pyyaml-only
+cd /path/to/your/bmad/project
+waves tui              # or: waves tui --project /path/to/project
+```
+
+`--project` defaults to the current directory. The selected terminal-multiplexer
+backend — tmux by default; external backends install separately, see
+[Terminal multiplexer backends](multiplexer-backends.md) — must be on PATH for the
+launch/attach keys (`r` `s` `e` `a`); pure observation works without it. (WSL counts as
+Linux, so tmux works there unchanged; native Windows awaits a Windows-capable backend.)
+`waves mux` shows which backend is selected and why, and the Settings editor's
+`mux.backend` (or the `WAVES_MUX_BACKEND` env var) forces the choice per machine.
+
+**Terminal sizes, as measured.** The modal dialogs — confirmations, the
+start/sweep option forms, the escalation, checkpoint, spec and validate viewers
+— are the tightest thing the TUI draws. The figures below describe those
+**dialogs**, not the dashboard behind them, which simply shows fewer rows as the
+window shrinks. **39 columns × 9 rows** is the size at which a dialog shows its
+title, a row of body and all of its docked buttons, fully visible — every
+dialog included: the spec and validate viewers, the escalation viewer with any
+of its hints, and the resume confirmation with its double-drive warning.
+
+Caller-supplied text cannot move that size. Titles, headers, subtitles and file
+paths are docked _outside_ the scrolling body, and their length comes from the
+caller — a deferred-work ledger heading, a story title, a `spec:` folder, a
+spec path. Each of their lines is held to **one row**, ending in `…` when it is
+too long, so a dialog's height depends on how many lines it docks, never on how
+long they are. Docked warnings and hints are the TUI's own text and are not
+held this way; they are written short enough to fit that size whole. On a
+short terminal the resume confirmation's body scrolls rather than push its
+warning out.
+
+What the `…` cuts is not always shown anywhere else. Some of it is: the spec
+path is cut from the front so it keeps its file name, and `copy path` copies the
+whole path; the deferred-work viewer's scrolling body repeats the full heading,
+and its done and legacy markers sit on lines of their own. At narrow widths,
+though, a long story title, the end of the validate header's lines — including
+its severity tallies and the note that the gates are chained — and the end of a
+long dialog title can be cut with no other copy on screen; widen the terminal
+to read them.
+
+Below **80 columns** the spec viewer's action row — `copy path`, the action
+verbs and `close` — wraps into two columns instead of clipping its right-most
+buttons, and the viewer takes the terminal's full height to fit the second
+row. Below about 43 columns the longest label (`Approve & resume`) may lose
+its tail to `…`; the button stays whole and still works.
+
+Below **60 columns or 20 rows** the dialogs degrade to a compact layout rather
+than clipping: the dialog clamps to the screen width, the action buttons shrink
+and tighten, and vertically the padding, the title margin and the button-row
+margin collapse while the buttons render one row tall instead of three. At 60
+columns and 20 rows and above you get the full chrome, unchanged (#281).
+
+Over a slow or high-latency link (SSH, Tailscale), a 60fps update stream can't
+drain in time and partial frames paint over old ones. Launch with
+`waves tui --low-frame-rate` to cap Textual to 15fps and disable
+animations (sets `TEXTUAL_FPS` / `TEXTUAL_ANIMATIONS`), or make it permanent
+with `[tui] low_frame_rate = true` in `policy.toml` (editable from the settings
+screen). An explicit `TEXTUAL_FPS` in the environment still wins.
+
+## Architecture: observer/launcher, never the engine
+
+The TUI never runs an engine in-process. The two halves:
+
+- **Launcher** — `r`, `s`, and `e` spawn detached `waves` processes as
+  windows of a dedicated tmux session, `waves-ctl` (on psmux the name
+  carries a per-project registry suffix — the launch toast names the exact
+  session; see [multiplexer backends](multiplexer-backends.md)). Windows are named
+  `run-<run-id>`, `sweep-<run-id>`, or `resume-<run-id>`, run the same Python
+  interpreter as the TUI (`python -m riaworks_waves_loop.cli`, immune to PATH/venv drift
+  inside tmux), and stay open after exit showing
+  `[waves exited <code> — press enter]` so you can inspect failures.
+  Quitting or crashing the TUI does not touch them. The engine each run drives
+  lives in a separate `waves-<run-id>` session; it is torn down when the run
+  finishes (unless `[adapter] cleanup_session_on_finish = false`). These parked
+  `waves-ctl` windows and any leftover `waves-<id>` sessions can be
+  swept with `c` (see [Cleaning up sessions](#cleaning-up-sessions-c)). Each
+  launch over an existing run records the id of the window it minted in the
+  run dir (`ctl-window`), so attach/stop follow the run's live window even
+  while an older same-run-id window is still parked (#482).
+- **Observer** — the dashboard reads only the artifacts the engine writes
+  atomically into `.waves/loop/runs/<run-id>/`: `state.json`, `journal.jsonl`,
+  `logs/<task-id>.log`, `ATTENTION`, `engine.pid`. It polls the selected run
+  every second (run list, sprint status, and the deferred-work ledger every 3
+  seconds) with stat-gated readers, so unchanged files are never re-parsed.
+  Runs started from a plain shell show up identically — the TUI has no
+  privileged channel.
+
+Fast read-only commands (`validate`, dry runs) are the exception: they are
+captured and shown in a scrollable modal instead of spawned in tmux.
+
+## Dashboard layout
+
+```text
+┌─ waves — /path/to/project ─────────────────────────────────────────┐
+│ st run              type │ 20260611-091500-3f2a  ▶ running             │
+│ ✔  20260610-…       story│ started 2026-06-11T09:15:00  epic 2         │
+│ ▶  20260611-…       story│ tasks 8  done 5  deferred 1  escalated 0    │
+├──────────────────────────┤─────────────────────────────────────────────┤
+│ ▼ Epic 1 · 4/4 ✓         │ story         phase           dev review …  │
+│ ▼ Epic 2 · 1/3           │ 2-3-billing   review-running  ×1  ×2     …  │
+│   ✓ 1-auth               ├─────────────────────────────────────────────┤
+│   ▶ 2-search             │ Journal │ Log │ Attention                   │
+├──────────────────────────┤ 09:15:02 session-start   task_id=…          │
+│ DW-1 Fix flaky retry     │                                             │
+│ DW-2 ✓ Polish help text  │                                             │
+├──────────────────────────┴─────────────────────────────────────────────┤
+│ q quit  r run  s sweep  e resume  a attach  v validate  g settings  …  │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+…and the same layout, live:
+
+<div align="center">
+<img src="images/dashboard.png" alt="The waves TUI dashboard, fully populated." width="880">
+</div>
+
+### Left column
+
+Three stacked panes; `tab` / `shift+tab` move focus between them, and their
+heights (like the sidebar width) are resizable — see [Resizing
+panes](#resizing-panes). The sprint and deferred panes read project-level files
+written outside the TUI — `sprint-status.yaml`, which the orchestrator writes
+while a run is in flight and your own BMAD skill runs generate and edit outside
+one, and `deferred-work.md` — so both parse forgivingly: a missing or malformed
+file shows a dim placeholder instead of an error, and the pane recovers on the
+next poll once the file is readable again.
+
+#### Run list (top)
+
+One row per run dir under `.waves/loop/runs/`, oldest first (run ids are
+`YYYYMMDD-HHMMSS-<hex>` and sort chronologically). Columns: `st` (status
+glyph, see below), `run` (the id), `type` (`story` or `sweep`), `note` (a
+colored pause-kind badge on a paused run — `plan` / `story` / `spec` / `epic` /
+`gate` / `esc`, or `⏹ stop` when a running run has a stop request pending).
+When any run is paused awaiting a human the pane's title shows
+a global **`⚑ N need attention`** count. On first load the newest run is
+auto-selected; arrow keys or mouse select another. A run you just launched is
+selected immediately, before its directory even exists.
+A deterministic `--plan` run with `max_parallel > 1` launches one child run per front of
+the current wave; the children appear here as ordinary runs while they work and finish
+with their units held, and the master run (the one you launched) is where the merges,
+the wave line and the merge queue show.
+
+#### Sprint tree (middle)
+
+Sprint status from `sprint-status.yaml` as one expandable node per epic —
+`Epic N · done/total`, fully green with a `✓` once every story is done.
+Enter (or click) expands an epic to its stories and retrospective, each with
+a status glyph:
+
+| Glyph | Status                     | Color   |
+| ----- | -------------------------- | ------- |
+| `✓`   | done                       | green   |
+| `▶`   | in-progress                | cyan    |
+| `◆`   | review                     | magenta |
+| `○`   | ready-for-dev              | cyan    |
+| `·`   | backlog / optional (retro) | dim     |
+| `?`   | anything unrecognized      | dim     |
+
+A story the selected run has run the TEA acceptance scaffold on carries a dim
+` ·atdd✓` suffix (`…` while `bmad-testarch-atdd` is still running, `✗` when it
+did not complete) — the same status the tasks table's `atdd` column shows, read
+from the run's `workflow-start`/`workflow-end` pair. Under an epic's stories,
+before its retrospective, one `boundary: <step>` row per epic-boundary workflow
+the loaded plugins provide — with the bundled TEA plugin on (the default), the
+Test Architect's `epic_td`, `epic_trace`, `epic_nfr`, `epic_test_review` and
+`epic_retro_prep` — each painted from the run's `boundary_progress`: `‣` pending,
+`▶` running, `✓` done, `✗` failed. In a project without TEA installed the plugin
+is inert and lists no rows; `waves validate` says why.
+
+Expansion state and the cursor survive the 3-second refresh — only labels are
+updated in place unless an epic's story set actually changes.
+
+#### Stories board (middle, stories mode)
+
+When the selected run is in **stories mode** (`source = "stories"`), the sprint
+tree is replaced in place by a flat **stories board** read from that run's
+`stories.yaml` + the id-keyed story specs on disk. One row per story: a state
+glyph + label, the story `id`, a two-slot checkpoint cell (`S` = `spec_checkpoint`,
+`D` = `done_checkpoint`, dim `·` for an unset slot), and the title. The state
+column reflects live disk state:
+
+| Glyph | State                                    | Color    |
+| ----- | ---------------------------------------- | -------- |
+| `✓`   | done                                     | green    |
+| `▶`   | in-progress                              | cyan     |
+| `◆`   | in-review                                | magenta  |
+| `○`   | ready-for-dev                            | cyan     |
+| `◦`   | draft                                    | dim      |
+| `·`   | pending (no spec on disk yet)            | dim      |
+| `✖`   | blocked                                  | bold red |
+| `⚠`   | ambiguous / sentinel (`sentinel:<kind>`) | bold red |
+
+Selecting a sprint-mode run swaps the sprint tree back. The board re-derives
+each poll so it tracks the dev sessions writing story specs.
+
+#### Deferred work (bottom)
+
+Every entry from the `deferred-work.md` ledger, in file order: `DW-<n>` plus
+the title, truncated to the pane width. Done entries are green with a `✓`;
+open entries are color-coded by the entry's optional `severity:` field —
+critical (bold red), high (red), medium (yellow), low (dim), unspecified
+(plain). Arrow keys navigate; `enter` opens the full entry body in a
+scrollable modal (`escape` closes).
+
+### Run header (top right)
+
+A one-glance summary of the selected run: id, `[sweep]` tag for sweep runs,
+status glyph + word, start timestamp, current epic, and a counts line —
+`tasks N · done (green) · deferred (yellow) · escalated (red when nonzero) ·
+tokens`, where the token figure reads `<weighted> tokens (<raw> raw)` — the
+cost-weighted total first (cache reads at `limits.cache_read_weight`), the
+unweighted one in parentheses. A `--plan` run adds a **plan line** — `plan <scope> ·
+wave n/total · in flight k · merged k · waiting k` (waiting = done but not landed: its front
+merges after another, or it needs a slot) — and, while the current wave has stories in
+flight, a `merge queue:` line in the grid's merge order, `✓` on a story ready to land, `…`
+on one still working. Below the counts, an **agent line** names who is
+driving: while a session is open it reads `agent <name> · <model> · <role>` (the
+resolved adapter for the live stage — `model` omitted when the session ran the
+CLI profile's default, `role` is the stage `dev` / `review` / `triage`), with a
+yellow `· idle <age>` appended while the session's transcript has sat still past
+`limits.dev_stall_grace_s` (#680 — derived from the journal's open
+`session-idle`, cleared by its `session-active`; `<age>` is whole minutes, or
+`1h05m` above an hour); when no
+session is open it falls back to the run's configured adapters, rebuilt from the
+run's policy snapshot — `agents <name·model>` when dev and review resolve alike,
+else `agents dev <name·model> review <name·model>`, plus a `triage <name·model>`
+on sweep runs. A run that predates adapter stamping (no rebuildable snapshot)
+shows no agent line at all rather than a fabricated default. An open session whose
+identity cannot be derived from a malformed journal entry reads a yellow
+`agent unreadable — <fault>` rather than no line, which would look like no session
+at all (DW-474). Below that, situational banners:
+
+- `⏸ paused (<stage>) — <reason> · press e to resume` — gate or escalation
+  pause; stages are `spec-approval`, `epic-boundary`, `escalation`,
+  `story-gate`. At the `escalation` stage, `e` only skips the escalated story —
+  press `R` instead to resolve it (see "Resolving an escalation" below).
+- `⏹ graceful stop pending — will stop after the current item` — a graceful
+  stop was requested (`S`, or `waves stop --graceful`); the run finishes the
+  in-flight story/bundle through commit (or, mid-sweep-triage, lets triage
+  complete and starts no bundles), then finalizes and stops (resumable). The
+  underlying read is the control file's presence, not its mode, so the same line
+  shows for as long as a **hard** stop's request sits on disk before the engine
+  honors it — usually seconds, longer if the session is blocked in a transport
+  call — and there the current item does not finish.
+- `✖ engine gone — run was interrupted · press e to resume` — the recorded
+  engine pid is dead.
+- `⚑ decision needed: DW-<n> — <question> / press a to attach and answer` —
+  an attended sweep is blocked on a human decision (see below).
+- `⧗ starting… waiting for the engine to write state.json` — just launched;
+  if nothing appears within 10 seconds the TUI raises a "launch may have
+  failed" error toast.
+- `⚠ state stale — state.json unreadable (<fault>); showing the last good read`
+  (DW-472) — the header keeps the last `state.json` that parsed, and this line says
+  it is no longer current: the file stopped parsing, went away, or cannot be
+  stat'd. It appears only once the same unchanged file has failed on two
+  consecutive polls, so a read torn by a write in progress never flashes it, and it
+  clears on the next good parse. A run whose `state.json` never parsed reads
+  `state unavailable — <fault>`.
+- `⚠ journal.jsonl …` / `⚠ ATTENTION …` (dim, DW-475) — the poll could not stat or
+  read that file this tick; the Journal / Attention tab holds what was read before.
+  The journal tail keeps its position across the fault, so nothing is re-listed or
+  skipped when it clears.
+
+### Task table (middle right)
+
+One row per story (or sweep bundle/triage task) in the selected run:
+
+| Column   | Meaning                                                                                                                                                                                                                                                                                                                                                                |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `wave`   | a `--plan` run's grid position for the story, `w2·B` (wave 2, front B); `-` outside a plan run                                                                                                                                                                                                                                                                         |
+| `story`  | story key, or the sweep task id                                                                                                                                                                                                                                                                                                                                        |
+| `phase`  | `pending` → `dev-running` → `dev-verify` → `review-running` → `review-verify` → `committing` → `done`; terminal alternatives `deferred` / `escalated`; sweep triage shows `triage-running` / `triage-verify`                                                                                                                                                           |
+| `atdd`   | the TEA acceptance scaffold's status for this story — `…` while `bmad-testarch-atdd` runs before dev, `✓` when it completed, `✗` when it did not, `-` when it never ran here (plugin off or inert, or the story predates it). Read from the run's `workflow-start`/`workflow-end` pair, which the engine and `unit workflows` both write, so both loops paint it alike |
+| `agent`  | the adapter driving this story, `<name·model>` (`·model` dropped when it's the profile default). The live agent when it's working this row, else the last session that stamped an identity (#153), else `-` (nothing recorded)                                                                                                                                         |
+| `dev`    | dev attempt counter, `×N`                                                                                                                                                                                                                                                                                                                                              |
+| `review` | review cycle counter, `×N`                                                                                                                                                                                                                                                                                                                                             |
+| `tokens` | cost-weighted token total for the story — cache reads counted at `limits.cache_read_weight` (default 0.1), the same total the budgets judge. `-` until known; a real `0` (possible with the weight set to 0) is shown as `0`, never `-`                                                                                                                                |
+| `info`   | defer reason, or the commit SHA (first 12 chars) once committed                                                                                                                                                                                                                                                                                                        |
+| `raw`    | unweighted token total, cache reads at full price — typically 5–8x the `tokens` column on agentic work                                                                                                                                                                                                                                                                 |
+
+### Tabs (bottom right)
+
+- **Journal** — every engine decision, live-tailed from `journal.jsonl`. Line
+  format: `HH:MM:SS  <kind>  field=value …` (long values truncated with `…`).
+  Kinds are color-coded — see the reference below. Every session lands a
+  `session-end` unconditionally (status `aborted` when the outcome is
+  unknowable, even after a teardown that threw); a timed-out one carries
+  `fired_at`, `teardown_s`, and `expired_clock` (`monotonic` / `wall` / `both` —
+  `wall` alone fingerprints a host suspend that froze the monotonic clock).
+  Entries whose usage was read carry `tokens` (raw) and `tokens_weighted` (cache
+  reads at `limits.cache_read_weight`); both are `null` if the usage read failed
+  and both are absent on an `aborted` end. `tokens_weighted` is the
+  end-of-session total, distinct from a tripped session's `budget_weighted`
+  (the guard's mid-session sample at trip time). The
+  matching `tasks/<id>/` dir holds the forensic breadcrumbs the adapter wrote
+  while the session ran: `session-lifecycle.jsonl` (timeout-fire — its
+  `probe_failures` counts a liveness-probe failure streak open at the deadline and
+  its `foreign_hook_events` the hook events dropped as a nested CLI's —,
+  budget-guard `budget-tripped` / `over-budget-fired`, kill-escalation — both
+  of these carry `liveness_unknown`, true when the verdict's probe raised —,
+  `session-vanished` (the mux no longer reported the session during the run, #489),
+  `foreign-hook-event-ignored` (a nested coding CLI's hook events dropped by session
+  attribution, #767 — written once per foreign id, with `hook_event`,
+  `foreign_session_id`, and `dropped_so_far`, the running count of dropped events;
+  id-less drops, which only a trusted relay-side lineage `mismatch` makes, share
+  one crumb with `foreign_session_id: null`, DW-507),
+  `hook-lineage-untrusted` (once per session when the first `SessionStart` could
+  not calibrate relay-side lineage, so only the #767 rules apply — `reason` is
+  `miscalibrated` or `unavailable`, `lineage` the first start's tag, DW-507),
+  `pinned-session-id-mismatch` (once per session when the first identified
+  non-`clear`/`compact` `SessionStart` of a pinned launch reports an id other than
+  the pin — a rejected `mismatch`-tagged nested start is skipped —
+  `pinned_session_id`, `reported_session_id`, `source`, DW-509),
+  mux transport faults `liveness-probe-failed` / `liveness-probe-recovered` /
+  `nudge-send-failed`, observation faults `parked-probe-failed` /
+  `log-evidence-failed` / `result-json-refused` / `usage-sample-failed` /
+  `usage-sample-recovered` / `transcript-scan-failed` / `transcript-scan-recovered` /
+  `spec-identity-unreadable` / `spec-digest-unreadable` / `spec-readback-failed`,
+  an abandoned post-kill rescue
+  `post-kill-rescue-abandoned` (liveness unknown or an unreadable artifact), and the
+  #276 missing-marker forensics `spec-status-transition-observed` /
+  `frontmatter-unmodified-refused` / `contract-nudge-sent`),
+  `heartbeat.json` (the wait loop's proof-of-life —
+  stale under a live session means the orchestrator itself was frozen; on the
+  generic adapter it also carries `probe_failures`, the running liveness-probe
+  failure streak, `stall_nudges_failed`, `usage_sample_failures`, the running
+  budget usage-sample failure streak, and `foreign_hook_events`, the running count
+  of hook events dropped as a nested CLI's, #767), and
+  `resultless-stops.jsonl` (each give-up Stop with its verdict: `no-result-json` /
+  `malformed-result-json`, `no-artifact`, `stat-failed` / `unreadable-spec` (a spec
+  read fault, with the error),
+  `ambiguous-frontmatter`, `unmodified-since-launch` — the spec's bytes were
+  unchanged since review launch, so it is a prior `done` re-opened, not this
+  session's output (#276) — or `terminal-frontmatter-pending`).
+- **Log** — the active agent session's pane output (`logs/<task-id>.log`),
+  ANSI colors preserved, starting with a dim `— <task-id>.log —` header. The
+  active task is the last `session-start` without a matching `session-end`
+  (falling back to the newest log file); the tab switches automatically when
+  the engine moves to the next session. Only the last 64 KB of a large log is
+  read on first open. If the scan of the skipped head for a fullscreen
+  (alt-screen) switch cannot read the file, a yellow `⚠ could not scan this log's
+head for a fullscreen switch` note says the pane may show only the final frame
+  (DW-475).
+  `n` cycles the pane through **every** session currently
+  open and then back to auto-follow — a run with more than one live session (an
+  LLM-held run always has the orchestrator up beside its worker) is otherwise
+  stuck on whichever started last. Cycling pins, so the header gains
+  `(pinned — esc to follow)` and `escape` releases it.
+- **Attention** — the run's `ATTENTION` file (escalations, gate
+  notifications). New lines after the first poll also fire a warning toast.
+
+### The orchestrator column (LLM-held runs)
+
+A run started with `llm-run` shows an extra full-height column on the right,
+tailing the orchestrator session's own log — the reasoning that explains why a
+story moved. It is the same emulated-terminal view as the Log pane, so what you
+see is the rendered current state rather than raw ANSI history.
+
+It appears only when the run reports `source: llm`; every other run looks
+exactly as it always did. Between turns the column stays put with a
+`— orchestrator — waiting for the next turn —` header rather than blinking out
+on each relaunch. Its width is draggable like every other boundary and persists
+to `[tui] orch_width` in `policy.toml`.
+
+While the column is up, the **Log** tab follows the run's _worker_ and only the
+worker. With no worker session open — a turn that has not dispatched yet, or the
+gap between two dispatches — the pane says
+`— no work session — the orchestrator holds the turn, watch the column →`. It
+does not fall back to anything: falling back to the orchestrator would paint the
+same log in both halves of the screen, and falling back to the newest file in
+`logs/` picks the orchestrator's anyway, since that is the log being written
+during the gap. There is nothing to follow, so it says so and points at where
+the work is.
+
+`n` still cycles the pane onto the orchestrator while a worker is running beside
+it — the exclusion is only on what auto-follow picks by itself. It cannot bring
+back a session that has _ended_: `n` walks the run's **open** sessions, and with
+only the orchestrator up it declines with "only one session is open on this run".
+To reach a finished session's log, select its entry in the **Journal** pane — the
+jump pins that task's log whether or not the session is still alive.
+
+On every other run the tab auto-follows exactly as before, orchestrator-named
+sessions included: the rule is scoped to runs that HAVE the column, because
+without one there is nothing to duplicate.
+
+The run header gains a turn line for these runs: `turn N`, whether one is
+running, the last verdict, and consecutive silent turns against the relaunch
+quota (`limits`-adjacent `[llm] max_turn_relaunches`). That count is the one
+that pauses the run when it reaches the quota.
+
+### Speaking to a session (`i`)
+
+`i` opens a one-line prompt and submits it into the session the **focused** pane
+is showing — the orchestrator when the column has focus, the worker when the Log
+tab does. It runs `waves intervene` under the hood, so it inherits
+the hold that stops the session-timeout clock while you type and the journal
+entry under kind `operator` that keeps the run's record honest about a human
+having driven part of it. Refusals (multi-line text, a dead window) come back in
+the output modal.
+
+Unlike `a` (attach), it does not put you inside the session: one line goes in,
+you stay in the dashboard, and the run records that you spoke.
+
+### Selecting and copying text
+
+The **Log** and **Attention** panes are click-drag selectable: highlight with
+the mouse and press `ctrl+c` to copy the selection, or press `y` to copy the
+whole active pane in one keystroke. The other panes (Runs, Sprint, Deferred
+Work, the task table, Journal) are interactive widgets and are not drag-
+selectable in-app.
+
+To select text in _any_ pane — or when the in-app copy can't reach your system
+clipboard — hold your terminal's bypass modifier while dragging to use the
+terminal's own selection instead of the TUI's: **Shift** on most Linux
+terminals and Windows Terminal, **Option/Alt** on iTerm2/macOS.
+
+`ctrl+c` and `y` copy via OSC 52. Inside tmux that only reaches the system
+clipboard when tmux forwards it — set `set -g set-clipboard on` and use an
+OSC 52-capable outer terminal. The Shift/Option-drag native selection above is
+the reliable fallback when OSC 52 isn't available.
+
+## Status reference
+
+Run status is classified from `state.json` plus a liveness probe:
+
+| Glyph | Status      | Color    | Meaning                                                     |
+| ----- | ----------- | -------- | ----------------------------------------------------------- |
+| `▶`   | running     | green    | not finished, not paused, engine pid alive                  |
+| `⏸`   | paused      | yellow   | engine is waiting at a gate or escalation — `e` resumes     |
+| `✔`   | finished    | dim      | run completed                                               |
+| `✖`   | interrupted | bold red | engine pid is dead but the run never finished — `e` resumes |
+| `?`   | unknown     | dim      | liveness can't be determined, or `state.json` is unreadable |
+
+Liveness is **local-only**: `engine.pid` is checked with `os.kill(pid, 0)`.
+A run driven on another host (shared checkout) always shows `unknown`, never
+falsely `interrupted`. Legacy runs without a pid file fall back to probing the
+per-run tmux session, which can prove `alive` but never `dead`.
+
+Journal kinds are styled by substring, first match wins — except the reader-minted
+marker below, which is matched by EQUALITY before the substring table runs, so a
+producer kind that merely contains its spelling is not restyled:
+
+| Match                                                 | Color  | Examples                                                                                                                                                                                                                    |
+| ----------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `journal-line-unreadable` (exact kind, matched first) | red    | a journal line that could not be parsed; reader-minted, never written by the engine. Renders `bytes=<n>` and nothing else — deliberately no timestamp (unknowable) and no content from the line (it can carry session text) |
+| `escalat`, `failed`                                   | red    | `preference-escalation`, `review-verify-failed`                                                                                                                                                                             |
+| `done`, `complete`, `finished`                        | green  | `story-done`, `run-complete`                                                                                                                                                                                                |
+| `decision`, `deferred`, `boundary`, `truncated`       | yellow | `decision-pending`, `epic-boundary`                                                                                                                                                                                         |
+| `start`, `resume`                                     | cyan   | `session-start`, `run-resume`                                                                                                                                                                                               |
+| anything else                                         | dim    |                                                                                                                                                                                                                             |
+
+## Key bindings
+
+| Key      | Action                                                                     |
+| -------- | -------------------------------------------------------------------------- |
+| `r`      | start a run (modal)                                                        |
+| `s`      | start a sweep (modal)                                                      |
+| `e`      | resume the selected paused/interrupted run (confirm modal)                 |
+| `p`      | review the selected paused run in the stage-appropriate HITL viewer        |
+| `R`      | resolve a run paused at an escalation (interactive, then re-arm)           |
+| `d`      | answer deferred-work decisions past sweeps left unanswered (modal walk)    |
+| `a`      | attach to the selected run's live session or orchestrator window           |
+| `x`      | stop the selected live run, abandoning the in-flight item (confirm modal)  |
+| `S`      | graceful stop: finish the in-flight item, then finalize & stop (confirm)   |
+| `D`      | delete the selected run's directory (confirm modal)                        |
+| `A`      | archive the selected run to `.waves/loop/archive` (confirm modal)          |
+| `c`      | clean up tmux sessions/windows for finished & stopped runs (confirm modal) |
+| `v`      | run `waves validate`, findings in a modal (`d` toggles detail)             |
+| `g`      | settings editor for `.waves/loop/policy.toml`                              |
+| `M`      | toggle theme (light/dark mode)                                             |
+| `i`      | say one line into the session the focused pane is showing (modal)          |
+| `n`      | cycle the Log pane through the run's open sessions, then auto-follow       |
+| `y`      | copy the active Log/Attention pane to the clipboard                        |
+| `ctrl+w` | enter/leave pane **resize mode** (see below)                               |
+| `q`      | quit (running engines are unaffected)                                      |
+
+In the settings editor: `ctrl+s` saves, `ctrl+e` expands/collapses all
+sections, `escape` goes back without saving. In any modal: `escape` cancels.
+
+### Resizing panes
+
+Every pane boundary is adjustable, by **mouse** or **keyboard**, and the sizes
+persist per-project to `[tui]` in `policy.toml` (re-applied on the next launch).
+
+- **Mouse** — drag any divider bar: the column split between the left sidebar and
+  the detail pane, the bars between the stacked left-column panes (they double as
+  the Sprint / Deferred Work section headings), and the bar between the Tasks
+  table and the Journal/Log/Attention tabs. Bars highlight on hover.
+- **Keyboard** — press `ctrl+w` to enter resize mode (the header shows a hint):
+  `←`/`→` widen or narrow the sidebar, `↑`/`↓` move the active horizontal
+  boundary, `Tab`/`Shift+Tab` pick which horizontal boundary is active, and
+  `Esc` (or `Enter`) leaves the mode. Outside resize mode the arrows and `Tab`
+  keep their usual navigation/focus behavior.
+
+To forget custom sizes, delete the `[tui]` size keys from `policy.toml` (or set
+them to `0`) — the panes return to their default proportions.
+
+## Starting runs and sweeps (`r` / `s`)
+
+`r` opens the **start run** modal — all fields optional:
+
+- **source** — `sprint mode` (walks `sprint-status.yaml`) or `stories mode` (folder+id dispatch), prefilled from `[stories]`
+- **spec folder** — stories mode only: the epic spec folder holding `stories.yaml` + `SPEC.md`; feeds a live **schedule preview** that validates the manifest and lists the linear schedule with `[spec/done]` checkpoint markers and each story's live disk state
+- **epic** — integer, restrict to one epic (sprint mode); blank = all
+- **story key** — restrict to one story; a story id in stories mode; blank = all
+- **max stories** — stop after N stories; blank = no limit
+- **dry run** — print the plan, spawn nothing (output shown in a modal)
+
+Selecting stories mode with an empty spec folder is refused with a toast; the run's preflight also validates the manifest + `SPEC.md` before spawning.
+
+`s` opens the **start sweep** modal:
+
+- **unattended (`--no-prompt`)** — skip decision prompts, leave decisions open
+- **decisions only** — triage + answer decisions, run no bundles
+- **max bundles** — override the policy's `[sweep] max_bundles`; blank = policy default
+- **dry run** — list open ledger entries, spawn nothing
+
+Before any real launch the TUI applies the same guard as the CLI:
+
+1. tmux must be on PATH.
+2. The git worktree must be clean — otherwise an error toast, no launch.
+3. If another run on this project is currently `running`, a confirmation
+   modal lists it and asks before you "launch anyway" (two engines on one
+   project may conflict).
+
+On success a toast names the run id and the `waves-ctl` session, and the
+dashboard selects the new run, showing `⧗ starting…` until `state.json`
+appears.
+
+## Resuming (`e`)
+
+`e` acts on the selected run. It refuses runs that are already finished or
+whose state is unreadable. The confirmation modal shows what you are resuming:
+
+- paused runs: `paused at <stage> — <reason>` in yellow;
+- non-paused runs: `run is not paused — it looks interrupted` (dim);
+- and, in bold red, `engine.pid may still be live — resuming could double-drive
+this run` when the original engine still appears to be running. Heed this
+  one: two engines driving one run dir corrupt each other's state. It can also
+  mean the pid was recycled by another process — verify before resuming.
+
+After the multiplexer and engine-liveness checks, confirming an unfinished sweep
+checks whether the main checkout's deferred-work ledger can be read. An undecodable ledger or a
+permissions/storage read failure shows an error toast with the same repair guidance
+as the CLI, and no detached window launches. Repair the ledger by hand (or fix its
+permissions or storage), then resume again to keep the in-flight bundle recovery.
+The toast also offers `waves sweep` after committing or stashing changes so the
+worktree is clean. Story runs and cases where the probe cannot locate the ledger
+retain the existing handoff, as does an absent ledger. The probe does not check an
+isolated unit worktree's ledger; an unreadable copy there may still re-pause the run
+after handoff until that copy is repaired.
+
+When these checks pass, confirming spawns `waves resume <run-id>` detached in `waves-ctl`,
+like any other launch. Resume drops any stale `waves-<run-id>` session a
+stopped or interrupted run left behind and spins up a fresh one, so the run
+never re-attaches to a dead session.
+
+## Cleaning up sessions (`c`)
+
+`c` removes leftover tmux artifacts for the current project in one pass, after a
+confirmation modal: every `waves-<run-id>` agent session whose run has
+finished, stopped, or crashed (and any orphan whose run dir is gone), plus the
+parked `[waves exited …]` windows in `waves-ctl`. Live runs, the window
+you triggered the cleanup from, and any session or window belonging to another
+project are always spared, so it is safe to press at any time even with other
+projects' runs in flight. A toast reports how many sessions and windows were closed. The same
+sweep is available from a plain shell as `waves cleanup` (`--dry-run` to
+preview). Runs already tear their own session down on finish unless you set
+`[adapter] cleanup_session_on_finish = false`; `c` is for the backlog that
+predates that, or that the flag deliberately keeps around.
+
+`c` only reaps tmux artifacts, not disk. To reclaim run-dir **disk** — worktrees a
+mid-flight stop orphaned (each holding a Unity `Library/`), and old run dirs — use
+the `waves clean` CLI command (see [`[cleanup]`](FEATURES.md#disk-reclamation-cleanup));
+it is intentionally not bound to a TUI key since it deletes/archives run history.
+
+## Resolving an escalation (`R`)
+
+`R` is the escalation-specific counterpart to `e`. It is only offered for a run
+paused at the `escalation` stage (otherwise it warns and does nothing) and
+refuses a run whose engine is still live. A CRITICAL escalation parks its story
+in a terminal `escalated` phase that plain `resume` skips — `R` is how you get
+it un-stuck.
+
+Confirming launches `waves resolve <run-id>` in a `waves-ctl` window and
+**attaches you to it** (the resolve agent is interactive). You converse with the
+agent — it is seeded with the escalation detail and the frozen spec — to
+disambiguate the spec. When it has recorded a resolution, the same window prompts
+`re-arm <story> and resume run <id>? [y/N]`; answer `y` and it re-arms the story
+(`escalated → pending`, spec status reset to `ready-for-dev`) and resumes the run
+in place — a clean rebuild against the corrected spec, then on through the rest
+of the sprint. Detach (`Ctrl-b d` on tmux; other backends have their own chord —
+herdr's is `ctrl+b q`) to return to the dashboard, which observes the
+resumed run like any other. Exiting the agent without recording a resolution
+leaves the story escalated and the run paused — the safe default.
+
+## Reviewing a paused run (`p`)
+
+`p` opens the **stage-appropriate HITL viewer** for the selected paused run,
+dispatched on `RunState.paused_stage`. Every action calls the exact code path the
+CLI uses — no duplicated logic — and every viewer is a read-only presentation of
+artifacts the engine already wrote.
+
+- **Plan checkpoint** (`spec_checkpoint`, stories mode) — a read-only viewer of
+  the planned `ready-for-dev` spec at its id-keyed path (shown prominently, with a
+  copy-path action). Under worktree isolation the path is anchored on the tree the
+  run owns, not on the directory the dashboard was launched from, so the viewer and
+  the replan write both act on the run's own copy rather than the main checkout's
+  twin. A spec that cannot be read at that path says so explicitly and its actions
+  are disabled — an unreviewable gate is not approvable. **Approve & resume** resumes straight to implementation;
+  **Request replan** resets the spec to `draft` and strips its Auto Run Result
+  (via the same `devcontract` primitives the engine's repair path uses), then
+  resumes so the next dispatch re-plans. Edit the markdown in your own editor — the
+  TUI never edits specs.
+- **Story checkpoint** (`done_checkpoint`, stories mode) — a summary card for the
+  just-committed story: id/title, commit subject + short hash, verification
+  outcome, and cost-weighted + raw token totals. **Continue run** resumes the
+  schedule; **Stop run** marks the run stopped.
+- **Escalation** — the escalation view enriched with story context: the story
+  entry's title/description (from `stories.yaml`), the blocking condition parsed
+  from the spec's `## Auto Run Result`, and a sentinel indicator when the matched
+  spec is a fixed-slug pre-planning-halt sentinel. Both of those answer from the
+  tree the run owns: under isolation the spec text and the sentinel live in the
+  unit's mount, and reading either from the launch directory let one modal
+  contradict itself. A spec that cannot be read reports its blocking condition as
+  unknown rather than absent — the two are otherwise indistinguishable — and
+  refuses **Re-arm & resume**, which would flip the spec's frontmatter, strip its
+  result and re-stamp the baseline on evidence nobody could read. **Resolve** stays
+  offered: it neither re-arms nor rewrites the spec — it writes the resolver's
+  `context.json` and starts the repair session, which is what repairs a bad anchor — and
+  gating it would have left `close` as the modal's only action while the `R` binding
+  reached the same agent anyway. **Resolve** launches the same interactive agent as `R`;
+  **Re-arm & resume** (offered once the resolve agent has recorded a resolution)
+  re-arms and resumes — deleting a sentinel with a preserved copy for a clean
+  re-dispatch. Both refuse a still-live engine.
+- **Spec-approval / epic / story gate** — a spec-approval gate reuses the spec viewer
+  (view the finalized spec, then **Approve & resume**), so the pre-existing sprint-mode
+  gate inherits the same richer surface — including the anchored read and the refusal
+  of **Approve & resume** on a spec that cannot be read. Story-gate and epic-boundary pauses have no
+  spec to show — a story gate fires before the story is recorded, or on a sweep bundle
+  whose intent regeneration the ledger refused (its task may carry a spec file, but the
+  gate is about the ledger, not the spec), an epic boundary has no story at all — so
+  they open a compact pause-reason viewer instead: the reason names
+  the blocking entries and the remedy. **Resume** re-picks a gated sprint story;
+  for a bundle-regeneration pause, it recovers the same persisted bundle and regenerates
+  its intent document. Both re-ask the ledger, so an unresolved refusal re-pauses.
+
+`p` and `R` overlap for an escalation (both reach Resolve); `p` also exposes
+Re-arm & resume inline once a resolution exists. Pause badges in the run list and
+the run header name the stage so you know which viewer `p` will open.
+
+## Attaching (`a`) and the sweep decision flow
+
+`a` picks its target in this order:
+
+1. **Decision-blocked sweep, or no live agent session** → the run's
+   orchestrator window in `waves-ctl` (only exists for runs launched from
+   the TUI).
+2. **Live agent session** → the per-run tmux session `waves-<run-id>`
+   where the coding CLI is working.
+3. Neither → a warning; there is nothing to attach to (runs started outside
+   the TUI between sessions, finished runs).
+
+If the TUI itself is running inside tmux, attach uses `switch-client` — the
+TUI keeps running and you switch back with your usual tmux client commands.
+Outside tmux, the TUI suspends, runs `tmux attach`, and resumes when you
+detach (`ctrl-b d`). External backends follow the same two paths with their own
+chords and caveats — on the herdr adapter the detach chord is `ctrl+b q` and one
+hand-back is manual; see
+[its operator guide](https://github.com/pbean/bmad-loop-adapter-herdr/blob/main/docs/adapter-multiplexer-herdr.md).
+
+### Answering a sweep decision
+
+An attended sweep that reaches a "needs human decision" entry blocks on its
+own terminal prompt. The dashboard spots the `decision-pending` journal event
+and shows the `⚑ decision needed: DW-<n>` banner plus a one-time warning
+toast. Then:
+
+1. Press `a` — with a decision pending this always targets the sweep's
+   orchestrator window, where the prompt is waiting.
+2. Answer the prompt (build / close / keep-open, with the triage
+   recommendation shown).
+3. Detach with `ctrl-b d`. (On tmux this step is belt-and-suspenders — answering
+   already hands your terminal back. On backends without a detach verb — e.g.
+   the herdr adapter — the hand-back cannot be automatic: press its detach
+   chord, `ctrl+b q` on herdr. Either way the sweep knows it can no longer reach
+   you and goes unattended for the rest of the run, so detaching first never
+   leaves it waiting on a prompt you can't see.)
+
+The banner clears on the next poll after the sweep journals anything further
+(the answer is recorded as a `decision:` line in `deferred-work.md`). Sweeps
+launched with **unattended** never prompt, so this flow only applies to
+attended sweeps.
+
+### Answering missed decisions (`d`)
+
+The flow above is for a decision a _live_ attended sweep is blocked on. For
+decisions an **unattended** sweep skipped — or an attended one you walked away
+from — press `d`. The Deferred Work pane title shows the outstanding count
+(`Deferred Work — N to answer (d)`), or `Deferred Work — decisions unreadable (d)`
+when they could not be read (no loadable BMAD config, an unreadable ledger, a read
+that raised — DW-473); `d` then toasts the fault as an error instead of claiming
+nothing is pending. Otherwise `d` walks them one modal at a time
+(question, context, and each option with its effect and the triage
+recommendation). Each answer is durable: a `close` is applied immediately, and
+a `build`/`keep-open` is saved to `.waves/loop/decisions.json`, so the next sweep
+acts on it (build → bundle, keep-open → recorded) without asking again. The
+ledger can take no `decision:` line, though — the entry retired by another
+writer while the modal was open, or the ledger file gone (DW-198). The modal
+says so in a `warning` toast (naming the id, and the store answer where one was
+still saved), the walk carries on to the next decision, and that answer is not
+counted in the `recorded N decision(s)` summary. A publication refusal is appended
+to that warning, or shown in its own `warning` toast when a ledger line landed.
+It says an answer that DID land on disk could not be published to git
+(DW-209/213): the modal's writer commits only the files that call actually
+wrote, and a file that vanished or went unreadable between the write and the
+staging is dropped from the commit and named here with its cause. That one does
+not change the count, which still depends only on whether a ledger line landed,
+and the walk carries on the same way. Skip a
+modal to leave that one for later. The same set is available on the CLI via
+`waves decisions` (`--list` to just view).
+
+## Validate (`v`)
+
+Runs `waves validate --project <project> --json` in the background and
+renders the document in a scrollable modal: a verdict header with the
+per-severity counts and the queue mode, then one row per check — glyph, the
+stable `check` id, and the message. Same preflight as the CLI: config,
+sprint-status, git, tmux, CLI binary, hooks.
+
+The verdict is the document's own `ok`, not the exit code, which cannot tell
+"the checks failed" from "the command broke". A check's `detail` — the data it
+knew before flattening itself into a sentence, like every detected mux backend
+rather than the text mode's `tmux*, psmux (unavailable)` — shows inline for
+warnings and problems, and `d` toggles it on for everything. When anything
+failed, a footer notes that the gates are **chained**: a policy failure leaves
+the later gates emitting nothing at all, so a short findings list after a
+failure is not a short list of problems.
+
+If the document cannot be rendered — a schema newer than this TUI, or output
+that is not a document at all — `v` silently re-runs validate in text mode and
+shows the combined output in a modal titled `validate — ok` (or `exit <code>`),
+exactly as it did before.
+
+## Settings editor (`g`)
+
+Edits `.waves/loop/policy.toml` **comment-preservingly** (tomlkit): saving only
+rewrites keys you actually changed; everything else — comments, order,
+formatting — stays byte-identical. A missing policy file starts from the full
+inline-documented template. The note at the top is load-bearing: **running
+engines snapshot policy at start — changes apply to new runs and resumes.**
+Because a resume re-stamps, editing `limits.cache_read_weight` and resuming
+re-weights that run's _whole_ accumulated history, not just the sessions after
+the resume — every total is recomputed from raw counts at the current weight.
+
+The form is grouped by TOML section. Every section starts **collapsed** with a
+one-line description in its header, so the grown-large form scans at a glance —
+expand only the section you want to edit, or press `ctrl+e` to toggle them all
+open/closed at once. Unset keys show their default as a placeholder rather than
+a baked-in value; clearing a field deletes the key, restoring default/inherit
+behavior.
+
+| Section.key                                                                  | Type                   | Default            | Notes                                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------------------------------------------------- | ---------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gates.mode`                                                                 | select                 | `per-epic`         | `none` / `per-epic` / `per-story-spec-approval`                                                                                                                                                                                                                                                                                    |
+| `gates.retrospective`                                                        | select                 | `notify`           | `never` / `notify` / `auto`                                                                                                                                                                                                                                                                                                        |
+| `limits.max_review_cycles`                                                   | int ≥ 1                | 3                  | review loop bound before plateau-defer                                                                                                                                                                                                                                                                                             |
+| `limits.max_dev_attempts`                                                    | int ≥ 1                | 2                  | dev retry budget                                                                                                                                                                                                                                                                                                                   |
+| `limits.artifact_file_max_mb`                                                | int ≥ 1                | 5                  | raw-byte cap for each ignored file selected for isolated artifact publication; tracked declarations ride Git and do not count                                                                                                                                                                                                      |
+| `limits.artifact_payload_max_mb`                                             | int ≥ 1                | 10                 | aggregate raw-byte cap across selected ignored publication files, enforced before base64 encoding                                                                                                                                                                                                                                  |
+| `limits.max_followup_reviews`                                                | int ≥ 0                | 1                  | extra review rounds granted for a finalized pass's own follow-up before it converges + refiles instead of burning a cycle · 0 = never honor one                                                                                                                                                                                    |
+| `limits.session_timeout_min`                                                 | int ≥ 1                | 90                 | per-session wall clock                                                                                                                                                                                                                                                                                                             |
+| `limits.git_timeout_s`                                                       | int ≥ 1                | 120                | bound on any single git subprocess; exceeding it pauses/degrades, never crashes the run — raise on a loaded host or a very large worktree                                                                                                                                                                                          |
+| `limits.teardown_grace_s`                                                    | int ≥ 0                | 20                 | verified teardown: poll a killed session up to this long, then force-kill its pane pids and re-kill · 0 = single unverified best-effort kill                                                                                                                                                                                       |
+| `limits.stop_without_result_nudges`                                          | int ≥ 0                | 1                  | nudges when a session stops without result.json                                                                                                                                                                                                                                                                                    |
+| `limits.dev_stall_grace_s`                                                   | int ≥ 0                | 600                | silence grace armed at dev/review launch and re-armed by transport activity or fresh Stop/idle evidence · also the transcript-idle notice threshold (journal `session-idle`/`session-active`, TUI idle age) · 0 = no launch timer (and no idle notice), but a result-less turn end still fails fast                                |
+| `limits.dev_stall_nudges`                                                    | int ≥ 0                | 2                  | best-effort wake nudges per silent grace before stalling; fresh Stop/idle evidence restores this budget · 0 = stall on grace expiry                                                                                                                                                                                                |
+| `limits.dev_stall_nudges_cap`                                                | int ≥ 0                | 6                  | total (never-restored) nudge bound per dev/review session — an accepted nudge does not guarantee a wake · 0 = stall on first grace expiry                                                                                                                                                                                          |
+| `limits.workflow_stall_nudges_cap`                                           | int ≥ 0                | 3                  | same monotonic cap for an injected plugin-workflow session that finished its work but never wrote its completion marker · 0 = stall on first grace expiry                                                                                                                                                                          |
+| `limits.max_tokens_per_story`                                                | int ≥ 1                | 2000000            | advisory cost-weighted cap on a story's cumulative spend, re-checked at every session boundary; one ATTENTION + desktop notice per story on the crossing, nothing terminated                                                                                                                                                       |
+| `limits.cache_read_weight`                                                   | float 0.0–1.0          | 0.1                | cache-read weight in every token total, budgets and displays alike; 1.0 = raw                                                                                                                                                                                                                                                      |
+| `limits.session_budget_mode`                                                 | select                 | `warn`             | mid-session per-session budget guard: `off` (no sampling) / `warn` (one ATTENTION + breadcrumb) / `enforce` (wrap-up nudge, then `over_budget` termination → retry/defer)                                                                                                                                                          |
+| `limits.max_tokens_per_session`                                              | int ≥ 1                | 4000000            | weighted per-session cap sampled every ~30s mid-session; healthy sessions run ~1–2.5M weighted, so the default trips only true runaways                                                                                                                                                                                            |
+| `limits.session_budget_grace_s`                                              | int ≥ 0                | 240                | enforce mode: wrap-up window after the nudge before `over_budget` · 0 = terminate at trip, no nudge                                                                                                                                                                                                                                |
+| `verify.commands`                                                            | one per line           | (none)             | test/lint commands run before commit                                                                                                                                                                                                                                                                                               |
+| `verify.stream_capture_kb`                                                   | int ≥ 0                | 256                | per-stream cap (KiB) on verifier stdout/stderr retained under the run's `verify/` directory; the tail is kept and the journal records the full size plus a truncation flag · 0 = capture nothing                                                                                                                                   |
+| `notify.desktop`                                                             | switch                 | on                 | desktop notifications                                                                                                                                                                                                                                                                                                              |
+| `notify.file`                                                                | switch                 | on                 | ATTENTION file logging                                                                                                                                                                                                                                                                                                             |
+| `review.enabled`                                                             | switch                 | on                 | off = skip the separate review session; dev pass runs its review layers inline                                                                                                                                                                                                                                                     |
+| `review.trigger`                                                             | select                 | `recommended`      | `recommended` (run only when the dev pass flags `followup_review_recommended`) / `always`; bounded by `limits.max_review_cycles`                                                                                                                                                                                                   |
+| `adapter.name`                                                               | text                   | `claude`           | CLI profile: `claude` / `codex` / `gemini` / custom                                                                                                                                                                                                                                                                                |
+| `adapter.model`                                                              | text                   | (CLI default)      | model override                                                                                                                                                                                                                                                                                                                     |
+| `adapter.effort`                                                             | text                   | (provider default) | reasoning effort, free-form (`high`, `max`, …); sent by `opencode-http` as the per-prompt `variant`, ignored by the tmux CLIs (validate warns)                                                                                                                                                                                     |
+| `adapter.extra_args`                                                         | override switch + args | profile defaults   | see below                                                                                                                                                                                                                                                                                                                          |
+| `adapter.cleanup_session_on_finish`                                          | switch                 | on                 | kill the run's tmux session on finish; off keeps it                                                                                                                                                                                                                                                                                |
+| `adapter.dev` / `.review` / `.triage` / `.orchestrator` / `.<workflow-role>` | text ×2 + args         | inherit            | per-stage `name` / `model` / `extra_args` overrides. `orchestrator` is the session that holds the control loop under `llm-run` (see `[llm]`) — its header on the form says so; the workflow roles (`atdd`, `td`, `trace`, `nfr`, `test-review`, `automate`, `retro-prep`) are the plugin steps                                     |
+| `adapter.dev` / `.review` / `.triage`                                        | text ×3 + args         | inherit            | per-stage `name` / `model` / `effort` / `extra_args` overrides                                                                                                                                                                                                                                                                     |
+| `sweep.auto`                                                                 | select                 | `never`            | `never` / `per-epic` / `run-end`                                                                                                                                                                                                                                                                                                   |
+| `sweep.max_bundles`                                                          | int ≥ 1                | 5                  | bundles per sweep; triage excess truncated                                                                                                                                                                                                                                                                                         |
+| `sweep.max_triage_attempts`                                                  | int ≥ 1                | 2                  | triage validation retries                                                                                                                                                                                                                                                                                                          |
+| `sweep.repeat`                                                               | switch                 | off                | re-triage after each cycle, continue on new work                                                                                                                                                                                                                                                                                   |
+| `sweep.max_cycles`                                                           | int ≥ 1                | 5                  | cycle cap per sweep run when repeat is on                                                                                                                                                                                                                                                                                          |
+| `scm.isolation`                                                              | select                 | `none`             | `none` (work in place) / `worktree` (per-unit worktree + merge-back)                                                                                                                                                                                                                                                               |
+| `scm.branch_per`                                                             | select                 | `story`            | worktree mode: branch per `story`, or one shared branch per `run` (forces delete-branch off)                                                                                                                                                                                                                                       |
+| `scm.target_branch`                                                          | text                   | (run-start branch) | worktree mode: branch units merge back into (created if missing)                                                                                                                                                                                                                                                                   |
+| `scm.merge_strategy`                                                         | select                 | `merge`            | worktree mode: `ff` / `merge` / `squash`                                                                                                                                                                                                                                                                                           |
+| `scm.delete_branch`                                                          | switch                 | on                 | worktree mode: delete the unit branch after a successful merge                                                                                                                                                                                                                                                                     |
+| `scm.keep_failed`                                                            | switch                 | on                 | keep a failed unit's worktree + branch mounted for inspection                                                                                                                                                                                                                                                                      |
+| `scm.rollback_on_failure`                                                    | switch                 | off                | in-place mode (`isolation = none`) only: on = auto-revert a failed attempt's tracked changes + delete the untracked files this run created (its uncommitted work is lost); off = never touch the tree, pause with manual recovery. A resolved escalation's re-drive always auto-recovers regardless. Prefer `isolation = worktree` |
+| `scm.preserve_keep`                                                          | int ≥ 0                | 20                 | `attempt-preserve/*` recovery branches + `attempt-preserve-dirty/*` rollback snapshots + `merge-preflight-preserve/*` merge pre-flight snapshots kept per family at each run start, newest by committer date; the tail is deleted (0 = never prune)                                                                                |
+| `scm.seed_adapter_defaults`                                                  | switch                 | on                 | worktree mode: seed each loaded adapter's gitignored MCP/CLI configs (`.mcp.json`, `.claude/settings.json`, `.codex/config.toml`…) into the worktree                                                                                                                                                                               |
+| `scm.worktree_seed`                                                          | one per line           | (none)             | worktree mode: extra project-relative gitignored files to seed, on top of the adapter defaults                                                                                                                                                                                                                                     |
+| `scm.commit_message_template`                                                | text                   | (built-in)         | story/bundle commit message; `{story_key}` / `{run_id}` / `{story_title}` substituted                                                                                                                                                                                                                                              |
+| `scm.failed_diff_max_mb`                                                     | int ≥ 1                | 5                  | per-file cap (MB) for untracked files in a kept-failed unit's `changes.patch`                                                                                                                                                                                                                                                      |
+| `scm.failed_diff_unlimited`                                                  | switch                 | off                | lift the failed-diff size cap (warns when active)                                                                                                                                                                                                                                                                                  |
+| `cleanup.run_retention`                                                      | int ≥ 0                | 10                 | newest concluded runs `waves clean` keeps whole; older ones trimmed/archived (0 = keep none by count)                                                                                                                                                                                                                              |
+| `cleanup.retention_days`                                                     | int ≥ 0                | 0                  | 0 = off; else also keep runs newer than N days regardless of the count above                                                                                                                                                                                                                                                       |
+| `cleanup.trim_artifacts`                                                     | switch                 | on                 | drop the heavy `worktrees/` tree from concluded runs; the run still lists in the dashboard                                                                                                                                                                                                                                         |
+| `cleanup.archive_old`                                                        | switch                 | on                 | archive (vs hard-delete) runs past the retention window                                                                                                                                                                                                                                                                            |
+| `cleanup.auto_clean_on_finish`                                               | switch                 | on                 | reconcile worktrees leaked by a mid-flight stop at each run/sweep start                                                                                                                                                                                                                                                            |
+| `cleanup.clean_tmp`                                                          | switch                 | on                 | let engine plugins clean their `/tmp` scratch on finish (e.g. the Unity MCP server zips)                                                                                                                                                                                                                                           |
+| `plugins.unity.editor_mode`                                                  | select                 | `shared`           | `shared` (needs `scm.isolation = none`) / `per_worktree` (needs `isolation = worktree`)                                                                                                                                                                                                                                            |
+| `plugins.unity.mcp`                                                          | select                 | `ivanmurzak`       | Editor MCP the plugin targets: `ivanmurzak` / `coplaydev`                                                                                                                                                                                                                                                                          |
+| `plugins.unity.unity_path`                                                   | text                   | (auto-detect)      | explicit Editor binary for a `per_worktree` launch; ignored in shared mode                                                                                                                                                                                                                                                         |
+| `plugins.unity.ready_timeout_sec`                                            | int ≥ 1                | 600                | readiness-gate budget for the Editor + MCP to come up                                                                                                                                                                                                                                                                              |
+| `plugins.unity.ready_grace_sec`                                              | int ≥ -1               | -1                 | pre-probe delay; `-1` = auto (120s cold `per_worktree`, 0s warm `shared`)                                                                                                                                                                                                                                                          |
+| `tui.low_frame_rate`                                                         | switch                 | off                | cap to 15fps + disable animations (slow/SSH links); applies next launch                                                                                                                                                                                                                                                            |
+| `mux.backend`                                                                | text                   | (auto-select)      | force a registered terminal-multiplexer backend by name (see `waves mux`); machine-specific — policy.toml is gitignored; applies next invocation                                                                                                                                                                                   |
+
+(`scm.max_parallel` is intentionally **not** exposed in the editor — it stays
+inert, clamped to 1, until parallel fan-out is built.)
+
+The form is **registry-driven**: the core sections above are described by
+`riaworks_waves_loop/data/settings/core.toml` (presentation only — defaults and options are
+referenced from the policy dataclasses, never duplicated), and every **enabled** plugin's
+`[[settings]]` are appended automatically under a collapsible section of their own,
+persisting to `[plugins.<name>]`. So the `plugins.unity.*` rows above only appear once
+`unity` is listed in `[plugins] enabled` — the opt-in layer for game projects that drive a
+live Editor through an MCP, off by default. A custom plugin dropped at
+`.waves/loop/plugins/<name>/` surfaces the same way. See [Writing a waves
+plugin](plugin-authoring-guide.md) for the settings schema, [Writing a Game Engine
+plugin](game-engine-plugin-guide.md), and [Writing a plugin for a specific Editor
+MCP](game-engine-mcp-guide.md). The Unity plugin's `editor_mode` ↔ `scm.isolation`
+coupling is validated on save, so an invalid combo (e.g. `per_worktree` with
+`isolation = none`) blocks with an error.
+
+`extra_args` fields are special: the switch distinguishes "use the profile's
+default flags" (off — the key stays absent) from "replace them with exactly
+this list" (on — the input is parsed shell-style; an empty list is a valid
+override and is not the same as unset). Because an override replaces the
+profile's `bypass_args`, it must repeat the permission-bypass flags;
+`waves validate` warns (`policy.bypass-dropped`) when it does not. Under an
+`opencode-http` profile the list lands after the adapter-owned `--port`/`--hostname`/
+`--print-logs`, so repeating one is warned too (`policy.extra-args-unservable`).
+
+`ctrl+s` validates the whole document through the engine's own parser
+(`policy.loads()`) before writing; errors land in a red strip above the
+buttons and block the save. The write itself is atomic (temp file +
+`os.replace`), confined to the project so a symlink planted at `.waves/loop/`
+is refused rather than followed, and refused outright with a `PermissionError`
+if the operator has marked `policy.toml` read-only (#593, #597).
+
+## Troubleshooting
+
+| Message                                                                             | Cause / fix                                                                                                                           |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `multiplexer backend unavailable — launch/attach disabled`                          | install the selected backend's binary (tmux by default — see `waves mux`); the dashboard still works read-only                        |
+| `git worktree is not clean — commit or stash first`                                 | the launch guard; commit/stash and retry. `.waves/loop/policy.toml` is exempt, so saving in the settings editor never blocks a launch |
+| `another run is live: <ids>`                                                        | a second engine on the same project may conflict — confirm only if you know they won't touch the same stories                         |
+| `launch may have failed — attach to control session <name>`                         | no `state.json` within 10 s of launch; attach to the named ctl session to read the error (the window stays open with the exit code)   |
+| `no run selected`                                                                   | `e` / `a` need a selected run — the project has no runs yet                                                                           |
+| `could not read past sweeps' decisions: <fault>`                                    | `d` could not read the missed decisions (DW-473) — fix the named config or ledger fault; `waves decisions` reports the same           |
+| `state for run <id> is unreadable`                                                  | corrupt/missing `state.json`; inspect the run dir                                                                                     |
+| `run <id> already finished`                                                         | finished runs can't be resumed                                                                                                        |
+| `nothing to attach: no live agent session … runs started outside the TUI have none` | between sessions there is no agent window, and shell-started runs have no ctl window; wait for the next session or attach manually    |
+| `cannot suspend here — run manually: tmux attach …`                                 | the terminal can't suspend the TUI; run the printed command in another terminal                                                       |
+| `engine.pid may still be live — resuming could double-drive this run`               | the original engine still runs (or its pid was recycled); attach and check before resuming                                            |
+| `policy.toml is not valid TOML: …`                                                  | hand-edited file is syntactically broken; fix it in an editor — the settings screen needs a parseable document to start from          |
+| sprint tree shows `sprint status unavailable`                                       | missing/invalid `_bmad/bmm/config.yaml` or sprint-status.yaml; run `waves init` / `bmad-sprint-planning`                              |
+| deferred pane shows `deferred ledger unavailable`                                   | missing/unreadable `deferred-work.md`; normal until the first session defers something                                                |
+| header shows `state unavailable`                                                    | the run dir exists but `state.json` is missing or never parsed; usually transient at launch                                           |
+
+Degradation is graceful by design: a mid-write or missing file never crashes a
+poll — the dashboard keeps the last good state (`?` / `unknown` where it has
+none), and catches up on the next tick.

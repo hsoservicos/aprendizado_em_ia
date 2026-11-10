@@ -53,3 +53,10 @@ tmp/
 .env.local
 *.pem
 *.key
+.waves/loop/runs/
+.waves/loop/cache/
+.waves/loop/policy.toml
+_waves/custom/*.user.toml
+
+# Riaworks Waves — bundle de instalação (vendorizado)
+riaworks-waves-*.zip

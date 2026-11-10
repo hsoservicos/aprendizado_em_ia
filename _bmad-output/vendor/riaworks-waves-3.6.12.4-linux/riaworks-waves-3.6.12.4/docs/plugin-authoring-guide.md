@@ -1,0 +1,948 @@
+# Writing a waves plugin
+
+A **plugin** extends the waves orchestrator **without touching its core loop**.
+It can be as simple as a settings-only data file or as complex as the bundled
+Unity game-engine layer. A plugin can:
+
+- **observe, veto, or mutate** the run at every lifecycle stage (a _hook bus_);
+- contribute **settings** that render in the settings TUI and persist to policy;
+- inject its own **workflow** sessions at defined points in the dev/review cycle.
+
+Plugins are **folder-drop**: a directory with a `plugin.toml` manifest (plus any
+helper scripts) dropped under `.waves/loop/plugins/<name>/`. No registration, no
+install step. A plugin that ships **in-process Python** is loaded only when you
+**trust** it by name — dropping a folder in never runs code.
+
+> Already wrote a [CLI adapter profile](../README.md#other-coding-clis) or the old
+> `[engine]` block? Same idea — declarative TOML + optional scripts, discovered and
+> overlaid. The plugin system generalizes both.
+
+---
+
+## Quick start: the smallest plugin
+
+A data-only plugin carries one setting and zero behavior. Create
+`.waves/loop/plugins/hello/plugin.toml`:
+
+```toml
+[plugin]
+name = "hello"
+version = "1.0.0"
+api_version = 1
+description = "Smallest possible plugin."
+author = "you"
+
+[[settings]]
+key = "greeting"
+type = "str"
+default = "hi"
+label = "Greeting"
+help = "Shown in the settings UI once this plugin is enabled."
+```
+
+That's a complete, loadable plugin. It has no `[hooks]` and no `[python]`, so it
+runs no code and is byte-identical to "no plugin" at run time — it exists only to
+contribute a setting. This is the shape the bundled
+[`example`](../src/riaworks_waves_loop/data/plugins/example/plugin.toml) plugin ships in.
+
+A setting-only section appears in the TUI only once the plugin is **enabled**:
+
+```toml
+# .waves/loop/policy.toml
+[plugins]
+enabled = ["hello"]
+```
+
+---
+
+## Distribution & discovery
+
+Plugins are discovered from three sources, overlaid in precedence order (a later
+same-name plugin **overrides** an earlier one; a new name **extends** the set):
+
+| Source        | Path                                                  | Precedence             |
+| ------------- | ----------------------------------------------------- | ---------------------- |
+| Builtin       | `riaworks_waves_loop/data/plugins/<name>/plugin.toml` | base                   |
+| Entry point   | `riaworks_waves_loop.plugins` group                   | _reserved (see below)_ |
+| Project-local | `<project>/.waves/loop/plugins/<name>/plugin.toml`    | **highest**            |
+
+Each plugin lives in its **own directory** — that directory is the plugin's
+`{scripts}` root (see [`{scripts}` substitution](#scripts-substitution)), so its
+manifest and helper scripts sit together.
+
+**Entry points are a documented future seam.** `discover()` already yields an
+`entry_point` source between builtin and project, but `_discover_entry_points()`
+returns nothing today — folder-drop is the only live distribution path. When
+pip-installable plugins land, they slot in here with **no change to authors or to
+discovery order** (`importlib.metadata` selectable entry points, group
+`riaworks_waves_loop.plugins`). See `src/riaworks_waves_loop/plugins/loader.py`.
+
+---
+
+## The manifest (`plugin.toml`)
+
+Every plugin is one `plugin.toml`. Only `[plugin] name` + `api_version` are
+required; every section below is optional, so a plugin opts into exactly what it
+needs. The manifest parses into the immutable `PluginManifest`
+(`src/riaworks_waves_loop/plugins/model.py`).
+
+### `[plugin]` — metadata
+
+| Field         | Type   | Default | Purpose                                                                         |
+| ------------- | ------ | ------- | ------------------------------------------------------------------------------- |
+| `name`        | string | —       | **Required.** Plugin id; the directory name; the `[plugins.<name>]` key.        |
+| `api_version` | int    | —       | **Required.** Plugin-API version this manifest targets (currently `1`).         |
+| `version`     | string | `0.0.0` | Your plugin's own version.                                                      |
+| `description` | string | `""`    | One line; shown in tooling.                                                     |
+| `author`      | string | `""`    | Attribution.                                                                    |
+| `priority`    | int    | `0`     | Cross-plugin ordering at a shared stage; **lower runs first**, then load order. |
+| `seed_files`  | list   | `[]`    | Project-relative gitignored files to copy into each isolated worktree.          |
+| `seed_globs`  | list   | `[]`    | Project-relative glob patterns to expand + copy into each worktree.             |
+
+`seed_files` / `seed_globs` must be **project-relative** (an absolute path is
+rejected at load). They let a plugin prime an isolated checkout with gitignored
+paths it needs — e.g. the Unity plugin seeds an MCP-generated skill tree.
+
+### `[[settings]]` — settings schema
+
+Each entry contributes one setting. See [Settings](#settings) for the full
+reference.
+
+```toml
+[[settings]]
+key = "strict"        # required; unique within the plugin
+type = "bool"         # bool | int | float | str | select
+default = false
+label = "Strict mode" # TUI label (falls back to the key)
+help = "..."          # TUI help text
+# select-only:
+# options = ["a", "b"]
+# numeric hints (int/float):
+# min = 0
+# max = 10
+```
+
+### `[hooks.<stage>]` — declarative (out-of-process) hooks
+
+A shell command bound to a [lifecycle stage](#stage-reference). See
+[Hooks](#hooks).
+
+```toml
+[hooks.pre_session]
+cmd = 'python3 "{scripts}/probe.py"'
+timeout_sec = 120          # default 120; must be >= 1
+blocking = true            # non-zero exit vetoes (defers) the unit
+fail_closed = false        # default: a hook *error* (timeout/launch) fails open
+```
+
+### `[python]` — in-process module (trust-gated)
+
+```toml
+[python]
+module = "hooks.py"        # plugin-relative file
+class = "MyPlugin"         # subclass of riaworks_waves_loop.plugins.Plugin (default "Plugin")
+```
+
+Declaring `[python]` makes the **whole plugin trust-gated**: the module is never
+imported unless the plugin is in `[plugins] enabled`. See [Trust](#trust--safety).
+
+### `[workflows.<name>]` — provided workflows
+
+An extra agent session injected at a stage. See [Workflows](#workflows-provides).
+
+```toml
+[workflows.lint-sweep]
+stage = "post_dev_phase"   # pre_dev_phase | post_dev_phase | post_review_result
+                           # | pre_commit_gate | post_epic_boundary
+role = "dev"               # dev | review
+prompt = "/lint-sweep {story_key}"
+blocking = false           # true: a failed session defers the unit
+```
+
+Declare `<name>_enabled` / `<name>_blocking` settings to let operators disable a
+step or flip its gate per run — see
+[Making a workflow configurable](#making-a-workflow-configurable).
+
+### `{scripts}` substitution
+
+In any hook `cmd` or workflow `prompt`, `{scripts}` expands to the plugin's own
+directory — so a plugin references its bundled scripts without hardcoding a path
+that breaks across machines or between a builtin and a project-local copy.
+
+---
+
+## Trust & safety
+
+There are **two trust tiers**, by design:
+
+1. **Declarative tier (always runs).** A data-only or declarative plugin —
+   settings + `[hooks.<stage>]` shell commands — loads and runs as soon as it is
+   discovered. This is the same risk surface as the old `engine.toml *_cmd` hooks
+   or a project's verify commands: operator-authored shell, trusted by virtue of
+   living in the repo.
+
+2. **In-process tier (trust-gated).** A plugin that declares a `[python]` module
+   is **never imported or executed** unless its `name` is in:
+
+   ```toml
+   [plugins]
+   enabled = ["my-plugin"]
+   ```
+
+   **Dropping a `[python]` plugin folder in never runs its code.** The module
+   (and anything it provides that depends on the module — its `on_<stage>`
+   handlers, its `validate`, and its provided **workflows**) stays inert until you
+   list it. An un-enabled `[python]` plugin is recorded `plugin-untrusted` in the
+   run journal.
+
+**Failure isolation.** Every hook — subprocess or Python — is wrapped. A Python
+handler that raises is caught (`except Exception` only — `RunStopped`/SIGTERM as
+`BaseException` always propagate), journalled `plugin-error`, and the offending
+instance is **disabled for the rest of the run**. The run survives. A blocking
+declarative hook fails **open** by default (an error lets the run continue; only a
+clean non-zero exit vetoes); set `fail_closed = true` to make any failure defer
+the unit. An in-process handler can opt into the same by setting `fail_closed =
+True` on its class.
+
+**Hard stops.** Declarative hooks (and the verify commands) run through a
+stop-aware runner. A hard `waves stop` that lands while a hook is running
+kills the hook's process tree, and the run stops: the bus journals
+`plugin-hook-interrupted` (`plugin`, `stage`) instead of `plugin-hook-error`, and
+`fail_closed` never turns that into a veto, because an interrupted hook has not
+failed. If the interrupted hook is on `post_run`, the run still finishes. A hook
+timeout kills the tree the same way. The runner re-scans the tree under the
+hook's root once a second while that root runs, and again every 50 ms while the
+root winds down after its signal; at kill time it also takes in each surviving
+known process's current children. Only processes still alive with a matching
+recorded identity are signalled. A background job whose parent shell exited is
+killed if its parent chain was still under the live root at one of those scans,
+and a process forked in the root's TERM handler is killed if the root lived one
+50 ms re-scan after forking. These cannot be reached: a process that starts and
+is reparented away within one scan interval, a TERM handler that forks and exits
+at once, a descendant already reparented away from a surviving job once the root
+has exited, and a process that starts while the survivors are being reaped. On
+macOS without `psutil`, only the root is killed. Hooks that run as part of the
+stop's own unwind — `pre_worktree_teardown`/`post_worktree_teardown`,
+`pre_rollback`/`post_rollback` — are not interrupted and still run to completion.
+
+**Versioning.** Every manifest declares `api_version`. The framework supports a
+set of versions (`SUPPORTED_API`). A **builtin** with an unsupported version is a
+hard error (a packaging bug we shipped); a **third-party** one is **skipped with a
+warning** (`plugin-skipped`) so a stale drop-in can never take a run down.
+
+---
+
+## Settings
+
+A `[[settings]]` entry is presentation + validation metadata. The vocabulary
+matches the core settings fields exactly:
+
+| Field       | Applies to    | Meaning                                          |
+| ----------- | ------------- | ------------------------------------------------ |
+| `key`       | all           | Unique within the plugin; the policy + env key.  |
+| `type`      | all           | `bool` \| `int` \| `float` \| `str` \| `select`. |
+| `default`   | all           | Value when the operator hasn't set one.          |
+| `label`     | all           | TUI label (falls back to `key`).                 |
+| `help`      | all           | TUI help text.                                   |
+| `options`   | `select`      | Non-empty list of allowed string values.         |
+| `min`/`max` | `int`/`float` | Numeric bounds (widget hints).                   |
+
+**Rendering.** Once a plugin is enabled, its settings appear as their own section
+in the settings TUI (generated from the schema — see
+`src/riaworks_waves_loop/settings_schema.py`). They persist to a `[plugins.<name>]` table in
+`policy.toml`:
+
+```toml
+[plugins]
+enabled = ["my-plugin"]
+
+[plugins.my-plugin]
+strict = true
+mode = "b"
+```
+
+**Reading a setting.**
+
+- In an **in-process** plugin: `self.settings["strict"]` — the manifest defaults
+  overlaid by the operator's `[plugins.<name>]` table.
+- In a **declarative** hook: each setting is exported as an environment variable
+  `WAVES_SETTING_<KEY>` (uppercased), already resolved.
+- Anywhere with a `Policy`: `policy.plugin_setting("my-plugin", "strict", default)`.
+
+Settings are **data**, not code — a plugin can carry `[plugins.<name>]` settings
+without being in `enabled` (the settings UI just won't surface a disabled plugin's
+section). Only the in-process `[python]` module is trust-gated.
+
+---
+
+## Hooks
+
+A hook binds a [stage](#stage-reference) to behavior. The **hook bus**
+(`src/riaworks_waves_loop/plugins/bus.py`) fans each stage out to every bound plugin, in
+registry order (`priority`, then load order). A run with no plugin bound to a
+stage does no work for it (an O(1) fast-path) — zero-plugin runs stay
+byte-identical.
+
+### Declarative hooks
+
+A `[hooks.<stage>]` shell command. The bus runs it with:
+
+- **cwd** = the unit's worktree (or repo root);
+- a `WAVES_*` environment describing the run:
+
+  | Var                                                               | Meaning                                                 |
+  | ----------------------------------------------------------------- | ------------------------------------------------------- |
+  | `WAVES_STAGE`                                                     | the stage firing                                        |
+  | `WAVES_RUN_ID` / `WAVES_RUN_DIR`                                  | run identity                                            |
+  | `WAVES_REPO_ROOT` / `WAVES_WORKTREE`                              | git roots                                               |
+  | `WAVES_STORY_KEY` / `WAVES_ROLE` / `WAVES_PHASE` / `WAVES_BRANCH` | unit context                                            |
+  | `WAVES_AGENTS`                                                    | comma-separated CLI agent ids in the worktree           |
+  | `WAVES_DELIVERY_ID`                                               | dedup key of an at-least-once stage                     |
+  | `WAVES_ROLLBACK_OUTCOME`                                          | `post_rollback` only: `completed` / `paused` / `failed` |
+  | `WAVES_PLUGIN`                                                    | your plugin's name                                      |
+  | `WAVES_SETTING_<KEY>`                                             | each resolved setting                                   |
+
+A **blocking** hook's non-zero exit **vetoes** (defers) the unit. A non-blocking
+hook is advisory (logged `plugin-hook`).
+
+**Mutating from a declarative hook.** Emit a single JSON object on the **last
+non-empty stdout line**:
+
+```json
+{
+  "shared": { "scanned": 42 },
+  "mutate": { "proposed_commit_message": "rewritten by my-plugin" },
+  "veto": { "action": "defer", "reason": "lint failed" }
+}
+```
+
+- `shared` — merged into the cross-stage `shared` dict.
+- `mutate` — only [whitelisted fields](#the-hookcontext) for the current stage.
+- `veto` — `action` ∈ `skip` \| `defer` \| `pause`. Supplying a `veto` replaces
+  the implicit "non-zero exit = defer".
+
+Any non-JSON output is treated as advisory log text.
+
+### In-process hooks
+
+Subclass `riaworks_waves_loop.plugins.Plugin` and define `on_<stage>(self, ctx)` methods.
+The bus calls the handler for each stage you implement; you only mark the stages
+you handle, so the fast path holds for the rest.
+
+```python
+from riaworks_waves_loop.plugins import Plugin
+
+class MyPlugin(Plugin):
+    fail_closed = False   # a raised handler is isolated; True also defers the unit
+
+    def on_pre_commit(self, ctx):
+        ctx.proposed_commit_message = f"{ctx.proposed_commit_message}\n\nShipped-by: me"
+```
+
+Optionally override `validate(self, policy)` to **reject an incompatible config at
+startup** (raise `PluginError`) — e.g. a coupling between a plugin setting and a
+core policy field. This runs once before any stage; a raise fails the run fast
+(it is a deliberate config rejection, not isolated like a hook bug).
+
+Optionally override `inapplicable_reason(self) -> str | None` to say the plugin
+has **nothing to do in this project** — a missing prerequisite, a tree without
+the files it works on. Consulted once at registry build, right after construction
+and before `validate`, with `self.project_root` set. A reason makes the plugin
+**inert**: its workflows are not injected, its hooks (declarative and in-process)
+do not fire, its seeds do not travel, and `validate` is not asked — while it stays
+listed, on, with the reason (`LoadedPlugin.inert`, journaled as `plugin-inert`,
+`PluginRegistry.inert_plugins()`, and `unit workflows list` names it). This is
+the seam that lets a plugin **ship enabled by default**: an enabled plugin in a
+project missing its prerequisite otherwise has two states — refuse to start, or
+run and fail every step — and neither is what a default may do to a project that
+never asked. Nothing is wrong in that project, which is what `validate` is for;
+there is just nothing to do. The bundled TEA plugin is the worked example: on by
+default, inert without `_bmad/tea/config.yaml`, a startup failure only under its
+own `require_tea = true`. A probe that raises is isolated exactly like a failed
+constructor.
+
+> **Don't do expensive or side-effecting work in `__init__`.** Construction
+> happens at registry-build time, and a raised exception there disables the
+> instance.
+
+### The `HookContext`
+
+Every hook receives one `HookContext` (`src/riaworks_waves_loop/plugins/context.py`) for the
+stage. It carries:
+
+- **Read-only facts** (properties, no setter): `run_id`, `story_key`, `epic`,
+  `phase`, `attempt`, `role`, `worktree`, `branch`, `repo_root`, `run_dir`,
+  `agents`, `result_json` (a copy), `session_status`, `verify_reason`,
+  `decision_action`, `delivery_id`, `rollback_outcome`, `settings`. Observe
+  these; you can never rewrite history.
+- **A mutable whitelist** — assign only these, and only where the stage allows:
+  `proposed_prompt`, `proposed_env`, `proposed_feedback`,
+  `proposed_commit_message`, `proposed_decision`.
+- **`ctx.shared`** — a free-form, JSON-serializable dict that **persists across
+  stages** (the engine backs it with `RunState.plugin_shared`, so it survives
+  pause/resume). Use it to carry state between your own hooks.
+
+**Veto** is `ctx.veto(action, reason)`, with `action`:
+
+| Action  | Routes onto the engine's existing… | Effect                                   |
+| ------- | ---------------------------------- | ---------------------------------------- |
+| `skip`  | quiet retire                       | unit dropped (DEFERRED), no notification |
+| `defer` | defer primitive                    | unit deferred + operator notified        |
+| `pause` | escalation                         | run pauses (raises `RunPaused`)          |
+
+There is **no new abort path** — a veto maps onto control flow the engine already
+has. Multiple plugins can object; the bus collects every veto without
+short-circuit and resolves the **most-conservative** one (`pause` > `defer` >
+`skip`), so load order can never hide a severer objection. A `post_*`-stage veto
+is **clamp-conservative only**: a plugin can escalate the engine's own decision,
+never silence it.
+
+---
+
+## Stage reference
+
+Stages fire in `pre_`/`post_` pairs around each unit of work. `post_*` stages see
+the mutations earlier `pre_*` stages made. The **mutable surface** column lists
+what a hook may assign at that stage; everything else on the context is read-only
+there.
+
+### Run / loop (no unit — a `pause` veto pauses the run)
+
+| Stage                                      | When                            |
+| ------------------------------------------ | ------------------------------- |
+| `pre_run` / `post_run`                     | around the whole run            |
+| `pre_pick_next` / `post_pick_next`         | around selecting the next story |
+| `pre_epic_boundary` / `post_epic_boundary` | at an epic transition           |
+
+Under `[gates] retrospective = "auto"`, the epic transition also runs one headless
+retrospective session between those two stages. That session fires
+`pre_retro_session`, then the generic `pre_session` / `post_session`, with
+`role = "retro"` and the story key `epic-<N>-retrospective`. That key is not a
+story in the run's state. A veto on either pre-stage fails the retrospective
+(journaled `retro-auto-failed`); it does not pause the run.
+
+### Story / unit
+
+| Stage                                              | When                                                                                                                                         | Mutable surface                                       |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `pre_story` / `post_story`                         | around one story                                                                                                                             | veto (`pre_`)                                         |
+| `pre_worktree_setup` / `post_worktree_setup`       | around isolated-worktree provisioning                                                                                                        | —                                                     |
+| `pre_ready_gate` / `post_ready_gate`               | around the engine-ready gate                                                                                                                 | veto (`pre_`)                                         |
+| `pre_worktree_teardown` / `post_worktree_teardown` | around teardown (in a `finally`)                                                                                                             | **observe-only** — a veto here cannot un-tear-down    |
+| `pre_rollback` / `post_rollback`                   | around a failed attempt's `git reset --hard` (only when a rollback actually runs); `post_` pairs every `pre_`, even a paused/failed rollback | **observe-only** — a veto here cannot block the reset |
+| `pre_integrate`                                    | before integrating a finished unit                                                                                                           | —                                                     |
+| `pre_merge` / `post_merge`                         | around the local branch merge                                                                                                                | —                                                     |
+
+The policy's provisioning contract — `[scm] provision` / `teardown`, shell commands the run executes in the worktree with the same `WAVES_*` coordinates — runs at these moments too: `provision` after the seeds and before `post_worktree_setup`, `teardown` at the top of integration. A plugin that owns a project's stack binds the stages instead of the policy keys; the two are alternatives, not a pipeline.
+
+`post_story` fires after an isolated unit's worktree teardown. If the worktree was
+removed, a declarative `post_story` hook runs from the repo root and
+`WAVES_WORKTREE` still names the removed worktree; if it was kept (a deferred
+unit under `keep_failed`), the hook runs from that worktree.
+
+`post_rollback` fires exactly once for every emitted `pre_rollback`, including when
+the rollback stops part-way — it pauses the run for manual recovery (an
+attempt-owned spec it cannot safely restore, work it could not park, a refused
+reset) or an unexpected error escapes it. `ctx.rollback_outcome`
+(`WAVES_ROLLBACK_OUTCOME` for a declarative hook) says which: `completed`,
+`paused`, or `failed`; after the latter two the tree may be only partially reset.
+It is `None` on every other stage, `pre_rollback` included. A plugin that
+quiesces in `pre_rollback` can therefore always rely on the matching release;
+one that does post-reset work (re-installing dependencies, re-applying state)
+should gate it on `completed`, since `post_rollback` no longer implies the reset
+finished.
+Rollback paths that never emit `pre_rollback` (a clean tree, a policy pause with
+`[scm] rollback_on_failure` off, an owned-spec pause raised before the rollback
+starts) emit neither stage.
+
+### Dev
+
+| Stage                              | When                             | Mutable surface                                                                                                                                                            |
+| ---------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pre_dev_phase` / `post_dev_phase` | around the dev attempt loop      | veto (`pre_`); both are [workflow injection points](#workflows-provides) — `pre_dev_phase` fires on a story's first attempt only, before the rollback baseline is captured |
+| `pre_dev_session`                  | before each dev session          | `proposed_prompt`, `proposed_env`, veto                                                                                                                                    |
+| `post_dev_verify`                  | after dev or repair verification | —                                                                                                                                                                          |
+
+`post_dev_verify` fires on **both** legs of the dev phase — once after the dev
+session's verification, and again after each repair session's — so a handler sees
+it **more than once per story**, not once. The two legs share one `attempt`
+counter bounded by `[limits] max_dev_attempts`, which is also the bound on how
+many times the stage can fire for one story. Write handlers to be idempotent and
+to key on the correlation fields below rather than on the story alone. It also
+fires on the way to a pause: an attempt whose session reported a CRITICAL
+escalation emits before the run stops, on either leg.
+
+`post_dev_verify` exposes `ctx.command_results`: an immutable tuple of the
+per-command `CommandResult` records core just executed. Each has `command`,
+`returncode`, the existing merged bounded `output_tail`, separate `stdout`
+and `stderr` strings, and `spawn_error` — normally `None`, and set when the child
+could not be started at all. The typical cause is the directory it was to run in
+(missing, not a directory, or unsearchable), which the message names, but any
+spawn-time `OSError` lands here — a missing shell, EMFILE, ENOMEM — so read the
+wrapped exception rather than assuming the directory. Such a result carries no
+real exit status (`verify.SPAWN_FAULT_RC`, deliberately outside the range a
+signal-killed child reports and distinct from the timeout leg's `-1`) and
+classifies as an environment fault, which pauses the run. The two stream strings
+are intended to be the streams essentially whole
+— they are not cut to `[verify] stream_capture_kb`, which bounds only what is
+written to disk — but they are not unbounded either: a hard 32 MiB per-stream
+ceiling applies, so a pathologically chatty command cannot grow the orchestrator's
+peak memory with the number of configured verify commands. When that ceiling cuts
+a stream the **tail** is what a plugin receives, and the matching journal record's
+`stdout_bytes` / `stderr_bytes` still report what the command emitted, so the cut
+is always detectable rather than silent. Ordinary suites never reach it. This is
+observation data only: a plugin cannot change the verifier's outcome or the commit
+decision. The run's `journal.jsonl` also records
+one `verify-command-result` entry per command with run/story/attempt/stage and
+verification-sequence correlation — note that `attempt` is the dev/repair counter, so every review
+cycle of one attempt shares a single value and only `verification_sequence` tells successive review
+passes apart — `output_tail`, `spawn_error`, byte counts, and run-relative `stdout_path` /
+`stderr_path` pointers under the run's `verify/` directory; full streams are not
+embedded in the journal. `spawn_error` rides the record because the record's
+readers are out-of-process and `returncode` alone cannot separate a child that
+never started from one that ran. A pass cut short by a hard `waves stop` (DW-353)
+records `interrupted: true` with `returncode` −1001 (`INTERRUPTED_RC`): the command
+the stop killed has `output_tail` `interrupted by a hard stop request`, and every later
+command, which was never started, still gets a record, with `output_tail`
+`not started: an earlier command was interrupted by a hard stop request`. The run
+stops right after journalling that pass, so no hook observes it and no decision is
+taken on it. The field is absent from every pass that ran through. That store is deliberately separate from `logs/`, which
+holds coding-CLI pane captures named after session task ids and is read as such
+by the TUI.
+
+Two more context fields say **which** verification the results came from, because
+nothing else on the context can: both the dev leg and the repair leg emit
+`post_dev_verify` from `Phase.DEV_VERIFY`, and `ctx.attempt` is one per-story
+counter the repair leg continues rather than restarts, so its value orders the
+two but names neither.
+
+| Field                       | Value                                                                                  |
+| --------------------------- | -------------------------------------------------------------------------------------- |
+| `ctx.verification_stage`    | `"dev"` for the initial dev verification, `"fix"` for a repair one, `None` if none ran |
+| `ctx.verification_sequence` | the story's 1-based ordinal for that pass, or `None` if it recorded nothing            |
+
+The review gate publishes the same pair on its own stage, [`post_review_verify`](#review),
+always as `"review"` (or `None`).
+
+Together they are the join key: the `verify-command-result` entries carrying this
+`story_key` + `verification_stage` + `verification_sequence` are exactly this
+context's results, one per record, ordered by `command_index`. The sequence is
+monotonic per story **across a pause/resume** — unlike `attempt`, which a human
+re-arm reuses — so it is safe to persist as a correlation id.
+
+Read `ctx.command_results == ()` together with `verification_stage`; on its own it
+is ambiguous:
+
+- **`verification_stage is None`** — no verify pass ran. Several causes land here
+  and the empty tuple names none of them: the session did not complete
+  (`ctx.session_status`), an earlier gate already failed the attempt — the
+  dev-artifact check or the deferral harvest (`ctx.verify_reason`) — or the engine
+  variant suppressed the pass for this leg (stories mode skips it on a plan-halt
+  leg, which has no implementation to build).
+- **stage set, `verification_sequence is None`** — the pass ran and executed
+  nothing, because `[verify] commands` is empty. No journal record exists either.
+- **stage set, sequence an int** — those commands ran, and each has a matching
+  journal record.
+
+What lands on disk is bounded by `[verify] stream_capture_kb` (default 256 KiB per
+stream): the **tail** is retained, and the record stays explicit about the cut —
+`stdout_bytes` / `stderr_bytes` are what the command emitted, `stdout_captured_bytes` /
+`stderr_captured_bytes` how much of that reached disk, and `stdout_truncated` /
+`stderr_truncated` their inequality. Both counts are UTF-8 lengths of the decoded
+stream, **not** file sizes: the files are written in text mode, so Windows newline
+translation makes the file larger there. Set the knob to `0` to retain nothing at
+all — no files are written and the pointers are null, but the record still lands
+with the full byte counts, because "nothing was retained" and "the command was
+silent" are different facts. Retaining is observation and never fails a run: if the
+write raises (ENOSPC, a read-only run dir, or a `verify/` directory whose
+confinement cannot be established — the store refuses rather than write through
+a symlink a session planted), the pointer is null and `capture_error`
+carries the reason. A plugin reading these pointers must therefore treat both
+`None` and a missing file as normal, and consult `*_truncated` before assuming a
+file holds a command's whole output. Treat verifier output as potentially sensitive and store, upload, sign,
+or act on it only from an explicitly configured plugin.
+
+**`post_dev_verify` covers the dev phase only.** `[verify] commands` also run at
+the _review_ gate — `verify_review` / `verify_review_stories` /
+`verify_review_bundle` end on the same core classifier — and those runs are
+journalled (`verification_stage: "review"`, sharing the story's one
+`verification_sequence` counter with the dev and fix passes) and published on
+their own stage, [`post_review_verify`](#review). They run in `repo_root`, the same root
+the dev phase uses (#695); only the gates' own artifact reads — the spec, the
+sprint board, the deferred-work ledger — stay project-rooted. Five engine gates reach them: the
+converged review pass, the review-budget-exhaustion rescue, the review-timeout
+salvage, and both passes inside the skip-review commit path (which runs the gate
+again after a repair). The records do not name which of the five ran — the
+neighbouring `review-result` / `review-skipped*` / `review-timeout-salvage*`
+entries and the sequence ordering say that. `waves confirm --reverify` runs
+the commands too, out of band by construction — the run that parked the story is
+finished, so there is no journal to write to and no hook bus to emit on.
+
+Two consequences a handler has to be written for:
+
+- **`verify-command-result` entries are a complete census of a RUN's verifier
+  command invocations, but not of every gate visit or of a project's.** Every
+  command an in-run dev, fix or review pass executed lands a record. A pass cut
+  short by a hard stop also records each command it never started, marked
+  `interrupted: true` with a `not started:` `output_tail`, so the record count of
+  such a pass is its configured command count, not what actually ran. A pass
+  with no `[verify] commands` configured executes nothing and therefore records
+  nothing; `waves confirm --reverify` stays outside because it runs after the
+  run that parked the story is over. Count distinct `verification_sequence`
+  values to derive recorded passes, while preserving that zero-command caveat.
+- **One command record is not a pass verdict**, and an earlier red pass is not
+  evidence the commit was blocked: a failed pass can be followed by a green
+  review-gate pass and a commit. Group records by `verification_sequence`, then
+  correlate that group with its surrounding decision event instead of inferring
+  the decision from one command or from an older pass. The dev and fix legs use
+  `dev-decision` / `fix-decision`; review passes use the applicable neighbouring
+  `review-result`, `review-skipped*`, `review-timeout-salvage*`,
+  `review-budget-committed`, or `review-followup-damped` event described above.
+
+### Review
+
+| Stage                 | When                           | Mutable surface                                   |
+| --------------------- | ------------------------------ | ------------------------------------------------- |
+| `pre_review_phase`    | before the review loop         | veto                                              |
+| `pre_review_session`  | before each review session     | `proposed_prompt`, `proposed_env`, veto           |
+| `post_review_session` | after each review session      | —                                                 |
+| `post_review_result`  | after a review verdict         | a [workflow injection point](#workflows-provides) |
+| `post_review_verify`  | after each review verify gate  | —                                                 |
+| `pre_fix_session`     | before a verify-repair session | `proposed_prompt`, `proposed_env`, veto           |
+
+`post_review_verify` is the review leg's counterpart of `post_dev_verify`: its own
+stage, not a second meaning for that one. It fires once per review verify gate
+visit — the converged review pass, the review-budget-exhaustion rescue, the
+review-timeout salvage, and each of the (up to two) passes inside the skip-review
+commit path — in every run mode (sprint, stories, sweep). A gate visit ended by
+an exception (a hard stop, a repair pause, an engine error) is never published. A
+story can therefore see it **several times** (once per review cycle that reached
+the gate, plus a re-check after a verify-repair), so write handlers to be
+idempotent and key on `verification_sequence` when it is set (it is `None` when no
+commands ran). It fires after the gate itself has finished — including its own
+acceptance bookkeeping (binding the review artifact source, a sweep's ledger
+reclose) — and before the engine routes on the outcome (journals
+`review-verify-failed`, escalates, repairs, or commits). It is observation only: a
+handler cannot change the gate's outcome, the routing, or the journal.
+
+The context carries the same payload as `post_dev_verify`:
+
+| Field                       | Value                                                                                                                                                                                                                                                                                  |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ctx.session_status`        | the status of the review session whose product was gated — the timeout-class status on the review-timeout salvage visit; `None` on the skip-review path, where no review session ran                                                                                                   |
+| `ctx.result_json`           | that review session's result (a copy) — often `None` on the timeout-salvage visit; `None` on the skip-review path                                                                                                                                                                      |
+| `ctx.verify_reason`         | the gate's outcome reason (the failure reason on a red gate)                                                                                                                                                                                                                           |
+| `ctx.command_results`       | the `CommandResult` records the gate's command pass ran, in order                                                                                                                                                                                                                      |
+| `ctx.verification_stage`    | `"review"` whenever the gate reached its command pass (including zero commands); `None` when one of the gate's artifact checks refused first — the spec, the operator-action list, the sprint board, or a sweep's ledger (stories mode checks the spec only); `verify_reason` names it |
+| `ctx.verification_sequence` | the story's ordinal for that pass (joins the `verify-command-result` entries), or `None` if it recorded nothing (no `[verify] commands`, or no pass)                                                                                                                                   |
+
+Read `command_results == ()` with `verification_stage` exactly as for
+`post_dev_verify`. A review pass cut short by a hard `waves stop` stops the run
+before the gate is classified, so it is never published.
+
+### Commit
+
+| Stage             | When                                        | Mutable surface                                                                          |
+| ----------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `pre_commit_gate` | just before every commit, on every path     | a [workflow injection point](#workflows-provides); defer-safe (the unit may still defer) |
+| `pre_commit`      | before committing (after `pre_commit_gate`) | **`proposed_commit_message`**; only a `pause` veto is honored (the unit is mid-commit)   |
+| `post_commit`     | after committing                            | —                                                                                        |
+
+### Generic session boundary
+
+| Stage          | When                                                                                         | Mutable surface                         |
+| -------------- | -------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `pre_session`  | before **every** session (after the role-specific `pre_*_session`, so it sees its mutations) | `proposed_prompt`, `proposed_env`, veto |
+| `post_session` | after every session                                                                          | —                                       |
+
+### Sweep (deferred-work cycle — bundles inherit all per-story stages)
+
+| Stage                                                  | When                             |
+| ------------------------------------------------------ | -------------------------------- |
+| `pre_sweep_cycle` / `post_sweep_cycle`                 | around a sweep cycle             |
+| `pre_triage_session` / `post_triage`                   | around triage                    |
+| `pre_migrate_session` / `post_migrate`                 | around a legacy-ledger migration |
+| `pre_close_resolved` / `post_close_resolved`           | around closing resolved entries  |
+| `pre_decision` / `post_decision`                       | around a human-decision item     |
+| `pre_bundle` / `post_bundle`                           | around a deferred-work bundle    |
+| `pre_materialize_bundles` / `post_materialize_bundles` | around materializing bundles     |
+
+`post_migrate` gets **at least one delivery attempt**. The engine records the
+completed migration before firing it and, if the process or host dies before the emit
+returns, fires it again on resume. A returned emit counts as delivered even when a
+handler failed: a Python raise, a declarative error, timeout or non-zero exit is not
+retried, and a veto on `post_migrate` is ignored. Every delivery of one completion
+carries the same `ctx.delivery_id` (`WAVES_DELIVERY_ID` for a declarative hook),
+and a later re-migration gets a new one. A handler with non-idempotent side effects
+should deduplicate on that id. Stages without an id leave `ctx.delivery_id` as `None`
+and do not set the variable. A migration whose ledger holds no legacy entries completes
+without a session and fires neither `pre_migrate_session` nor `post_migrate`.
+
+---
+
+## Workflows (`[provides]`)
+
+A **workflow** is the conservative form of custom orchestration: an **extra agent
+session** injected at a lifecycle stage, run through the engine's normal session
+machinery — **no new pipeline stage**. It is the right tool when you want an
+additional pass (a doc sync, a lint sweep, an extra reviewer) without rewriting
+the loop.
+
+```toml
+[workflows.doc-sync]
+stage = "post_dev_phase"   # injection point (see below)
+role = "review"            # which adapter runs it: dev | review
+prompt = "Update CHANGELOG.md for story {story_key} if it introduced user-facing changes."
+blocking = false           # true: a non-completed session defers the unit
+```
+
+- **Injection stages** are deliberately limited to where the unit's worktree is
+  live: **`pre_dev_phase`** (before the dev session, on a story's first attempt
+  only — the tree is real but still the baseline), **`post_dev_phase`** (right
+  after dev lands), **`post_review_result`** (after a review verdict — fires only
+  when the orchestrator review loop actually runs; `review.trigger =
+"recommended"` skips it on stories whose dev session recommends no follow-up),
+  and **`pre_commit_gate`** (unconditionally just before every commit — review,
+  skip, and budget-rescue paths alike — so a session there evaluates the exact
+  tree about to commit). `pre_commit_gate` is **defer-safe**: it fires before the
+  unit enters COMMITTING, so a _blocking_ workflow whose session doesn't complete
+  still defers cleanly. Other stages lack a worktree or run after teardown.
+- **`pre_dev_phase` exists for work that must precede the code** — a red-phase
+  acceptance scaffold is the case it was added for. Two properties are positional
+  and matter: it is dispatched BEFORE `baseline_untracked` is captured, so what it
+  writes survives the rollback of a failed attempt (that snapshot is what a
+  rollback subtracts), and only on `task.attempt == 0`, so a retry does not
+  regenerate a net the previous attempt is midway through turning green.
+  `blocking = true` is **refused** there: the story is still PENDING, and
+  `statemachine.py` gives PENDING no terminal transition to defer into.
+- **`prompt`** expands `{story_key}`, `{run_id}`, and `{scripts}`.
+- **The orchestrator appends two sections to what you write**, and appends them
+  _after_ the session gates fire, so a `pre_workflow_session` / `pre_session`
+  prompt rewrite cannot strip them: a **`## Sprint board`** prohibition — the
+  same one dev and review prompts carry, because a workflow session runs while
+  the orchestrator's own `sprint-status.yaml` advance is still uncommitted and
+  must not be "fixed" or reverted (#437) — and the **`## Completion signal`**
+  contract naming the marker file the session must write before ending its turn.
+  Write `prompt` as a self-contained instruction; do not restate either. (Stories
+  mode has no board, so the first section is absent there.)
+- The injected session is a **first-class session**: it fires `pre_workflow_session`
+  → `pre_session` → `post_session`, is recorded on the task, and counts toward the
+  token budget. Its journal entries are `workflow-start` / `workflow-end`.
+- **`blocking`**: a blocking workflow whose session doesn't complete **defers the
+  unit** (through the existing defer primitive). A non-blocking one is advisory.
+- A workflow from a `[python]` plugin is **trust-gated** along with the module: it
+  fires only when the plugin is enabled. A workflow from a pure-declarative plugin
+  fires whenever the plugin is discovered.
+
+`registry.provided_workflows()` lists declared workflow names for introspection.
+
+### Making a workflow configurable
+
+The `blocking` and (in effect) on/off state a workflow declares in its manifest
+are **defaults**. A plugin can let an operator tune them per run — disable a step
+or flip its gate — by declaring settings that follow a naming convention. No
+Python is required; the registry reads the resolved settings when it injects.
+
+The convention, keyed on the workflow's `name`:
+
+| Setting key       | Type   | Effect                                                                                 |
+| ----------------- | ------ | -------------------------------------------------------------------------------------- |
+| `<name>_enabled`  | bool   | When explicitly `false`, the step is **dropped** — no session runs.                    |
+| `<name>_blocking` | bool   | **Overrides** the manifest's `blocking` flag for that workflow.                        |
+| `<name>_role`     | string | **Overrides** which adapter runs it — the step gets its own `[adapter.<role>]` config. |
+
+**Default semantics — absent settings change nothing.** The overlay only acts on
+a setting that is present and (for `_enabled`) explicitly `false`; `_blocking` and
+`_role` fall back to the manifest value when unset. A plugin that declares none of
+these settings is **byte-identical** to one written before the feature existed. A
+`_role` naming something outside [`WORKFLOW_ROLES`](#workflows-provides) is
+ignored, not raised: the manifest's load-time check is where a typo belongs, and a
+setting must not crash a run at dispatch time.
+
+**Why `_role` is a setting and not a copy.** Plugin overlay is **by name**: drop a
+manifest named `tea` into the project tree and it replaces the bundled `tea`
+whole — so a project that wants one step on a cheaper (or costlier) model would
+otherwise carry a copy of every workflow, prompt and setting in that plugin just to
+change one field, and inherit the job of keeping it current. Measured downstream:
+195 lines copied to move one step off the `dev` adapter.
+
+**Declare the matching `[[settings]]`** so the keys are first-class (typed,
+documented, surfaced in the settings UI) and operators can flip them from
+`[plugins.<plugin>]` in `policy.toml`:
+
+```toml
+# A gate step: generated advisory by default, an operator can make it block.
+[workflows.nfr]
+stage = "pre_commit_gate"
+role = "review"
+prompt = "Run the NFR assessment for the changes in {story_key}."
+blocking = false              # manifest default: advisory
+
+[[settings]]
+key = "nfr_enabled"           # <name>_enabled  -> drop the step when false
+type = "bool"
+default = true
+help = "Run the NFR workflow after review."
+
+[[settings]]
+key = "nfr_blocking"          # <name>_blocking -> override the blocking flag
+type = "bool"
+default = false
+help = "Escalate the unit when the NFR gate is not satisfied."
+```
+
+An operator then opts in from policy:
+
+```toml
+[plugins.my-quality]
+nfr_blocking = true           # flip the advisory gate to blocking
+td_enabled   = false          # turn the test-design step off entirely
+```
+
+**Interaction with the blocking / defer path.** `<name>_blocking` feeds the same
+`WorkflowSpec.blocking` the engine already honors: a blocking workflow whose
+session does not **complete** defers the unit through the existing defer
+primitive (see [Workflows](#workflows-provides) above). The overlay only changes
+which value that flag holds at injection time — it adds no new control flow. (For
+quality gating on a workflow's _output_ rather than its completion, do that in an
+in-process `on_pre_commit` hook; the manifest `blocking` flag only checks session
+completion.)
+
+**Disabling every step at a stage is free.** When a setting turns off the last
+remaining workflow at a stage, that stage drops out of `registry.workflow_stages()`
+too, so the engine's O(1) per-stage injection guard skips it entirely — the same
+as if no workflow had ever been declared there.
+
+---
+
+## Worked walkthrough: the `guardrails` plugin
+
+The repo ships a complete example under
+[`examples/plugins/guardrails/`](../examples/plugins/guardrails/) that exercises a
+setting, an observe hook, a veto gate, a commit-message mutation, and a provided
+workflow — in ~40 lines of Python plus a manifest. Build it yourself:
+
+**1. Make the folder.** In your project:
+
+```text
+.waves/loop/plugins/guardrails/
+  plugin.toml
+  guardrails.py
+```
+
+**2. Write the manifest** (`plugin.toml`): metadata, a `[python]` module, two
+`[[settings]]` (`trailer`, `forbid_epic`), and one `[workflows.doc-sync]` bound to
+`post_dev_phase`. Copy it from the example.
+
+**3. Write the module** (`guardrails.py`):
+
+```python
+from riaworks_waves_loop.plugins import Plugin
+
+class GuardrailsPlugin(Plugin):
+    fail_closed = False
+
+    def on_pre_story(self, ctx):
+        # observe: count stories in the cross-stage shared dict
+        ctx.shared["stories_seen"] = ctx.shared.get("stories_seen", 0) + 1
+
+    def on_pre_dev_phase(self, ctx):
+        # gate: skip a "parked" epic
+        parked = int(self.settings.get("forbid_epic") or 0)
+        if parked and ctx.epic == parked:
+            ctx.veto("skip", f"epic {parked} is parked")
+
+    def on_pre_commit(self, ctx):
+        # mutate: append a trailer to the commit message
+        trailer = str(self.settings.get("trailer") or "").strip()
+        if trailer and trailer not in (ctx.proposed_commit_message or ""):
+            base = (ctx.proposed_commit_message or "").rstrip()
+            ctx.proposed_commit_message = f"{base}\n\n{trailer}" if base else trailer
+```
+
+**4. Enable + configure** in `.waves/loop/policy.toml`:
+
+```toml
+[plugins]
+enabled = ["guardrails"]
+
+[plugins.guardrails]
+trailer = "Automated-by: waves"
+forbid_epic = 0           # set to an epic number to park it
+```
+
+**5. Run.** On the next `waves run`:
+
+- the settings TUI shows a **guardrails** section with `trailer` + `forbid_epic`;
+- each story increments `stories_seen` in the run's `plugin_shared`;
+- a story in the parked epic is **skipped** before its dev session;
+- after dev lands, the **doc-sync** workflow runs an extra review-role session;
+- each commit message gets the **trailer** appended.
+
+Drop `[python]` from the manifest and `guardrails` from `enabled`, and the plugin
+goes completely inert — proof of the trust gate.
+
+---
+
+## Platform portability
+
+waves's core is portable Python, and the OS-specific work is quarantined behind
+seams (the tmux transport, the `ProcessHost` lifecycle, the hook interpreter — see
+[Porting waves to a new OS](porting-to-a-new-os.md)). Plugin **helper scripts**
+are spawned under the orchestrator's own interpreter (`sys.executable`), **not** a
+PATH-resolved `python3` — so a bundled script may `import riaworks_waves_loop` and reach those
+seams instead of re-implementing OS primitives. Follow this discipline:
+
+- **Use the `ProcessHost` seam for pid lifecycle.** For terminate / force-kill /
+  liveness, call `get_process_host()` rather than guarding `os.kill` /
+  `signal.SIGKILL` / `taskkill` behind your own `sys.platform` branch:
+
+  ```python
+  from riaworks_waves_loop.process_host import get_process_host
+
+  host = get_process_host()
+  host.terminate(pid)
+  if host.is_alive(pid):
+      host.force_kill(pid)
+  ```
+
+  The seam already carries the POSIX and Windows behavior, so the script gains a
+  new OS for free when a host registers.
+
+- **Stay dependency-free.** Beyond `riaworks_waves_loop` itself, import only the stdlib so the
+  script runs anywhere the core does. If you genuinely need a third-party package on
+  one platform, make it an **optional extra** in `pyproject.toml` and **import it
+  lazily** with a clear error if missing — never at module top level. The bundled
+  Unity plugin does exactly this for `psutil`: imported only on non-Linux process
+  _discovery_ (a core dependency on Windows, the `non-linux` extra on macOS), so the
+  dep-free Linux/WSL path never pulls it in.
+
+- **Guard the primitives that have no seam.** Anything absent or differently-shaped
+  on Windows that isn't behind a seam — `cp`/`--reflink`, symlinks, `/proc` scanning,
+  `/tmp`, `start_new_session` — still needs a fallback behind a `sys.platform`
+  branch, with a `# portability: <reason>` comment so the intent (and the CI
+  portability guard, `tests/test_portability_guard.py`) stays honest. Keep the Linux
+  fast path byte-identical; the Windows branch can be best-effort and is not
+  exercised until a native-Windows backend ships. WSL **is** Linux, so it takes the
+  fast path unchanged.
+
+The Unity plugin's `unity_teardown.py` is the worked example: it **delegates** its
+SIGTERM→SIGKILL sweep of leaked Editor / MCP-server processes to
+`get_process_host()` (so it inherits Windows behavior), while still doing its own
+worktree-bound process _discovery_ via the guarded `/proc`-with-psutil-fallback
+scan. See it alongside `unity_setup.py` / `unity_cleanup.py` (and the
+[Game Engine plugin guide](game-engine-plugin-guide.md)) for both shapes.
+
+## Reference
+
+- Model + base class: `src/riaworks_waves_loop/plugins/model.py`
+- Manifest parser: `src/riaworks_waves_loop/plugins/manifest.py`
+- Discovery + overlay + api-check: `src/riaworks_waves_loop/plugins/loader.py`
+- Trust gate: `src/riaworks_waves_loop/plugins/trust.py`
+- Registry (the inter-pillar contract): `src/riaworks_waves_loop/plugins/registry.py`
+- Hook bus + dispatch: `src/riaworks_waves_loop/plugins/bus.py`
+- Hook context + veto: `src/riaworks_waves_loop/plugins/context.py`
+- Settings schema: `src/riaworks_waves_loop/settings_schema.py`
+- The bundled Unity engine plugin (a real, complex example):
+  `src/riaworks_waves_loop/data/plugins/unity/`
+- Game-engine specifics: [Game Engine plugin guide](game-engine-plugin-guide.md)
