@@ -382,6 +382,12 @@ Uma story ≈ um (ou poucos) commits, cada um descrito em uma frase.
   decisão humana a cada passo.
 - **O que fazer:** `> /bmad-build-auto`
 - **Cuidado:** revise os commits gerados ao final como se fossem seus.
+- **Em escala (Riaworks Waves):** para muitas stories, use `> /waves-master-tui` (o
+  orquestrador `waves run` abre uma sessão nova por story: dev → verify → review →
+  commit) ou `> /waves-master-parallelism <épico>` (mede colisões, planeja ondas e
+  executa frentes em paralelo). Pré-requisitos: `tmux`, `sprint-status.yaml` e
+  `/waves-tests` feito uma vez. Nunca rode um loop Waves e o `/bmad-build-auto` nas
+  mesmas stories ao mesmo tempo. Manual: `_bmad-output/vendor/riaworks-waves-3.6.12.4-linux/manuais/02-MANUAL-USO-WAVES.md`.
 
 > ✅ **Saída da Fase 3:** todas as stories do sprint implementadas, com testes,
 > commitadas.
@@ -798,6 +804,9 @@ reporte a saída e **pare**.
 | `/bmad-sprint-planning` | Prontidão e status do sprint | A2 / A3 |
 | `/bmad-build` | Implementar uma story/incremento | A3 / B4 |
 | `/bmad-build-auto` | Loop de build autônomo | A3 (opcional) |
+| `/waves-master-tui` | Riaworks Waves — lançar/retomar/vigiar um `waves run` (uma story por vez, sem supervisão) | A3 (opcional) |
+| `/waves-master-parallelism` | Riaworks Waves — planejar e executar um épico em ondas/frentes paralelas | A3 (opcional) |
+| `/waves-tests` | Riaworks Waves — configurar como os testes rodam (`_waves/tests_memory.toml`) | A3 (antes das ondas) |
 | `/bmad-code-review` | Revisão adversarial de código | A4 / B2 / B4 |
 | `/bmad-checkpoint-preview` | Passo a passo explicado de uma mudança | A4 (opcional) |
 | `/bmad-qa-generate-e2e-tests` | Gerar testes E2E / de caracterização | A4 / B3 |
@@ -824,6 +833,7 @@ reporte a saída e **pare**.
 | Deploy Coolify | `_bmad-output/coolify-deploy-guide.md` (+ github / local) | Entrega em produção |
 | Guia de Instalação da Toolchain | `_bmad-output/toolchain-installation-guide.md` | Instalar/ativar/usar BMAD + Impeccable + Superpowers |
 | Estudo do Superpowers | `_bmad-output/superpowers-study-2026-10-07.md` | Estudo/auditoria do obra/superpowers |
+| Riaworks Waves | `_bmad-output/vendor/riaworks-waves-3.6.12.4-linux/manuais/` | Manuais PT-BR: instalação (01) e uso (02) |
 | Instruções dos agentes | `AGENTS.md` (OpenCode) / `CLAUDE.md` (Claude Code) | Contrato de trabalho dos agentes |
 
 ---

@@ -1,8 +1,8 @@
 # Tools Registry — Inventário de Ferramentas do Projeto
 
-**Last Updated**: 2026-11-09T00:00:00Z
+**Last Updated**: 2026-11-10T00:00:00Z
 **Maintainer**: Hsantos
-**Version**: 1.8.0
+**Version**: 1.9.0
 
 ---
 
@@ -105,7 +105,13 @@ Este artefato rastrea todas as ferramentas, dependências e recursos instalados 
 | **OpenCode** | v2.2.6 | `~/.opencode/bin/opencode` | `AGENTS.md`, `.opencode/commands/`, `.agents/skills/` | `~/.config/opencode/plugins/rtk.ts` |
 | **Claude Code** | 2.1.319 | `~/.local/bin/claude` | `CLAUDE.md`, `.claude/settings.json`, `.claude/skills/` | `PreToolUse` hook in `.claude/settings.json` (`rtk hook claude`) + `.claude/RTK.md` |
 
-Both agents run the **same 55 skills** and the **same toolchain**. See §3.
+Both agents run the **same 66 skills** and the **same toolchain**. See §3.
+
+> **Atualizado em 2026-11-10** (instalação do Riaworks Waves): BMAD **6.12.4**
+> confirmado como a última versão publicada no npm (= piso do Waves) · Impeccable
+> **4.8.2** (engine v0.1.21) · **Riaworks Waves 3.6.12.4** (`waves`, uv tool, extras
+> `[tui,opencode]`) · uv 0.13.7, RTK 1.2.0, rea-agents 6.8.0 já na última release.
+> **Pendente:** `tmux` (apt 3.6a) + `libnotify-bin` — exigem `sudo`.
 
 > **Atualizado em 2026-11-09** (sessão de verificação de atualizações):
 > toolchain validado — Node **v24.22.2** · npm **12.2.2** · uv **0.13.7** ·
@@ -133,14 +139,15 @@ Both agents run the **same 55 skills** and the **same toolchain**. See §3.
 | **Manifest** | `_bmad/_config/manifest.yaml` |
 | **Status** | ✅ Active |
 
-### 2.2 Skills (55 Total)
+### 2.2 Skills (66 Total)
 
 | Category | Count | Location |
 |----------|-------|----------|
 | **Official BMAD skills** | 50 | `_bmad/core/`, `_bmad/bmm/` (incl. 21 deprecated v6-shims) |
 | **Custom skills (Technology Agents)** | 4 | `.agents/skills/`, `.claude/skills/` |
 | **Impeccable (design)** | 1 | `.agents/skills/`, `.claude/skills/`, `.opencode/skills/` |
-| **Total** | 55 | `.agents/skills/`, `.claude/skills/` (byte-identical, parity verified 2026-10-07) |
+| **Riaworks Waves (`waves-*`)** | 11 | `.claude/skills/` (source, checked by `waves validate`), mirrored to `.agents/skills/` — see §3.6 |
+| **Total** | 66 | `.agents/skills/`, `.claude/skills/` (byte-identical except Impeccable's provider-flavoured copy; parity verified 2026-11-10) |
 
 #### Custom Skills Created (Technology Agents)
 
@@ -185,19 +192,21 @@ Every capability in this registry is reachable from **both** OpenCode and Claude
 | Surface | OpenCode | Claude Code |
 |---------|----------|-------------|
 | Instructions file | `AGENTS.md` | `CLAUDE.md` (imports `AGENTS.md`) |
-| Skill tree | `.agents/skills/` (55) | `.claude/skills/` (55) — byte-identical mirror |
-| Skill invocation | `.opencode/commands/*.md` (`/bmad-*`) | native skill discovery (`/bmad-*`) |
+| Skill tree | `.agents/skills/` (66) | `.claude/skills/` (66) — byte-identical mirror |
+| Skill invocation | `.opencode/commands/*.md` (`/bmad-*`, `/waves-*`) | native skill discovery (`/bmad-*`, `/waves-*`) |
+| Waves orchestrator transport | profile `opencode-http` — headless `opencode serve` per session, no hooks, no tmux | profile `claude` — tmux session + hook relay (`waves relay <Event>`) in `.claude/settings.json` |
 | Tool allow-list | shell `PATH` | `.claude/settings.json` → `permissions.allow` |
 | RTK compression | `~/.config/opencode/plugins/rtk.ts` | `.claude/settings.json` → `PreToolUse` hook |
 | RTK reference | — | `.claude/RTK.md` |
 
-### 3.1 OpenCode Commands (55 Total)
+### 3.1 OpenCode Commands (66 Total)
 
 | Category | Count |
 |----------|-------|
 | **Core Commands** | 50 |
 | **Custom Commands** | 5 |
-| **Total** | 55 |
+| **Riaworks Waves (`waves-*.md`, generated from each SKILL.md frontmatter)** | 11 |
+| **Total** | 66 |
 
 #### Custom Commands Created
 
@@ -217,15 +226,15 @@ Removed in `d6e8139`: `bmad-docker`, `bmad-python314`, `bmad-php84`,
 | Component | Location | Purpose |
 |-----------|----------|---------|
 | **Instructions** | `CLAUDE.md` | Entry point; `@AGENTS.md` import + Claude-specific notes |
-| **Settings** | `.claude/settings.json` | Tool allow-list (`uv`, `rtk`, `rg`, `gh`, `crewai`, `npx bmad-method`) + RTK `PreToolUse` hook |
+| **Settings** | `.claude/settings.json` | Tool allow-list (`uv`, `rtk`, `rg`, `gh`, `crewai`, `npx bmad-method`) + RTK `PreToolUse` hook + Waves relay hooks (`SessionStart`/`Stop`/`SessionEnd`/`PreCompact`/`Notification` → `/home/hsantos/.local/bin/waves relay <Event>`) |
 | **Settings (local)** | `.claude/settings.local.json` | Impeccable hooks (gitignored, per-machine) |
 | **RTK reference** | `.claude/RTK.md` | RTK command reference for the agent |
-| **Skills** | `.claude/skills/` (55) | Auto-discovered; invoked as `/bmad-*`, `/impeccable`, or model-selected |
-| **Subagents** | `.claude/agents/impeccable-*.md` (4) | asset-producer, documenter, finish-reviewer, manual-edit-applier |
+| **Skills** | `.claude/skills/` (66) | Auto-discovered; invoked as `/bmad-*`, `/impeccable`, `/waves-*`, or model-selected |
+| **Subagents** | `.claude/agents/impeccable-*.md` (4) + `waves-agent.md` (1, generated by `waves init`) | asset-producer, documenter, finish-reviewer, manual-edit-applier; waves adapter agent for wave-run fronts |
 
 Skills are **not** duplicated as command files for Claude Code — it discovers
 `.claude/skills/` natively, so `/bmad-help`, `/bmad-build`, `/impeccable`, etc.
-work with no wrapper. The 55 skills in `.claude/skills/` are kept identical
+work with no wrapper. The 66 skills in `.claude/skills/` are kept identical
 to `.agents/skills/`; `npx bmad-method install` regenerates both (but drops
 custom skills — see §8).
 
@@ -382,6 +391,66 @@ instalável via setup com aprovação explícita `--install-hopper`), Ghidra
 projeto — logo, o `npx bmad-method install` não as apaga. Para atualizar,
 re-executar o setup e reiniciar os agentes.
 
+### 3.6 Riaworks Waves — Build Loop + Epic Parallelism
+
+| Property | Value |
+|----------|-------|
+| **Name** | Riaworks Waves (`riaworks-waves`, command `waves`) |
+| **Version** | 3.6.12.4 (= waves major 3 + BMAD-METHOD release it requires, 6.12.4) · tracks upstream `bmad-loop` 0.13.1 |
+| **License** | MIT (fork of `bmad-code-org/bmad-loop` by BMad Code, LLC; trademark policy in `TRADEMARK.md`) |
+| **Repo** | <https://github.com/riaworks/waves> · status: early open beta |
+| **Install Date** | 2026-11-10 — offline bundle `riaworks-waves-3.6.12.4.zip` (SHA256SUMS verified `OK` for the 3 OS zips) |
+| **Install cmd** | `uv tool install --force --python ">=3.11" "./wheels/riaworks_waves-3.6.12.4-py3-none-any.whl[tui,opencode]"` → `waves init --project /home/hsantos/app --cli claude --cli opencode` |
+| **Purpose** | (1) Deterministic/LLM-held unattended build loop: pick story → `bmad-build-auto` session → verify on disk → fresh review session → verify → commit. (2) Epic-level parallelism: collision matrix → wave/front plan → fronts as subagents, merges by grid. |
+| **Requires** | BMAD-METHOD ≥ 6.12.4 (ok: 6.12.4) · git ≥ 2.34 (ok: 2.53) · Python ≥ 3.11 (uv-managed) · **tmux ≥ 3.2 (MISSING — sudo)** · `claude` on PATH (ok) |
+| **Status** | ⚠️ Installed + wired; **runs blocked until `tmux` is installed and a `sprint-status.yaml` exists** (greenfield project). Skills/doors usable now. |
+
+**Layout:**
+
+| Component | Location |
+|-----------|----------|
+| Tool (machine level) | `~/.local/bin/waves` — uv tool env `riaworks-waves v3.6.12.4` (deps: pyyaml, regex, textual 8.2.8, rich, tomlkit, pyte, httpx) |
+| Bundle (vendored for collaborators — **not on PyPI**) | `_bmad-output/vendor/riaworks-waves-3.6.12.4-linux/` (`install.sh`, `INSTALL.md`, `SHA256SUMS`, `wheels/*.whl`, `manuais/` PT-BR, module `README/CHANGELOG/docs/*.md`); full bundle incl. macOS/Windows zips + images at `~/riaworks-waves-3.6.12.4-linux/` on this machine only |
+| Skills (11) | `.claude/skills/waves-{config,core-orchestrator,core-parallelism,core-sweep,deferred,master-parallelism,master-tui,provisioning,resolve,setup,tests}` → mirrored to `.agents/skills/` → wrappers `.opencode/commands/waves-*.md` |
+| Hooks (Claude Code) | `.claude/settings.json` → 5 events run `/home/hsantos/.local/bin/waves relay <Event>` (absolute path; re-run `waves init` if the binary moves) |
+| OpenCode transport | profile `opencode-http` (needs OpenCode ≥ 1.18; have v2.2.6) — hookless, no tmux; `opencode auth login` once per machine |
+| Generated agent | `.claude/agents/waves-agent.md` (from `[adapter.<role>] effort`; regenerate via `waves init`, never hand-edit) |
+| Policy (per machine, gitignored) | `.waves/loop/policy.toml` — gates, limits, `[verify] commands`, `[adapter.*]` (name/model/effort), `[scm] isolation`, `[notify]` |
+| Runs / cache (gitignored) | `.waves/loop/runs/`, `.waves/loop/cache/` |
+| Skill overrides | `_waves/custom/<skill>.toml` (team, tracked) · `<skill>.user.toml` (gitignored) |
+| Tests config | `_waves/tests_memory.toml` (written by `/waves-tests`, required before a wave plan) |
+| `/bmad-help` entries | `_bmad/waves/module-help.csv` appended to `_bmad/_config/bmad-help.csv` (7 rows) |
+
+**Doors (both agents):** `/waves-master-tui` (launch / resume / watch a loop run) ·
+`/waves-master-parallelism <epic>` (`[P]` plan, `[A]` approve, `[E]` execute) ·
+`/waves-tests` · `/waves-config` · `/waves-provisioning` · `/waves-deferred` ·
+`/waves-resolve <story>` · `/waves-setup` (upgrade). Automation-only (never by hand):
+`waves-core-orchestrator`, `waves-core-parallelism`, `waves-core-sweep`.
+
+**CLI:** `waves validate [--json]` · `waves run [--epic N|--story K|--plan F] [--dry-run]
+[--deterministic]` · `waves tui` · `waves resume|resolve|stop <id>` · `waves sweep` ·
+`waves decisions [--list|--json]` · `waves config --json` · `waves mux [set <name>]` ·
+`waves adapters` · `waves diagnose`.
+
+**Preflight on 2026-11-10 (`waves validate`):** ok — BMAD 6.12.4 floor, policy, plugin
+manifests (example, unity, waves-tea), git 2.34+, claude found, hooks registered, relay
+executable, upstream skills present (`bmad-build-auto` + review layers), 11 bundled skills
+up to date, overrides in `_waves/custom/`. FAIL (expected) — `sprint-status.yaml` not found
+(no planning yet), git worktree not clean (install files), **`TmuxMultiplexer unavailable`**
+(tmux missing). Warnings — `notify-send` absent (install `libnotify-bin` or set
+`[notify] desktop = false`), TEA module not installed (optional; the `waves-tea` plugin
+stays inert), `_bmad/render/` was tracked → fixed with `git rm -r --cached _bmad/render`.
+
+**Decisions:** `install.sh --via-bmad` **not** used — it runs `npx bmad-method install`,
+which deletes the custom + Impeccable skills (§8); the module was registered in
+`bmad-help.csv` by hand instead. OpenCode registered alongside Claude so either agent can
+be an adapter (`[adapter.<role>] name = "opencode"`, `model = "provider/model"`).
+
+**Maintenance:** upgrade = new bundle → `sh install.sh --project /home/hsantos/app --cli
+claude --cli opencode` (never during a run; `waves stop <id>` first) → re-mirror
+`waves-*` to `.agents/skills/` → regenerate `.opencode/commands/waves-*.md` → re-append
+`bmad-help.csv`. After any BMAD update, run step 4 of §8.
+
 ---
 
 ## 4. RTK (Rust Token Killer)
@@ -477,12 +546,15 @@ One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --open
 
 ```
 /home/hsantos/app/
-├── .agents/skills/          # 57 BMAD skills (OpenCode)
+├── .agents/skills/          # 66 skills (OpenCode parity tree: 54 bmad-* + impeccable + 11 waves-*)
 ├── .claude/                 # Claude Code integration
-│   ├── skills/              # 57 BMAD skills (byte-identical mirror)
-│   ├── settings.json        # tool allow-list + RTK PreToolUse hook
+│   ├── skills/              # 66 skills (byte-identical mirror)
+│   ├── agents/              # impeccable-*.md (4) + waves-agent.md (generated)
+│   ├── settings.json        # tool allow-list + RTK PreToolUse hook + waves relay hooks
 │   └── RTK.md               # RTK command reference for the agent
-├── .opencode/commands/      # 57 OpenCode command wrappers
+├── .opencode/commands/      # 66 OpenCode command wrappers
+├── .waves/loop/             # Waves per-machine state: policy.toml, runs/, cache/ (gitignored)
+├── _waves/                  # Waves versioned project dir: custom/<skill>.toml, tests_memory.toml
 ├── .git/                    # Git repository
 ├── AGENTS.md                # OpenCode instructions
 ├── CLAUDE.md                # Claude Code instructions (imports AGENTS.md)
@@ -582,6 +654,16 @@ One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --open
 | 2026-11-09 | Registry v1.7.0 | Versões auditadas + atualizadas (toolchain + frameworks) | OpenCode |
 | 2026-11-09 | OpenCode v2.2.6 | `opencode upgrade` (2.2.5 → 2.2.6); Claude Code 2.1.319 via `claude update` | OpenCode |
 | 2026-11-09 | RTK 1.2.0 | binário atualizado de 1.1.0 (release `rtk-ai/rtk` v1.2.0); backup em `~/.local/share/rtk/backups/rtk-1.1.0` | OpenCode |
+| 2026-11-10 | `riaworks-waves-3.6.12.4.zip` | Descompactado fora do repo em `~/riaworks-waves-3.6.12.4-linux/`; `sha256sum -c SHA256SUMS` → 3× OK | Claude Code |
+| 2026-11-10 | Riaworks Waves 3.6.12.4 (tool) | `uv tool install --force --python ">=3.11" "<wheel>[tui,opencode]"` → `~/.local/bin/waves` (`waves --version` = 3.6.12.4) | Claude Code |
+| 2026-11-10 | Riaworks Waves (project) | `waves init --project . --cli claude --cli opencode`: 11 skills em `.claude/skills/`, 5 hooks em `.claude/settings.json`, `.claude/agents/waves-agent.md`, `.waves/loop/policy.toml`, 4 linhas no `.gitignore` | Claude Code |
+| 2026-11-10 | Waves ↔ OpenCode parity | 11 skills espelhadas em `.agents/skills/` + 11 wrappers `.opencode/commands/waves-*.md` gerados do frontmatter | Claude Code |
+| 2026-11-10 | Waves ↔ `/bmad-help` | `_bmad/waves/module-help.csv` criado e anexado a `_bmad/_config/bmad-help.csv` (7 entradas) — sem `--via-bmad` | Claude Code |
+| 2026-11-10 | `_bmad/render/` | `git rm -r --cached` (estava rastreado apesar do `.gitignore`; aviso do `waves validate`) | Claude Code |
+| 2026-11-10 | Impeccable CLI 4.8.2 + engine v0.1.21 | `npx impeccable install -y --providers=claude,opencode --scope=project --force` (skill 4.8.1 → 4.8.2); re-espelhado para `.agents/skills/` | Claude Code |
+| 2026-11-10 | Auditoria de versões | BMAD 6.12.4 = última no npm · uv 0.13.7 = última release · RTK 1.2.0 = última · rea-agents 6.8.0 = última · apt sem candidatos novos para `python3`/`git` | Claude Code |
+| 2026-11-10 | Registry v1.9.0 | Seção 3.6 Riaworks Waves; contagens 55 → 66; §8 passo 4; §11 reavaliação | Claude Code |
+| 2026-11-10 | **PENDENTE** `tmux` 3.6a + `libnotify-bin` | `sudo apt install -y tmux libnotify-bin` — aguarda aprovação do usuário (regra de sudo do `~/.claude/CLAUDE.md`) | — |
 
 ---
 
@@ -624,6 +706,15 @@ cp -r .opencode/skills/impeccable .agents/skills/impeccable
 
 # 3. verify parity between the two skill trees
 diff <(ls .agents/skills) <(ls .claude/skills) && echo PARITY_OK
+
+# 4. Riaworks Waves — refresh skills + hooks, re-mirror, regenerate OpenCode wrappers,
+#    re-register in /bmad-help (the BMAD installer regenerates bmad-help.csv)
+waves init --project . --cli claude --cli opencode --force-skills
+for s in .claude/skills/waves-*; do rm -rf ".agents/skills/$(basename "$s")"; cp -r "$s" .agents/skills/; done
+for s in .claude/skills/waves-*; do n=$(basename "$s"); printf -- '---\n%s\n---\n\n@skills/%s\n' \
+  "$(sed -n '/^---$/,/^---$/p' "$s/SKILL.md" | grep '^description:')" "$n" > ".opencode/commands/$n.md"; done
+grep -q "Riaworks Waves" _bmad/_config/bmad-help.csv || tail -n +2 _bmad/waves/module-help.csv >> _bmad/_config/bmad-help.csv
+waves validate
 ```
 
 If a `git checkout` cannot recover a deleted custom skill (not committed),
@@ -728,3 +819,13 @@ dedicado, com validação de REA e CrewAI antes do Node 26.
 
 > **Regra:** não aplicar durante ciclos ativos de desenvolvimento. Agendar como
 > tarefa isolada de manutenção quando não houver trabalho em andamento.
+
+**Reavaliação em 2026-11-10 (instalação do Riaworks Waves) — adiamento mantido:**
+
+| Ferramenta | Exigido pelo Waves 3.6.12.4 | Atual | Veredito |
+|---|---|---|---|
+| Node.js | ≥ 20.12 (só para `npx bmad-method`) | v24.22.2 | Suficiente. Node 26 segue adiado: nenhum componente novo exige; REA pinado em ≥ 24.22.1. |
+| Python | ≥ 3.11 (o `waves` roda no env do uv, isolado do sistema) | 3.14.4 (sistema) + 3.13.16 (uv) | Suficiente. `apt` não oferece candidato acima de 3.14.3-0ubuntu2; patch 3.14.10 só via PPA/fonte — sem motivo. |
+| Git | ≥ 2.34 (**enforçado** por `run`/`sweep`/`resume`) | 2.53.0 | Suficiente. `apt` sem candidato novo (1:2.53.0-1ubuntu1.1); 2.56 só via PPA — sem motivo. |
+| tmux | ≥ 3.2 (backend `TmuxMultiplexer`) | **ausente** | **Nova pendência, bloqueante para `waves run`** — `sudo apt install -y tmux` (candidato 3.6a-2ubuntu0.2). Não é adiamento: é instalação nova que exige aprovação de sudo. |
+| BMAD-METHOD | ≥ 6.12.4 (piso) e < 7 | 6.12.4 | Exato. **Não** migrar para BMAD v7 enquanto o Waves 3.6.12.x não o suportar (manual §11.2). |

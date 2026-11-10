@@ -2,8 +2,8 @@
 
 Claude Code's entry point for this repository. It is the Claude Code counterpart
 of `AGENTS.md` (which OpenCode reads). **Both coding agents are first-class here**
-and share one source of truth, the same 55 skills (54 BMAD + 1 Impeccable), and
-the same tooling.
+and share one source of truth, the same 66 skills (54 BMAD + 1 Impeccable + 11 Riaworks
+Waves), and the same tooling.
 
 @AGENTS.md
 
@@ -14,8 +14,9 @@ the same tooling.
 | Concern | OpenCode | Claude Code |
 |---------|----------|-------------|
 | Instructions | `AGENTS.md` | `CLAUDE.md` → imports `AGENTS.md` |
-| BMAD skills | `.agents/skills/` (55) via `.opencode/commands/*.md` | `.claude/skills/` (55), auto-discovered |
-| Slash commands | `/bmad-*`, `/impeccable` (command files) | `/bmad-*`, `/impeccable` (native skill discovery) |
+| BMAD skills | `.agents/skills/` (66) via `.opencode/commands/*.md` | `.claude/skills/` (66), auto-discovered |
+| Slash commands | `/bmad-*`, `/impeccable`, `/waves-*` (command files) | `/bmad-*`, `/impeccable`, `/waves-*` (native skill discovery) |
+| Waves orchestrator | profile `opencode-http` (hookless HTTP/SSE) | hooks in `.claude/settings.json` (`waves relay <Event>`) + `.claude/agents/waves-agent.md` |
 | Tool allow-list | inherits shell | `.claude/settings.json` → `permissions.allow` |
 | RTK token compression | `~/.config/opencode/plugins/rtk.ts` | `.claude/settings.json` → `PreToolUse` hook (`rtk hook claude`) |
 | RTK reference | — | `.claude/RTK.md` |
@@ -63,6 +64,17 @@ change to one must be mirrored to the other (BMAD's installer does this on
   `subagent-driven-development` and `bmad-build-auto` in the same session.
   Telemetry is disabled via `env.SUPERPOWERS_DISABLE_TELEMETRY=1` in
   `.claude/settings.json`. Update with `claude plugin update superpowers`.
+- **Riaworks Waves** (unattended build loop + epic parallelism, 3.6.12.4): tool
+  `~/.local/bin/waves`, 11 skills `waves-*` in `.claude/skills/`, hooks
+  `SessionStart`/`Stop`/`SessionEnd`/`PreCompact`/`Notification` → `waves relay
+  <Event>` in `.claude/settings.json`, generated agent `.claude/agents/waves-agent.md`,
+  per-machine policy `.waves/loop/policy.toml` (gitignored). Doors:
+  `/waves-master-tui` (launch/resume/watch a `waves run`), `/waves-master-parallelism
+  <epic>` (plan + execute waves/fronts via subagents), `/waves-tests`, `/waves-config`.
+  Preflight: `waves validate`. **Runs need `tmux` (not yet installed — sudo) and a
+  `sprint-status.yaml` from `/bmad-sprint-planning`.** Never run a `waves` loop and
+  `bmad-build-auto`/`subagent-driven-development` on the same stories at once. Full
+  section + upgrade/restore steps: `@AGENTS.md` → *Riaworks Waves*.
 - **Per-machine setup** for both agents at once:
   `rtk init -g --auto-patch --opencode`.
 

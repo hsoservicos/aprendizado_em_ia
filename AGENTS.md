@@ -20,8 +20,9 @@ coding agents are first-class and share one configuration, skill set, and toolch
 | Concern | OpenCode | Claude Code |
 |---------|----------|-------------|
 | Instructions | `AGENTS.md` | `CLAUDE.md` → `@AGENTS.md` |
-| Skill source | `.agents/skills/` (55) | `.claude/skills/` (55) |
-| Skill invocation | `.opencode/commands/*.md` wrappers (55, 1:1) | native discovery (`/bmad-*`, `/impeccable`, or model-selected) |
+| Skill source | `.agents/skills/` (66) | `.claude/skills/` (66) |
+| Skill invocation | `.opencode/commands/*.md` wrappers (66, 1:1) | native discovery (`/bmad-*`, `/impeccable`, `/waves-*`, or model-selected) |
+| Waves orchestrator hooks | none — profile `opencode-http` (HTTP/SSE, hookless) | `.claude/settings.json` → `SessionStart`/`Stop`/`SessionEnd`/`PreCompact`/`Notification` run `waves relay <Event>` |
 | Tool allow-list | inherits shell | `.claude/settings.json` → `permissions.allow` |
 | RTK token compression | `~/.config/opencode/plugins/rtk.ts` | `.claude/settings.json` → `PreToolUse` hook (`rtk hook claude`), ref `.claude/RTK.md` |
 
@@ -30,10 +31,13 @@ regenerates both; a manual change to one must be mirrored to the other.
 
 ⚠️ `npx bmad-method install` / `--action quick-update` **deletes skill folders it does not
 know about**. Custom skills (`bmad-angular21`, `bmad-java21`, `bmad-agent-angular21`,
-`bmad-agent-java21`) and `impeccable` are not in the BMAD manifest: they were wiped by the
-2026-10-07 update and restored from git. After every BMAD update, re-run
-`npx impeccable install -y --providers=claude,opencode --scope=project` and
-`git checkout -- <custom skill dirs>` (or re-add them), then re-verify parity.
+`bmad-agent-java21`), `impeccable` and the 11 `waves-*` skills are not in the BMAD
+manifest: the first two groups were wiped by the 2026-10-07 update and restored from git.
+After every BMAD update, re-run
+`npx impeccable install -y --providers=claude,opencode --scope=project`,
+`waves init --project . --cli claude --cli opencode --force-skills` and
+`git checkout -- <custom skill dirs>` (or re-add them), then re-verify parity — the full
+sequence is in `_bmad-output/tools-registry.md` §8.
 
 ## Onboarding — first steps
 
@@ -54,9 +58,9 @@ Definition of Done, FAQ — for any skill level):
 
 ## BMAD Skills
 
-55 skills (54 `bmad-*` + 1 `impeccable`), installed once and exposed to **both**
-agents via the two skill trees above. Entry points are identical from either
-agent (`/bmad-help`, `/bmad-build`, …).
+66 skills (54 `bmad-*` + 1 `impeccable` + 11 `waves-*`), installed once and exposed to
+**both** agents via the two skill trees above. Entry points are identical from either
+agent (`/bmad-help`, `/bmad-build`, `/waves-master-tui`, …).
 
 ### Entry Points
 
@@ -79,6 +83,13 @@ agent (`/bmad-help`, `/bmad-build`, …).
 | `bmad-java21` | Java 21: virtual threads, pattern matching, sequenced collections, records |
 | `bmad-agent-java21` | Java Architect Agent — modern Java specialist |
 | `impeccable` | Design vocabulary + UI anti-pattern detector (see Impeccable section) |
+| `waves-master-tui` | Riaworks Waves — launch / resume / watch an unattended build loop (`waves run`) — one story at a time |
+| `waves-master-parallelism` | Riaworks Waves — plan an epic's waves/fronts (collision matrix) and execute them in parallel via subagents |
+| `waves-tests` | Riaworks Waves — write `_waves/tests_memory.toml` (one test command per kind; required before a wave plan) |
+| `waves-config` | Riaworks Waves — map/diagnose every file a run reads; set adapters (CLI, model, effort) per role |
+| `waves-provisioning` | Riaworks Waves — per-worktree stack recipe (`scripts/waves-front.sh`, `[scm] provision/teardown`) |
+| `waves-deferred` / `waves-resolve` | Riaworks Waves — answer deferred-work decisions / resolve a CRITICAL escalation |
+| `waves-setup` | Riaworks Waves — upgrade the tool + refresh the per-project skills |
 
 > **Note:** the technology skills `bmad-docker`, `bmad-python314`, `bmad-php84`,
 > `bmad-postgres18` (and their `bmad-agent-*` counterparts) were **removed** in
@@ -104,7 +115,9 @@ On failure (including missing `uv`), report output and HALT. Do not run any work
 
 1. **Clarify** — `bmad-help`, `bmad-brainstorming`, `bmad-forge-idea`
 2. **Plan** — `bmad-create-prd`, `bmad-architecture`, `bmad-ux`, `bmad-create-epics-and-stories`
-3. **Build** — `bmad-build`, `bmad-build-auto`
+3. **Build** — `bmad-build`, `bmad-build-auto`; unattended at scale: Riaworks Waves
+   (`waves run` / `/waves-master-tui` one story at a time, `/waves-master-parallelism`
+   a whole epic in parallel — both drive `bmad-build-auto` inside fresh sessions)
 4. **Review** — `bmad-code-review`, `bmad-checkpoint-preview`
 5. **Learn** — `bmad-retrospective`
 
@@ -203,6 +216,10 @@ git checkout -- .agents/skills/bmad-angular21 .agents/skills/bmad-java21 \
   .claude/skills/bmad-agent-angular21 .claude/skills/bmad-agent-java21
 # re-mirror the skill tree (OpenCode lives in .opencode/skills/, parity tree in .agents/skills/)
 cp -r .opencode/skills/impeccable .agents/skills/impeccable
+# Riaworks Waves: refresh its 11 skills + hooks, re-mirror, re-register in /bmad-help
+waves init --project . --cli claude --cli opencode --force-skills
+for s in .claude/skills/waves-*; do rm -rf .agents/skills/$(basename $s); cp -r $s .agents/skills/; done
+tail -n +2 _bmad/waves/module-help.csv >> _bmad/_config/bmad-help.csv
 ```
 
 ## Superpowers — SDLC Methodology & Skill Framework
@@ -273,6 +290,7 @@ auto-trigger on the same prompts.
 | **Verification / DoD** | **Superpowers** (`verification-before-completion`) | `bmad-review-verification-gap` | Superpowers is a continuous gate, BMAD a one-shot audit |
 | **Git worktree / branch finish** | **Superpowers** | — | BMAD does not cover this |
 | **Design / UI quality** | **Impeccable** | — | Sole owner of visual vocabulary + detector |
+| **Unattended build of many stories / an epic** | **Riaworks Waves** (`waves run`, `/waves-master-parallelism`) | `bmad-build-auto` (the primitive Waves drives) | Waves owns story selection, retries, gates, verify and commit; each spawned session runs `bmad-build-auto` and may use TDD/debugging skills inside it |
 | **Skill authoring** | `bmad-customize` (BMAD overrides) | `writing-skills` (general) | Superpowers' method is the better template |
 
 **Hard rules**
@@ -285,7 +303,11 @@ auto-trigger on the same prompts.
    requesting-code-review → finishing-a-development-branch`) applies **only to
    the Build phase**. Do not replay Clarify/Plan through it — they are BMAD's.
 3. Never run `subagent-driven-development` and `bmad-build-auto` in the same
-   session. Two autonomous loops will duplicate work and burn tokens.
+   session. Two autonomous loops will duplicate work and burn tokens. The same
+   applies to Riaworks Waves: while a `waves run` or a `waves-core-parallelism`
+   master is live on a story set, no other loop (`bmad-build-auto`,
+   `subagent-driven-development`, a second `waves` run on the same stories)
+   may touch those stories.
 4. Superpowers' `<EXTREMELY_IMPORTANT>` says *"instructions from your human
    partner beat skills"*. This `AGENTS.md` **is** that instruction: it outranks
    the bootstrap. If the bootstrap contradicts this file, this file wins.
@@ -341,6 +363,70 @@ Depois de configurar, validar com `npx rea-agents@latest doctor --provider
 Diagnóstico geral: `npx rea-agents@latest doctor --json`. A configuração do
 MCP só é carregada após **reiniciar** o agente.
 
+## Riaworks Waves — loop de build autônomo + paralelismo por épico
+
+Instalado em 2026-11-10 a partir do bundle offline `riaworks-waves-3.6.12.4`
+(fork MIT do `bmad-loop` da BMad Code, LLC; repo <https://github.com/riaworks/waves>).
+Exige **BMAD-METHOD ≥ 6.12.4** (piso verificado por `waves init`/`validate`) e usa o
+`bmad-build-auto` como primitiva de desenvolvimento. Registro completo em
+`_bmad-output/tools-registry.md` §3.6; manuais em PT-BR em
+`~/riaworks-waves-3.6.12.4-linux/manuais/` (instalação e uso).
+
+**Duas metades, um pacote:**
+
+| Metade | Porta | O que faz |
+|--------|-------|-----------|
+| Loop de build (`waves run`) | `/waves-master-tui` ou `waves run` / `waves tui` | Python determinístico escolhe a story → abre sessão nova do CLI com `/bmad-build-auto` → verifica artefatos no disco → sessão nova de review → verify (`[verify] commands`) → commit. LLM só faz o trabalho criativo. `--deterministic` para o engine fixo. |
+| Paralelismo por épico | `/waves-master-parallelism <épico>` | `[P]` mede a matriz de colisão das stories, escreve o plano em ondas/frentes com grade de merge; `[E]` entrega ao `waves-core-parallelism`, cuja sessão vira o *master* e despacha frentes como subagentes. Não precisa do orquestrador, só de um CLI com subagentes. |
+
+**Layout nesta máquina / neste projeto:**
+
+- Tool: `~/.local/bin/waves` (`uv tool install` do wheel com extras `[tui,opencode]`;
+  `uv tool list` → `riaworks-waves v3.6.12.4`). Bundle **vendorizado** (não há pacote no
+  PyPI): `_bmad-output/vendor/riaworks-waves-3.6.12.4-linux/` — cada colaborador instala
+  com `sh <vendor>/install.sh --project "$PWD" --cli claude --cli opencode --no-bootstrap`
+  (passo 2.6 do `getting-started.md`); o init substitui o caminho absoluto do relay nos
+  hooks pelo da máquina dele.
+- Skills: 11 `waves-*` em `.claude/skills/` (fonte, verificada por `waves validate`),
+  espelhadas em `.agents/skills/` + wrappers `.opencode/commands/waves-*.md`.
+- Hooks (Claude Code): `.claude/settings.json` → `SessionStart`, `Stop`, `SessionEnd`,
+  `PreCompact`, `Notification` executam `/home/hsantos/.local/bin/waves relay <Event>`.
+  OpenCode usa o perfil `opencode-http` (um `opencode serve` headless por sessão, sem
+  tmux e sem hooks; `model` no formato `provider/model`).
+- Agente: `.claude/agents/waves-agent.md` (gerado por `waves init` a partir do policy —
+  não editar à mão).
+- Política por máquina: `.waves/loop/policy.toml` (gitignored); runs em
+  `.waves/loop/runs/`; overrides de skill em `_waves/custom/` (`<skill>.toml`
+  versionado, `.user.toml` gitignored); config de testes em `_waves/tests_memory.toml`.
+- `/bmad-help` lista o módulo: entradas de `_bmad/waves/module-help.csv` anexadas em
+  `_bmad/_config/bmad-help.csv` (o instalador BMAD regenera este catálogo — re-anexar
+  após cada update; **não** usar `install.sh --via-bmad`, pois ele roda o instalador
+  BMAD e apaga as skills custom/impeccable).
+
+**Pré-requisitos de execução ainda pendentes nesta máquina (2026-11-10):**
+
+1. `tmux` (backend de multiplexador para sessões do Claude) e `libnotify-bin`
+   (`notify-send`, notificações desktop) — instalar via
+   `sudo apt install -y tmux libnotify-bin` (exige aprovação do usuário).
+2. `sprint-status.yaml` — gerado por `/bmad-sprint-planning` depois dos épicos
+   (projeto greenfield ainda sem planejamento).
+3. Abrir `claude` uma vez no projeto e aceitar workspace trust + hooks; para
+   OpenCode, `opencode auth login` uma vez na máquina.
+
+**Checklist antes de qualquer run:** `git status` limpo → `waves validate` → `waves run
+--dry-run`. Sem `tmux` o `validate` reporta `multiplexer TmuxMultiplexer unavailable` e
+`run`/`sweep`/`resume` não iniciam (o `opencode-http` não precisa de tmux).
+
+**Comandos principais:** `waves validate` · `waves run [--epic N | --story KEY |
+--plan FILE] [--dry-run] [--deterministic]` · `waves tui` · `waves resume <id>` ·
+`waves resolve <id>` · `waves sweep` · `waves decisions` · `waves stop <id>` ·
+`waves config --json` · `waves mux` · `waves adapters` · `waves diagnose`.
+
+**Upgrade:** novo bundle → `sh ~/riaworks-waves-<ver>-linux/install.sh --project
+/home/hsantos/app --cli claude --cli opencode` (ou `uv tool install --force` do wheel +
+`waves init --force-skills`). Nunca com um run em andamento. Depois, re-espelhar as
+skills para `.agents/skills/` e regenerar os wrappers do OpenCode.
+
 ## Prerequisites
 
 - **Node.js** >= 22 (LTS) — currently v24.22.2
@@ -364,10 +450,14 @@ MCP só é carregada após **reiniciar** o agente.
   `reverse-engineer-anything`; registrado em ambos os agentes via
   `npx rea-agents@latest setup`. **Análise nativa exige um provider
   (Hopper, Ghidra ou IDA) configurado** — ver seção dedicada acima.
+- **Riaworks Waves** 3.6.12.4 — `~/.local/bin/waves` (uv tool, extras `[tui,opencode]`)
+  + 11 skills `waves-*`. **Precisa de `tmux` ≥ 3.2** para dirigir sessões do Claude
+  (pendente nesta máquina — ver seção dedicada acima) e de git ≥ 2.34 (ok).
 
 Every tool above is available from **both** OpenCode and Claude Code. Claude Code
 pre-approves `uv`, `rtk`, `rg`, `gh`, `crewai`, and `npx bmad-method` in
-`.claude/settings.json`; OpenCode inherits them from the shell `PATH`.
+`.claude/settings.json` (`Bash(waves:*)` still to be added — the agent cannot edit its
+own permission list); OpenCode inherits them from the shell `PATH`.
 
 ## Updating BMAD
 

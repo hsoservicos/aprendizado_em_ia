@@ -48,6 +48,8 @@ Ambiente exigido (instale o que faltar — o script automatizado faz tudo):
 | CrewAI | >= 1.15 (opcional) | `crewai version` |
 | Agente | OpenCode >= 1.18 **e/ou** Claude Code >= 2.1 | `opencode --version` / `claude --version` |
 | Superpowers | >= 6.4 (plugin — sem binário próprio) | `claude plugin list` / `cat .opencode/opencode.json` |
+| tmux | >= 3.2 (exigido pelo Riaworks Waves para abrir sessões do Claude) | `tmux -V` |
+| Riaworks Waves | 3.6.12.4 (instalado no Passo 2.6) | `waves --version` |
 
 **Setup automatizado (recomendado):**
 
@@ -145,6 +147,33 @@ claude plugin install superpowers@claude-plugins-official
 > **Nota:** Superpowers fica no plugin cache, nunca em `.agents/skills/` — o
 > instalador do BMAD apaga pastas fora do manifesto.
 
+### Passo 2.6 — Instalar Riaworks Waves (loop de build autônomo + paralelismo por épico)
+
+O bundle de instalação está **vendorizado no repositório** (não existe pacote no PyPI):
+`_bmad-output/vendor/riaworks-waves-3.6.12.4-linux/` — wheel, `install.sh`, manuais em
+PT-BR (`manuais/01-MANUAL-INSTALACAO-BMAD-E-WAVES.md`, `02-MANUAL-USO-WAVES.md`) e docs.
+
+```bash
+# 1) pré-requisito de execução (uma vez por máquina; Linux/WSL)
+sudo apt install -y tmux libnotify-bin
+
+# 2) nível máquina (comando `waves` no env do uv) + nível projeto (skills, hooks, policy)
+#    Os hooks em .claude/settings.json são registrados com caminho ABSOLUTO do `waves`
+#    desta máquina — por isso cada colaborador precisa rodar o init na sua: ele substitui
+#    o caminho antigo (`waves validate` acusa `hooks.relay-stale` enquanto não rodar).
+sh _bmad-output/vendor/riaworks-waves-3.6.12.4-linux/install.sh \
+  --project "$PWD" --cli claude --cli opencode --no-bootstrap
+
+# 3) espelhar as skills waves-* para a árvore do OpenCode (paridade) e conferir
+for s in .claude/skills/waves-*; do rm -rf ".agents/skills/$(basename "$s")"; cp -r "$s" .agents/skills/; done
+waves validate        # esperado: tudo ok, exceto `sprint status file not found` antes do planejamento
+```
+
+> **Nunca** use `install.sh --via-bmad` neste repo: ele roda o instalador do BMAD, que
+> apaga as skills custom e o Impeccable. As entradas do `/bmad-help` já estão em
+> `_bmad/_config/bmad-help.csv`. Antes do primeiro `waves run`: abra `claude` uma vez no
+> projeto (aceitar trust + hooks) e, para OpenCode, `opencode auth login`.
+
 ---
 
 ## Passo 3 — Verificar toolchain + os dois agentes + RTK
@@ -177,6 +206,11 @@ cat .opencode/opencode.json                # esperado: superpowers@git+.../obra/
 # Impeccable (design + detector) — CLI + hooks
 npx impeccable detect --version            # CLI respondendo
 test -f .claude/settings.local.json && echo "OK: hooks Impeccable"
+
+# Riaworks Waves — tool + hooks + skills nos dois agentes
+waves --version                            # esperado: waves 3.6.12.4
+tmux -V                                    # esperado: tmux 3.x
+waves validate                             # `hooks registered for claude`, `bundled skills up to date: 11`
 ```
 
 Checklist rápido: **`_bmad-output/scripts/installation-validation-report.md`**.
@@ -337,6 +371,8 @@ Pré-flight (uma vez)
 [ ] Passo 2.5 Impeccable instalado (skill + hooks) e espelhado em .agents/skills
 [ ] Passo 2.5 Superpowers instalado (plugin OpenCode .opencode/opencode.json + plugin Claude)
 [ ] Passo 2.5 Superpowers telemetry OFF (SUPERPOWERS_DISABLE_TELEMETRY=1)
+[ ] Passo 2.6 tmux instalado + Riaworks Waves (install.sh do vendor) + waves-* espelhadas em .agents/skills
+[ ] Passo 2.6 waves validate sem FAIL (exceto sprint-status antes do planejamento)
 [ ] Passo 3  diff .agents/skills .claude/skills == idêntico
 [ ] Passo 3  rtk init --show → OpenCode plugin + Claude hook OK
 [ ] Passo 4  _bmad/custom/config.toml (projeto) e config.user.toml (pessoal) ajustados
@@ -377,6 +413,7 @@ Trilha B — Projeto legado
 | Deploy | `_bmad-output/coolify-deploy-guide.md` | Entrega em produção |
 | Guia de Instalação da Toolchain | `_bmad-output/toolchain-installation-guide.md` | Instalar/ativar/usar BMAD + Impeccable + Superpowers |
 | Estudo do Superpowers | `_bmad-output/superpowers-study-2026-10-07.md` | Estudo/auditoria do obra/superpowers |
+| Riaworks Waves — instalação e uso | `_bmad-output/vendor/riaworks-waves-3.6.12.4-linux/manuais/` | Manuais PT-BR (instalação + uso do loop e das ondas) |
 
 ---
 
