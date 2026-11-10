@@ -71,7 +71,7 @@ change to one must be mirrored to the other (BMAD's installer does this on
   per-machine policy `.waves/loop/policy.toml` (gitignored). Doors:
   `/waves-master-tui` (launch/resume/watch a `waves run`), `/waves-master-parallelism
   <epic>` (plan + execute waves/fronts via subagents), `/waves-tests`, `/waves-config`.
-  Preflight: `waves validate`. **Runs need `tmux` (not yet installed — sudo) and a
+  Preflight: `waves validate`. **Runs need `tmux` (installed, 3.6) and a
   `sprint-status.yaml` from `/bmad-sprint-planning`.** Never run a `waves` loop and
   `bmad-build-auto`/`subagent-driven-development` on the same stories at once. Full
   section + upgrade/restore steps: `@AGENTS.md` → *Riaworks Waves*.

@@ -403,11 +403,10 @@ Exige **BMAD-METHOD ≥ 6.12.4** (piso verificado por `waves init`/`validate`) e
   após cada update; **não** usar `install.sh --via-bmad`, pois ele roda o instalador
   BMAD e apaga as skills custom/impeccable).
 
-**Pré-requisitos de execução ainda pendentes nesta máquina (2026-11-10):**
+**Pré-requisitos de execução (2026-11-10):**
 
-1. `tmux` (backend de multiplexador para sessões do Claude) e `libnotify-bin`
-   (`notify-send`, notificações desktop) — instalar via
-   `sudo apt install -y tmux libnotify-bin` (exige aprovação do usuário).
+1. `tmux` 3.6 e `libnotify-bin` — **instalados** nesta máquina (em outra:
+   `sudo apt install -y tmux libnotify-bin`).
 2. `sprint-status.yaml` — gerado por `/bmad-sprint-planning` depois dos épicos
    (projeto greenfield ainda sem planejamento).
 3. Abrir `claude` uma vez no projeto e aceitar workspace trust + hooks; para
@@ -451,8 +450,8 @@ skills para `.agents/skills/` e regenerar os wrappers do OpenCode.
   `npx rea-agents@latest setup`. **Análise nativa exige um provider
   (Hopper, Ghidra ou IDA) configurado** — ver seção dedicada acima.
 - **Riaworks Waves** 3.6.12.4 — `~/.local/bin/waves` (uv tool, extras `[tui,opencode]`)
-  + 11 skills `waves-*`. **Precisa de `tmux` ≥ 3.2** para dirigir sessões do Claude
-  (pendente nesta máquina — ver seção dedicada acima) e de git ≥ 2.34 (ok).
+  + 11 skills `waves-*`. Precisa de `tmux` ≥ 3.2 (ok: 3.6) para dirigir sessões do Claude
+  e de git ≥ 2.34 (ok).
 
 Every tool above is available from **both** OpenCode and Claude Code. Claude Code
 pre-approves `uv`, `rtk`, `rg`, `gh`, `crewai`, and `npx bmad-method` in

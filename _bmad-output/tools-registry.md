@@ -111,7 +111,7 @@ Both agents run the **same 66 skills** and the **same toolchain**. See §3.
 > confirmado como a última versão publicada no npm (= piso do Waves) · Impeccable
 > **4.8.2** (engine v0.1.21) · **Riaworks Waves 3.6.12.4** (`waves`, uv tool, extras
 > `[tui,opencode]`) · uv 0.13.7, RTK 1.2.0, rea-agents 6.8.0 já na última release.
-> **Pendente:** `tmux` (apt 3.6a) + `libnotify-bin` — exigem `sudo`.
+> tmux **3.6** + libnotify-bin instalados (2026-11-10).
 
 > **Atualizado em 2026-11-09** (sessão de verificação de atualizações):
 > toolchain validado — Node **v24.22.2** · npm **12.2.2** · uv **0.13.7** ·
@@ -402,8 +402,8 @@ re-executar o setup e reiniciar os agentes.
 | **Install Date** | 2026-11-10 — offline bundle `riaworks-waves-3.6.12.4.zip` (SHA256SUMS verified `OK` for the 3 OS zips) |
 | **Install cmd** | `uv tool install --force --python ">=3.11" "./wheels/riaworks_waves-3.6.12.4-py3-none-any.whl[tui,opencode]"` → `waves init --project /home/hsantos/app --cli claude --cli opencode` |
 | **Purpose** | (1) Deterministic/LLM-held unattended build loop: pick story → `bmad-build-auto` session → verify on disk → fresh review session → verify → commit. (2) Epic-level parallelism: collision matrix → wave/front plan → fronts as subagents, merges by grid. |
-| **Requires** | BMAD-METHOD ≥ 6.12.4 (ok: 6.12.4) · git ≥ 2.34 (ok: 2.53) · Python ≥ 3.11 (uv-managed) · **tmux ≥ 3.2 (MISSING — sudo)** · `claude` on PATH (ok) |
-| **Status** | ⚠️ Installed + wired; **runs blocked until `tmux` is installed and a `sprint-status.yaml` exists** (greenfield project). Skills/doors usable now. |
+| **Requires** | BMAD-METHOD ≥ 6.12.4 (ok: 6.12.4) · git ≥ 2.34 (ok: 2.53) · Python ≥ 3.11 (uv-managed) · tmux ≥ 3.2 (ok: 3.6) · `claude` on PATH (ok) |
+| **Status** | ✅ Installed + wired; tmux available. Runs start once `/bmad-sprint-planning` writes `sprint-status.yaml` (greenfield project). |
 
 **Layout:**
 
@@ -665,7 +665,7 @@ One-liner to wire both agents on a new machine: `rtk init -g --auto-patch --open
 | 2026-11-10 | Registry v1.9.0 | Seção 3.6 Riaworks Waves; contagens 55 → 66; §8 passo 4; §11 reavaliação | Claude Code |
 | 2026-11-10 | `_bmad-output/scripts/waves-wire-project.sh` | Script reutilizável: `waves init` + espelho `.agents/skills` + wrappers OpenCode + `bmad-help.csv` + `_bmad/render` fora do git — aplicado em hsoservicos, infoservice, megasena, sound-music-app e aprendizado_em_ia | Claude Code |
 | 2026-11-10 | Outros projetos desta máquina | hsoservicos: BMAD 6.12.0→6.12.4 + Impeccable 4.8.2 + Waves + Superpowers(OpenCode) · infoservice: Impeccable 4.8.2 + Waves · megasena: Waves · sound-music-app: Impeccable 4.8.2 + Waves + Superpowers(OpenCode) · aprendizado_em_ia (clone deste repo): pull + install.sh do vendor. **Não tocados (árvore suja / BMAD antigo):** markdown-studio-live (6.11.0, 146 arquivos), servicetec (6.12.1, 15 arquivos) | Claude Code |
-| 2026-11-10 | **PENDENTE** `tmux` 3.6a + `libnotify-bin` | `sudo apt install -y tmux libnotify-bin` — aguarda aprovação do usuário (regra de sudo do `~/.claude/CLAUDE.md`) | — |
+| 2026-11-10 | tmux 3.6 + libnotify-bin | `sudo apt install -y tmux libnotify-bin` executado pelo usuário (classificador do modo automático bloqueia sudo); `waves validate` → `mux backends: tmux* (available, tmux 3.6)` em todos os projetos | Hsantos |
 
 ---
 
@@ -830,5 +830,5 @@ dedicado, com validação de REA e CrewAI antes do Node 26.
 | Node.js | ≥ 20.12 (só para `npx bmad-method`) | v24.22.2 | Suficiente. Node 26 segue adiado: nenhum componente novo exige; REA pinado em ≥ 24.22.1. |
 | Python | ≥ 3.11 (o `waves` roda no env do uv, isolado do sistema) | 3.14.4 (sistema) + 3.13.16 (uv) | Suficiente. `apt` não oferece candidato acima de 3.14.3-0ubuntu2; patch 3.14.10 só via PPA/fonte — sem motivo. |
 | Git | ≥ 2.34 (**enforçado** por `run`/`sweep`/`resume`) | 2.53.0 | Suficiente. `apt` sem candidato novo (1:2.53.0-1ubuntu1.1); 2.56 só via PPA — sem motivo. |
-| tmux | ≥ 3.2 (backend `TmuxMultiplexer`) | **ausente** | **Nova pendência, bloqueante para `waves run`** — `sudo apt install -y tmux` (candidato 3.6a-2ubuntu0.2). Não é adiamento: é instalação nova que exige aprovação de sudo. |
+| tmux | ≥ 3.2 (backend `TmuxMultiplexer`) | 3.6 (instalado 2026-11-10) | Resolvido — `waves validate` reporta o backend disponível. |
 | BMAD-METHOD | ≥ 6.12.4 (piso) e < 7 | 6.12.4 | Exato. **Não** migrar para BMAD v7 enquanto o Waves 3.6.12.x não o suportar (manual §11.2). |
